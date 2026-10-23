@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
@@ -7,6 +8,7 @@ import 'package:uuid/uuid.dart';
 import '../models/receipt.dart';
 import '../models/receipt_category.dart';
 import '../models/receipt_item.dart';
+import '../services/ocr_service.dart';
 import '../services/sample_data_service.dart';
 import '../services/storage_service.dart';
 import '../widgets/receipt_image_view.dart';
@@ -36,6 +38,8 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
   String? _imagePath;
   String? _imageBase64;
   bool _isLoading = false;
+  bool _isOcrScanning = false;
+  String? _rawOcrText;
 
   final List<ReceiptItem> _items = [];
   bool _showAdvanced = false;
@@ -104,14 +108,8 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
           _imageBase64 = base64Encode(bytes);
         });
 
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Receipt image captured successfully!'),
-              duration: Duration(seconds: 2),
-            ),
-          );
-        }
+        // Run On-Device OCR Extraction
+        await _runOcrExtraction(pickedFile.path);
       }
     } catch (e) {
       debugPrint('Error picking image: $e');
@@ -149,6 +147,165 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
         }
       }
     }
+  }
+
+  Future<void> _runOcrExtraction([String? path]) async {
+    String? targetPath = path ?? _imagePath;
+    File? tempFile;
+
+    // If only imageBase64 is available, write to a temp file for OCR
+    if (targetPath == null && _imageBase64 != null && _imageBase64!.isNotEmpty) {
+      try {
+        final bytes = base64Decode(_imageBase64!);
+        final tempDir = Directory.systemTemp;
+        tempFile = File('${tempDir.path}/ocr_temp_${DateTime.now().millisecondsSinceEpoch}.png');
+        await tempFile.writeAsBytes(bytes);
+        targetPath = tempFile.path;
+      } catch (e) {
+        debugPrint('Error writing temp image for OCR: $e');
+      }
+    }
+
+    if (targetPath == null) return;
+
+    setState(() => _isOcrScanning = true);
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Row(
+            children: [
+              SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+              ),
+              SizedBox(width: 12),
+              Text('Scanning receipt on-device...'),
+            ],
+          ),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
+
+    try {
+      final extracted = await OcrService.instance.scanAndExtract(targetPath);
+      _rawOcrText = extracted.rawText;
+
+      if (!mounted) return;
+
+      bool anyFieldUpdated = false;
+
+      setState(() {
+        if (extracted.merchant != null && extracted.merchant!.isNotEmpty) {
+          _merchantController.text = extracted.merchant!;
+          anyFieldUpdated = true;
+        }
+        if (extracted.totalAmount != null && extracted.totalAmount! > 0) {
+          _amountController.text = extracted.totalAmount!.toStringAsFixed(2);
+          anyFieldUpdated = true;
+        }
+        if (extracted.taxAmount != null && extracted.taxAmount! > 0) {
+          _taxController.text = extracted.taxAmount!.toStringAsFixed(2);
+          _showAdvanced = true;
+          anyFieldUpdated = true;
+        }
+        if (extracted.tipAmount != null && extracted.tipAmount! > 0) {
+          _tipController.text = extracted.tipAmount!.toStringAsFixed(2);
+          _showAdvanced = true;
+          anyFieldUpdated = true;
+        }
+        if (extracted.date != null) {
+          _selectedDate = extracted.date!;
+          anyFieldUpdated = true;
+        }
+        if (extracted.category != null && extracted.category != 'other') {
+          _selectedCategory = extracted.category!;
+        }
+        if (extracted.items.isNotEmpty) {
+          _items.clear();
+          _items.addAll(extracted.items);
+          _showAdvanced = true;
+          anyFieldUpdated = true;
+        }
+      });
+
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      if (anyFieldUpdated) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: const Color(0xFF0F766E),
+            content: Row(
+              children: [
+                const Icon(Icons.auto_awesome, color: Colors.white, size: 20),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'Extracted: ${extracted.merchant ?? 'Receipt'} • $_currency${extracted.totalAmount?.toStringAsFixed(2) ?? ''}',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
+            ),
+            action: (_rawOcrText != null && _rawOcrText!.isNotEmpty)
+                ? SnackBarAction(
+                    label: 'View Text',
+                    textColor: Colors.white,
+                    onPressed: _showRawOcrDialog,
+                  )
+                : null,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Receipt image attached. Enter details below.'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint('OCR extraction error: $e');
+    } finally {
+      if (tempFile != null && tempFile.existsSync()) {
+        try {
+          await tempFile.delete();
+        } catch (_) {}
+      }
+      if (mounted) setState(() => _isOcrScanning = false);
+    }
+  }
+
+  void _showRawOcrDialog() {
+    if (_rawOcrText == null || _rawOcrText!.isEmpty) return;
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.document_scanner, size: 20),
+            SizedBox(width: 8),
+            Text('Scanned Text'),
+          ],
+        ),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: SingleChildScrollView(
+            child: SelectableText(
+              _rawOcrText!,
+              style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _generateSampleReceiptImage() async {
@@ -513,6 +670,29 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
                                 ),
                               ),
                             ),
+                            if (_rawOcrText != null && _rawOcrText!.isNotEmpty)
+                              Positioned(
+                                top: 10,
+                                left: 10,
+                                child: InkWell(
+                                  onTap: _showRawOcrDialog,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF0F766E).withValues(alpha: 0.85),
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    child: const Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(Icons.check, color: Colors.white, size: 14),
+                                        SizedBox(width: 4),
+                                        Text('OCR Scanned', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
                             Positioned(
                               top: 10,
                               right: 10,
@@ -532,6 +712,23 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
                                 ),
                               ),
                             ),
+                            if (_isOcrScanning)
+                              Container(
+                                color: Colors.black54,
+                                child: const Center(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      CircularProgressIndicator(color: Colors.white),
+                                      SizedBox(height: 10),
+                                      Text(
+                                        'Scanning receipt on-device...',
+                                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
                             Positioned(
                               bottom: 12,
                               left: 12,
@@ -539,14 +736,29 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  TextButton.icon(
-                                    style: TextButton.styleFrom(
-                                      backgroundColor: Colors.black54,
-                                      foregroundColor: Colors.white,
-                                    ),
-                                    onPressed: _showImageSourceDialog,
-                                    icon: const Icon(Icons.refresh, size: 16),
-                                    label: const Text('Change Photo'),
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      TextButton.icon(
+                                        style: TextButton.styleFrom(
+                                          backgroundColor: Colors.black54,
+                                          foregroundColor: Colors.white,
+                                        ),
+                                        onPressed: _showImageSourceDialog,
+                                        icon: const Icon(Icons.refresh, size: 16),
+                                        label: const Text('Change'),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      TextButton.icon(
+                                        style: TextButton.styleFrom(
+                                          backgroundColor: const Color(0xFF0F766E).withValues(alpha: 0.85),
+                                          foregroundColor: Colors.white,
+                                        ),
+                                        onPressed: _isOcrScanning ? null : () => _runOcrExtraction(),
+                                        icon: const Icon(Icons.document_scanner, size: 16),
+                                        label: const Text('Scan OCR'),
+                                      ),
+                                    ],
                                   ),
                                   IconButton(
                                     style: IconButton.styleFrom(
@@ -557,6 +769,7 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
                                       setState(() {
                                         _imageBase64 = null;
                                         _imagePath = null;
+                                        _rawOcrText = null;
                                       });
                                     },
                                     icon: const Icon(Icons.delete_outline, size: 18),
