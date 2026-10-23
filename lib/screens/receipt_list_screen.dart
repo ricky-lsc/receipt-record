@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/receipt.dart';
 import '../models/receipt_category.dart';
-import '../services/sample_data_service.dart';
 import '../services/storage_service.dart';
 import '../utils/currency_helper.dart';
 import '../widgets/empty_state.dart';
@@ -179,16 +178,6 @@ class _ReceiptListScreenState extends State<ReceiptListScreen> {
     );
   }
 
-  Future<void> _loadSampleData() async {
-    final messenger = ScaffoldMessenger.of(context);
-    messenger.showSnackBar(const SnackBar(content: Text('Generating sample receipts...')));
-    final samples = await SampleDataService.getPreloadedSampleReceipts();
-    await StorageService.instance.importReceipts(samples);
-    messenger.showSnackBar(
-      SnackBar(content: Text('Added ${samples.length} sample receipts with photos!')),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -209,44 +198,32 @@ class _ReceiptListScreenState extends State<ReceiptListScreen> {
                 tooltip: 'Sort & Filter',
                 onPressed: _showSortFilterModal,
               ),
-              PopupMenuButton<String>(
-                icon: const Icon(Icons.more_vert),
-                onSelected: (val) async {
-                  if (val == 'samples') {
-                    await _loadSampleData();
-                  } else if (val == 'clear') {
-                    final confirm = await showDialog<bool>(
-                      context: context,
-                      builder: (ctx) => AlertDialog(
-                        title: const Text('Clear All Receipts'),
-                        content: const Text('Are you sure you want to delete all saved receipts?'),
-                        actions: [
-                          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                            onPressed: () => Navigator.of(ctx).pop(true),
-                            child: const Text('Clear All'),
-                          ),
-                        ],
-                      ),
-                    );
-                    if (confirm == true) {
-                      await StorageService.instance.clearAll();
+              if (allReceipts.isNotEmpty)
+                PopupMenuButton<String>(
+                  icon: const Icon(Icons.more_vert),
+                  onSelected: (val) async {
+                    if (val == 'clear') {
+                      final confirm = await showDialog<bool>(
+                        context: context,
+                        builder: (ctx) => AlertDialog(
+                          title: const Text('Clear All Receipts'),
+                          content: const Text('Are you sure you want to delete all saved receipts?'),
+                          actions: [
+                            TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                              onPressed: () => Navigator.of(ctx).pop(true),
+                              child: const Text('Clear All'),
+                            ),
+                          ],
+                        ),
+                      );
+                      if (confirm == true) {
+                        await StorageService.instance.clearAll();
+                      }
                     }
-                  }
-                },
-                itemBuilder: (context) => [
-                  const PopupMenuItem(
-                    value: 'samples',
-                    child: Row(
-                      children: [
-                        Icon(Icons.auto_awesome, size: 18, color: Colors.amber),
-                        SizedBox(width: 8),
-                        Text('Load Sample Receipts'),
-                      ],
-                    ),
-                  ),
-                  if (allReceipts.isNotEmpty)
+                  },
+                  itemBuilder: (context) => [
                     const PopupMenuItem(
                       value: 'clear',
                       child: Row(
@@ -257,8 +234,8 @@ class _ReceiptListScreenState extends State<ReceiptListScreen> {
                         ],
                       ),
                     ),
-                ],
-              ),
+                  ],
+                ),
             ],
           ),
           body: Column(
@@ -362,8 +339,6 @@ class _ReceiptListScreenState extends State<ReceiptListScreen> {
                             'Take a photo of your paper receipt, track items and accumulate records for instant summarization.',
                         primaryActionLabel: 'Record First Receipt',
                         onPrimaryAction: widget.onNavigateToAdd,
-                        secondaryActionLabel: 'Load Demo Sample Receipts',
-                        onSecondaryAction: _loadSampleData,
                       )
                     : filteredReceipts.isEmpty
                         ? Center(

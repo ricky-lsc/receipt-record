@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'screens/home_navigation_screen.dart';
-import 'services/sample_data_service.dart';
 import 'services/storage_service.dart';
 import 'theme/app_theme.dart';
 
@@ -8,15 +7,11 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await StorageService.instance.init();
 
-  // If there are no receipts stored, preload the realistic sample receipts
-  // so the user immediately has data to review, summarize, and export.
-  if (StorageService.instance.receiptsNotifier.value.isEmpty) {
-    try {
-      final samples = await SampleDataService.getPreloadedSampleReceipts();
-      await StorageService.instance.importReceipts(samples);
-    } catch (e) {
-      debugPrint('Error loading initial sample data: $e');
-    }
+  // Remove any previously preloaded sample receipts to ensure a completely clean start
+  final current = StorageService.instance.receiptsNotifier.value;
+  final sampleIds = current.where((r) => r.id.startsWith('sample-')).map((r) => r.id).toList();
+  for (final id in sampleIds) {
+    await StorageService.instance.deleteReceipt(id);
   }
 
   runApp(const ReceiptRecordApp());

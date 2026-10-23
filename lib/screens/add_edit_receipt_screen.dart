@@ -116,12 +116,37 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
     } catch (e) {
       debugPrint('Error picking image: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Could not access camera/photo: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        if (source == ImageSource.camera) {
+          final selectFile = await showDialog<bool>(
+            context: context,
+            builder: (ctx) => AlertDialog(
+              title: const Text('Camera Not Available'),
+              content: const Text(
+                'Camera is not available on this platform or simulator.\n\nWould you like to select a receipt photo from files instead?',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(ctx).pop(false),
+                  child: const Text('Cancel'),
+                ),
+                ElevatedButton(
+                  onPressed: () => Navigator.of(ctx).pop(true),
+                  child: const Text('Choose from Files'),
+                ),
+              ],
+            ),
+          );
+          if (selectFile == true && mounted) {
+            _pickImage(ImageSource.gallery);
+          }
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Could not access photo: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       }
     }
   }
