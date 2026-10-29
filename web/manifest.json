@@ -1,6 +1,6 @@
 {
-    "name": "receipt_record",
-    "short_name": "receipt_record",
+    "name": "Receipt Record",
+    "short_name": "Receipt Record",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

@@ -40,7 +40,7 @@ class _ReceiptRecordAppState extends State<ReceiptRecordApp> {
       valueListenable: _themeModeNotifier,
       builder: (context, currentMode, _) {
         return MaterialApp(
-          title: 'Receipt Record & Summary',
+          title: 'Receipt Record',
           debugShowCheckedModeBanner: false,
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
