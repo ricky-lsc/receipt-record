@@ -1,11 +1,15 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
-import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
+import 'package:flutter/services.dart';
 import 'receipt_parser.dart';
 
 class OcrService {
   static final OcrService instance = OcrService._internal();
   OcrService._internal();
+
+  /// Platform channel for Apple Vision on iOS and macOS
+  static const MethodChannel _appleVisionChannel =
+      MethodChannel('receipt_record/apple_vision');
 
   /// Scans receipt image file on-device and extracts structured receipt data
   Future<ExtractedReceiptData> scanAndExtract(String imagePath) async {
@@ -25,14 +29,21 @@ class OcrService {
         return '';
       }
 
-      // 1. Mobile (Android & iOS): Google ML Kit On-Device Vision
-      if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
-        return await _recognizeMobile(imagePath);
+      // 1. Apple Vision (iOS & macOS): Native on-device VNRecognizeTextRequest
+      if (!kIsWeb && (Platform.isIOS || Platform.isMacOS)) {
+        return await _recognizeAppleVision(imagePath);
       }
 
-      // 2. Desktop (Linux, macOS, Windows): Tesseract CLI if installed
-      if (!kIsWeb && (Platform.isLinux || Platform.isMacOS || Platform.isWindows)) {
+      // 2. Desktop (Linux & Windows): System Tesseract CLI if installed
+      if (!kIsWeb && (Platform.isLinux || Platform.isWindows)) {
         return await _recognizeDesktopTesseract(imagePath);
+      }
+
+      // 3. Android fallback note
+      if (!kIsWeb && Platform.isAndroid) {
+        debugPrint(
+            'OCR note: Apple Vision is active for iOS/macOS. Android OCR can be connected via cloud vision or Tesseract.');
+        return '';
       }
 
       return '';
@@ -42,20 +53,20 @@ class OcrService {
     }
   }
 
-  /// Mobile recognition via Google ML Kit Text Recognition
-  Future<String> _recognizeMobile(String imagePath) async {
-    TextRecognizer? textRecognizer;
+  /// Apple Vision Framework text recognition via platform channel
+  Future<String> _recognizeAppleVision(String imagePath) async {
     try {
-      final inputImage = InputImage.fromFilePath(imagePath);
-      textRecognizer = TextRecognizer(script: TextRecognitionScript.latin);
-      final RecognizedText recognizedText =
-          await textRecognizer.processImage(inputImage);
-      return recognizedText.text;
-    } catch (e) {
-      debugPrint('Google ML Kit error: $e');
+      final String? result = await _appleVisionChannel.invokeMethod<String>(
+        'recognizeText',
+        {'path': imagePath},
+      );
+      return result ?? '';
+    } on PlatformException catch (e) {
+      debugPrint('Apple Vision PlatformException: ${e.message}');
       return '';
-    } finally {
-      textRecognizer?.close();
+    } catch (e) {
+      debugPrint('Apple Vision recognition error: $e');
+      return '';
     }
   }
 

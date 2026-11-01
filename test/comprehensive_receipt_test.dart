@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:receipt_record/models/receipt.dart';
@@ -5,6 +7,7 @@ import 'package:receipt_record/models/receipt_category.dart';
 import 'package:receipt_record/models/receipt_item.dart';
 import 'package:receipt_record/models/summary_data.dart';
 import 'package:receipt_record/services/export_service.dart';
+import 'package:receipt_record/services/ocr_service.dart';
 import 'package:receipt_record/services/receipt_parser.dart';
 import 'package:receipt_record/services/sample_data_service.dart';
 import 'package:receipt_record/services/storage_service.dart';
@@ -270,4 +273,54 @@ BALANCE DUE: \$5.75
       expect(extracted.totalAmount, isNull);
     });
   });
+
+  group('OcrService Apple Vision Integration Tests', () {
+    test('Non-existent file returns empty result safely', () async {
+      final extracted = await OcrService.instance.scanAndExtract('/non/existent/path/receipt.jpg');
+      expect(extracted.rawText, '');
+      expect(extracted.hasExtractedInfo, false);
+    });
+
+    test('Apple Vision channel mock returns parsed receipt data', () async {
+      TestWidgetsFlutterBinding.ensureInitialized();
+      const MethodChannel channel = MethodChannel('receipt_record/apple_vision');
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        channel,
+        (MethodCall methodCall) async {
+          if (methodCall.method == 'recognizeText') {
+            return '''
+STARBUCKS COFFEE
+2026-10-24
+Caffe Latte 4.95
+TOTAL 4.95
+''';
+          }
+          return null;
+        },
+      );
+
+      final tempDir = Directory.systemTemp;
+      final tempFile = File('${tempDir.path}/test_receipt.jpg');
+      await tempFile.writeAsString('dummy');
+
+      try {
+        final result = await OcrService.instance.recognizeText(tempFile.path);
+        if (Platform.isMacOS || Platform.isIOS) {
+          expect(result.contains('STARBUCKS COFFEE'), true);
+          final extracted = await OcrService.instance.scanAndExtract(tempFile.path);
+          expect(extracted.merchant, 'STARBUCKS COFFEE');
+          expect(extracted.totalAmount, 4.95);
+        }
+      } finally {
+        if (await tempFile.exists()) {
+          await tempFile.delete();
+        }
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+          channel,
+          null,
+        );
+      }
+    });
+  });
 }
+
