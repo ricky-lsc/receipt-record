@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:receipt_record/l10n/app_localizations.dart';
 import 'package:receipt_record/screens/add_edit_receipt_screen.dart';
+import 'package:receipt_record/services/glm_receipt_service.dart';
 import 'package:receipt_record/services/locale_service.dart';
 import 'package:receipt_record/services/storage_service.dart';
 import 'package:receipt_record/widgets/quick_receipt_action_sheet.dart';
@@ -10,6 +12,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 void main() {
   setUp(() async {
     SharedPreferences.setMockInitialValues({});
+    FlutterSecureStorage.setMockInitialValues({});
     await StorageService.instance.init();
     await StorageService.instance.clearAll();
     await LocaleService.instance.init();
@@ -56,7 +59,10 @@ void main() {
       expect(find.text('MERCHANT / STORE NAME'), findsOneWidget);
     });
 
-    testWidgets('AddEditReceiptScreen initializes with initialImagePath attached', (tester) async {
+    testWidgets('AddEditReceiptScreen hides AI Extract when no key is set, and shows it when key is configured', (tester) async {
+      await GlmReceiptService.instance.clearApiKey();
+
+      // 1. Without key: AI Extract is hidden, Scan OCR is removed
       await tester.pumpWidget(
         buildTestApp(
           const AddEditReceiptScreen(
@@ -68,8 +74,24 @@ void main() {
       await tester.pump(const Duration(milliseconds: 300));
 
       expect(find.text('Receipt Attached'), findsOneWidget);
+      expect(find.text('Change'), findsOneWidget);
+      expect(find.text('AI Extract'), findsNothing); // Hidden without key!
+      expect(find.text('Scan OCR'), findsNothing); // Removed!
+
+      // 2. With key configured: AI Extract appears
+      await GlmReceiptService.instance.saveApiKey('mock-key-12345');
+      await tester.pumpWidget(
+        buildTestApp(
+          const AddEditReceiptScreen(
+            key: Key('with_ai_key'),
+            initialImagePath: '/dummy/receipt/path.jpg',
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
       expect(find.text('AI Extract'), findsOneWidget);
-      expect(find.text('Scan OCR'), findsOneWidget);
     });
   });
 }

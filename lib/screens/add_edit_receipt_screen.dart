@@ -11,7 +11,6 @@ import '../models/receipt_category.dart';
 import '../models/receipt_item.dart';
 import '../services/glm_receipt_service.dart';
 import '../services/locale_service.dart';
-import '../services/ocr_service.dart';
 import '../services/sample_data_service.dart';
 import '../services/storage_service.dart';
 import '../widgets/cloud_ai_settings_dialog.dart';
@@ -47,7 +46,7 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
   String? _imagePath;
   String? _imageBase64;
   bool _isLoading = false;
-  bool _isOcrScanning = false;
+  bool _hasAiKey = false;
   bool _isAiExtracting = false;
   String? _rawOcrText;
 
@@ -72,6 +71,7 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
   @override
   void initState() {
     super.initState();
+    _checkAiKeyAvailability();
     if (widget.initialImagePath != null && widget.initialImagePath!.isNotEmpty) {
       _imagePath = widget.initialImagePath;
       _loadInitialImageBytes(widget.initialImagePath!);
@@ -113,6 +113,16 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
     }
   }
 
+  Future<void> _checkAiKeyAvailability() async {
+    final hasKey = await GlmReceiptService.instance.hasApiKey();
+    final isEnabled = await GlmReceiptService.instance.isAiEnabled();
+    if (mounted) {
+      setState(() {
+        _hasAiKey = hasKey && isEnabled;
+      });
+    }
+  }
+
   @override
   void dispose() {
     _merchantController.dispose();
@@ -141,7 +151,7 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
           _rawOcrText = null;
         });
 
-        if (mounted) {
+        if (mounted && _hasAiKey) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(l10n.photoAttachedTip),
@@ -211,11 +221,8 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
           content: Text(l10n.configureCloudAiDesc),
           actions: [
             TextButton(
-              onPressed: () {
-                Navigator.of(ctx).pop(false);
-                _runOcrExtraction(path);
-              },
-              child: Text(l10n.useOnDeviceOcr),
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: Text(l10n.cancel),
             ),
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
@@ -232,6 +239,7 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
 
       if (shouldConfigure == true && mounted) {
         final saved = await CloudAiSettingsDialog.show(context);
+        await _checkAiKeyAvailability();
         if (saved == true && mounted && await glm.hasApiKey()) {
           // Key was saved, proceed with extraction
         } else {
@@ -248,7 +256,6 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
     }
 
     setState(() {
-      _isOcrScanning = true;
       _isAiExtracting = true;
     });
 
@@ -360,151 +367,16 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
           SnackBar(
             backgroundColor: Colors.deepOrange,
             content: Text('${l10n.dataExtracted} error: $e'),
-            action: SnackBarAction(
-              label: l10n.runOnDeviceOcr,
-              textColor: Colors.white,
-              onPressed: () => _runOcrExtraction(targetPath),
-            ),
-            duration: const Duration(seconds: 5),
+            duration: const Duration(seconds: 4),
           ),
         );
       }
     } finally {
       if (mounted) {
         setState(() {
-          _isOcrScanning = false;
           _isAiExtracting = false;
         });
       }
-    }
-  }
-
-  Future<void> _runOcrExtraction([String? path]) async {
-    final l10n = AppLocalizations.of(context);
-    String? targetPath = path ?? _imagePath;
-    File? tempFile;
-
-    // If only imageBase64 is available, write to a temp file for OCR
-    if (targetPath == null && _imageBase64 != null && _imageBase64!.isNotEmpty) {
-      try {
-        final bytes = base64Decode(_imageBase64!);
-        final tempDir = Directory.systemTemp;
-        tempFile = File('${tempDir.path}/ocr_temp_${DateTime.now().millisecondsSinceEpoch}.png');
-        await tempFile.writeAsBytes(bytes);
-        targetPath = tempFile.path;
-      } catch (e) {
-        debugPrint('Error writing temp image for OCR: $e');
-      }
-    }
-
-    if (targetPath == null) return;
-
-    setState(() => _isOcrScanning = true);
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              const SizedBox(
-                width: 16,
-                height: 16,
-                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-              ),
-              const SizedBox(width: 12),
-              Text(l10n.scanningOnDevice),
-            ],
-          ),
-          duration: const Duration(seconds: 2),
-        ),
-      );
-    }
-
-    try {
-      final extracted = await OcrService.instance.scanAndExtract(targetPath);
-      _rawOcrText = extracted.rawText;
-
-      if (!mounted) return;
-
-      bool anyFieldUpdated = false;
-
-      setState(() {
-        if (extracted.merchant != null && extracted.merchant!.isNotEmpty) {
-          _merchantController.text = extracted.merchant!;
-          anyFieldUpdated = true;
-        }
-        if (extracted.totalAmount != null && extracted.totalAmount! > 0) {
-          _amountController.text = extracted.totalAmount!.toStringAsFixed(2);
-          anyFieldUpdated = true;
-        }
-        if (extracted.taxAmount != null && extracted.taxAmount! > 0) {
-          _taxController.text = extracted.taxAmount!.toStringAsFixed(2);
-          _showAdvanced = true;
-          anyFieldUpdated = true;
-        }
-        if (extracted.tipAmount != null && extracted.tipAmount! > 0) {
-          _tipController.text = extracted.tipAmount!.toStringAsFixed(2);
-          _showAdvanced = true;
-          anyFieldUpdated = true;
-        }
-        if (extracted.date != null) {
-          _selectedDate = extracted.date!;
-          anyFieldUpdated = true;
-        }
-        if (extracted.category != null && extracted.category != 'other') {
-          _selectedCategory = extracted.category!;
-        }
-        if (extracted.items.isNotEmpty) {
-          _items.clear();
-          _items.addAll(extracted.items);
-          _showAdvanced = true;
-          anyFieldUpdated = true;
-        }
-      });
-
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-      if (anyFieldUpdated) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: const Color(0xFF0F766E),
-            content: Row(
-              children: [
-                const Icon(Icons.auto_awesome, color: Colors.white, size: 20),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    '${l10n.dataExtracted}: ${extracted.merchant ?? 'Receipt'} • $_currency${extracted.totalAmount?.toStringAsFixed(2) ?? ''}',
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ],
-            ),
-            action: (_rawOcrText != null && _rawOcrText!.isNotEmpty)
-                ? SnackBarAction(
-                    label: l10n.viewText,
-                    textColor: Colors.white,
-                    onPressed: _showRawOcrDialog,
-                  )
-                : null,
-            duration: const Duration(seconds: 4),
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.receiptAttached),
-            duration: const Duration(seconds: 2),
-          ),
-        );
-      }
-    } catch (e) {
-      debugPrint('OCR extraction error: $e');
-    } finally {
-      if (tempFile != null && tempFile.existsSync()) {
-        try {
-          await tempFile.delete();
-        } catch (_) {}
-      }
-      if (mounted) setState(() => _isOcrScanning = false);
     }
   }
 
@@ -874,7 +746,10 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
           IconButton(
             icon: const Icon(Icons.auto_awesome),
             tooltip: l10n.cloudAiSettingsTooltip,
-            onPressed: () => CloudAiSettingsDialog.show(context),
+            onPressed: () async {
+              await CloudAiSettingsDialog.show(context);
+              await _checkAiKeyAvailability();
+            },
           ),
           Padding(
             padding: const EdgeInsets.only(right: 12),
@@ -977,7 +852,7 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
                                 ),
                               ),
                             ),
-                            if (_isOcrScanning || _isAiExtracting)
+                            if (_isAiExtracting)
                               Container(
                                 color: Colors.black54,
                                 child: Center(
@@ -987,9 +862,7 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
                                       const CircularProgressIndicator(color: Colors.white),
                                       const SizedBox(height: 10),
                                       Text(
-                                        _isAiExtracting
-                                            ? l10n.extractingWithAi
-                                            : l10n.scanningOnDevice,
+                                        l10n.extractingWithAi,
                                         style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                                       ),
                                     ],
@@ -1015,30 +888,20 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
                                         icon: const Icon(Icons.refresh, size: 16),
                                         label: Text(l10n.changePhoto),
                                       ),
-                                      const SizedBox(width: 6),
-                                      TextButton.icon(
-                                        style: TextButton.styleFrom(
-                                          backgroundColor: const Color(0xFF0F766E),
-                                          foregroundColor: Colors.white,
+                                      if (_hasAiKey) ...[
+                                        const SizedBox(width: 6),
+                                        TextButton.icon(
+                                          style: TextButton.styleFrom(
+                                            backgroundColor: const Color(0xFF0F766E),
+                                            foregroundColor: Colors.white,
+                                          ),
+                                          onPressed: _isAiExtracting
+                                              ? null
+                                              : () => _runAiExtraction(),
+                                          icon: const Icon(Icons.auto_awesome, size: 16),
+                                          label: Text(l10n.aiExtract),
                                         ),
-                                        onPressed: (_isOcrScanning || _isAiExtracting)
-                                            ? null
-                                            : () => _runAiExtraction(),
-                                        icon: const Icon(Icons.auto_awesome, size: 16),
-                                        label: Text(l10n.aiExtract),
-                                      ),
-                                      const SizedBox(width: 6),
-                                      TextButton.icon(
-                                        style: TextButton.styleFrom(
-                                          backgroundColor: Colors.black54,
-                                          foregroundColor: Colors.white,
-                                        ),
-                                        onPressed: (_isOcrScanning || _isAiExtracting)
-                                            ? null
-                                            : () => _runOcrExtraction(),
-                                        icon: const Icon(Icons.document_scanner, size: 16),
-                                        label: Text(l10n.scanOcr),
-                                      ),
+                                      ],
                                     ],
                                   ),
                                   Row(
@@ -1050,7 +913,10 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
                                           foregroundColor: Colors.white,
                                         ),
                                         tooltip: l10n.cloudAiSettings,
-                                        onPressed: () => CloudAiSettingsDialog.show(context),
+                                        onPressed: () async {
+                                          await CloudAiSettingsDialog.show(context);
+                                          await _checkAiKeyAvailability();
+                                        },
                                         icon: const Icon(Icons.tune, size: 16),
                                       ),
                                       const SizedBox(width: 4),

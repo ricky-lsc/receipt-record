@@ -1,5 +1,3 @@
-import 'dart:io';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:receipt_record/models/receipt.dart';
@@ -7,8 +5,6 @@ import 'package:receipt_record/models/receipt_category.dart';
 import 'package:receipt_record/models/receipt_item.dart';
 import 'package:receipt_record/models/summary_data.dart';
 import 'package:receipt_record/services/export_service.dart';
-import 'package:receipt_record/services/ocr_service.dart';
-import 'package:receipt_record/services/receipt_parser.dart';
 import 'package:receipt_record/services/sample_data_service.dart';
 import 'package:receipt_record/services/storage_service.dart';
 import 'package:receipt_record/utils/currency_helper.dart';
@@ -220,106 +216,6 @@ void main() {
       expect(csv.contains('199.99'), true);
       expect(csv.contains('Shopping & Retail'), true);
       expect(csv.contains('Keyboard'), true);
-    });
-  });
-
-  group('ReceiptParser OCR Extraction Tests', () {
-    test('Parses total, merchant, tax, date, and category from realistic receipt text', () {
-      const sampleText = '''
-TRADER JOE'S
-Store #402 - Main St
-2026-10-24 14:32
-----------------------------
-Organic Milk x2       6.50
-Sourdough Bread       4.99
-Fresh Salmon         14.50
-----------------------------
-Subtotal             25.99
-Sales Tax             2.15
-TOTAL AMOUNT         28.14
-Payment: Visa Card
-Thank you for shopping!
-''';
-
-      final extracted = ReceiptParser.parse(sampleText);
-      expect(extracted.merchant, "TRADER JOE'S");
-      expect(extracted.totalAmount, 28.14);
-      expect(extracted.taxAmount, 2.15);
-      expect(extracted.date, DateTime(2026, 10, 24));
-      expect(extracted.category, 'groceries');
-      expect(extracted.items.length, greaterThanOrEqualTo(2));
-      expect(extracted.hasExtractedInfo, true);
-    });
-
-    test('Parses alternative receipt date and balance due formats', () {
-      const sampleText = '''
-BLUE BOTTLE COFFEE
-Official Receipt
-Date: Oct 20, 2026
-Pour Over Coffee      5.75
-BALANCE DUE: \$5.75
-''';
-
-      final extracted = ReceiptParser.parse(sampleText);
-      expect(extracted.merchant, 'BLUE BOTTLE COFFEE');
-      expect(extracted.totalAmount, 5.75);
-      expect(extracted.date, DateTime(2026, 10, 20));
-      expect(extracted.category, 'dining');
-    });
-
-    test('Handles empty and noisy text gracefully', () {
-      final extracted = ReceiptParser.parse('   ');
-      expect(extracted.hasExtractedInfo, false);
-      expect(extracted.totalAmount, isNull);
-    });
-  });
-
-  group('OcrService Apple Vision Integration Tests', () {
-    test('Non-existent file returns empty result safely', () async {
-      final extracted = await OcrService.instance.scanAndExtract('/non/existent/path/receipt.jpg');
-      expect(extracted.rawText, '');
-      expect(extracted.hasExtractedInfo, false);
-    });
-
-    test('Apple Vision channel mock returns parsed receipt data', () async {
-      TestWidgetsFlutterBinding.ensureInitialized();
-      const MethodChannel channel = MethodChannel('receipt_record/apple_vision');
-      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
-        channel,
-        (MethodCall methodCall) async {
-          if (methodCall.method == 'recognizeText') {
-            return '''
-STARBUCKS COFFEE
-2026-10-24
-Caffe Latte 4.95
-TOTAL 4.95
-''';
-          }
-          return null;
-        },
-      );
-
-      final tempDir = Directory.systemTemp;
-      final tempFile = File('${tempDir.path}/test_receipt.jpg');
-      await tempFile.writeAsString('dummy');
-
-      try {
-        final result = await OcrService.instance.recognizeText(tempFile.path);
-        if (Platform.isMacOS || Platform.isIOS) {
-          expect(result.contains('STARBUCKS COFFEE'), true);
-          final extracted = await OcrService.instance.scanAndExtract(tempFile.path);
-          expect(extracted.merchant, 'STARBUCKS COFFEE');
-          expect(extracted.totalAmount, 4.95);
-        }
-      } finally {
-        if (await tempFile.exists()) {
-          await tempFile.delete();
-        }
-        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
-          channel,
-          null,
-        );
-      }
     });
   });
 }

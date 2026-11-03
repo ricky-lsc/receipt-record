@@ -6,9 +6,9 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
+import '../models/extracted_receipt_data.dart';
 import '../models/receipt_category.dart';
 import '../models/receipt_item.dart';
-import 'receipt_parser.dart';
 
 class GlmApiException implements Exception {
   final String message;
