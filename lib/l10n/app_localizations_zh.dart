@@ -757,6 +757,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get shareViaReceiptRecord => '由收据记账生成';
+
+  @override
+  String get photoAttachedTip => '照片已添加。可手动填写信息或点击“AI 提取”。';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -1511,6 +1514,9 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get shareViaReceiptRecord => '由收据记账生成';
+
+  @override
+  String get photoAttachedTip => '照片已添加。可手动填写信息或点击“AI 提取”。';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -2265,4 +2271,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get shareViaReceiptRecord => '由收據記帳產生';
+
+  @override
+  String get photoAttachedTip => '相片已加入。可手動填寫資訊或點擊「AI 辨識」。';
 }

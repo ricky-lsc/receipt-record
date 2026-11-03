@@ -265,5 +265,6 @@
   "summaryCopied": "Summary copied to clipboard!",
   "topCategoriesHeader": "Top Categories",
   "saveMarkdownReport": "Save Report (.md)",
-  "shareViaReceiptRecord": "Shared via Receipt Record"
+  "shareViaReceiptRecord": "Shared via Receipt Record",
+  "photoAttachedTip": "Photo attached. Fill details by hand or tap AI Extract."
 }

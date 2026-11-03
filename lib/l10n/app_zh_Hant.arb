@@ -265,5 +265,6 @@
   "summaryCopied": "支出統計已複製到剪貼簿！",
   "topCategoriesHeader": "主要支出類別",
   "saveMarkdownReport": "儲存為報告 (.md)",
-  "shareViaReceiptRecord": "由收據記帳產生"
+  "shareViaReceiptRecord": "由收據記帳產生",
+  "photoAttachedTip": "相片已加入。可手動填寫資訊或點擊「AI 辨識」。"
 }

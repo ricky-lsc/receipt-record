@@ -774,4 +774,8 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get shareViaReceiptRecord => 'Shared via Receipt Record';
+
+  @override
+  String get photoAttachedTip =>
+      'Photo attached. Fill details by hand or tap AI Extract.';
 }

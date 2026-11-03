@@ -1587,6 +1587,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Shared via Receipt Record'**
   String get shareViaReceiptRecord;
+
+  /// No description provided for @photoAttachedTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo attached. Fill details by hand or tap AI Extract.'**
+  String get photoAttachedTip;
 }
 
 class _AppLocalizationsDelegate

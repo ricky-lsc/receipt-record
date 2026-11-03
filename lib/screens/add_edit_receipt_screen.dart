@@ -113,10 +113,22 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
         setState(() {
           _imagePath = pickedFile.path;
           _imageBase64 = base64Encode(bytes);
+          _rawOcrText = null;
         });
 
-        // Run intelligent extraction (Cloud AI with On-Device OCR fallback)
-        await _extractReceiptData(pickedFile.path);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(l10n.photoAttachedTip),
+              action: SnackBarAction(
+                label: l10n.aiExtract,
+                textColor: Colors.tealAccent,
+                onPressed: () => _runAiExtraction(pickedFile.path),
+              ),
+              duration: const Duration(seconds: 4),
+            ),
+          );
+        }
       }
     } catch (e) {
       debugPrint('Error picking image: $e');
@@ -151,18 +163,6 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
           );
         }
       }
-    }
-  }
-
-  Future<void> _extractReceiptData([String? path]) async {
-    final glm = GlmReceiptService.instance;
-    final hasKey = await glm.hasApiKey();
-    final isEnabled = await glm.isAiEnabled();
-
-    if (hasKey && isEnabled) {
-      await _runAiExtraction(path);
-    } else {
-      await _runOcrExtraction(path);
     }
   }
 
