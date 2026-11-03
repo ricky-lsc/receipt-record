@@ -49,5 +49,35 @@ void main() {
       // Should be able to see categories scrolled into view
       expect(find.byType(ChoiceChip), findsWidgets);
     });
+
+    testWidgets('Scroll arrows and mouse wheel pointer events scroll category bar', (tester) async {
+      await tester.pumpWidget(
+        buildTestApp(
+          ReceiptListScreen(onNavigateToAdd: () {}),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final rightArrow = find.byTooltip('Scroll right');
+      final leftArrow = find.byTooltip('Scroll left');
+      expect(rightArrow, findsOneWidget);
+      expect(leftArrow, findsOneWidget);
+
+      // Tap right arrow
+      await tester.tap(rightArrow);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      final singleChild = tester.widget<SingleChildScrollView>(
+        find.byWidgetPredicate((w) => w is SingleChildScrollView && w.scrollDirection == Axis.horizontal),
+      );
+      expect(singleChild.controller!.offset, greaterThan(0));
+
+      // Tap left arrow
+      await tester.tap(leftArrow);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(singleChild.controller!.offset, 0.0);
+    });
   });
 }

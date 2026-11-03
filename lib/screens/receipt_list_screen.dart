@@ -270,49 +270,99 @@ class _ReceiptListScreenState extends State<ReceiptListScreen> {
                       onChanged: (_) => setState(() {}),
                     ),
                     const SizedBox(height: 10),
-                    // Category Chips Bar
-                    Listener(
-                      onPointerSignal: (pointerSignal) {
-                        if (pointerSignal is PointerScrollEvent && _categoryScrollController.hasClients) {
-                          final targetOffset = (_categoryScrollController.offset + pointerSignal.scrollDelta.dy)
-                              .clamp(0.0, _categoryScrollController.position.maxScrollExtent);
-                          _categoryScrollController.jumpTo(targetOffset);
-                        }
-                      },
-                      child: SingleChildScrollView(
-                        controller: _categoryScrollController,
-                        scrollDirection: Axis.horizontal,
-                        physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
-                        child: Row(
-                          children: [
-                            ChoiceChip(
-                              label: Text(l10n.categoryAll),
-                              selected: _selectedCategory == 'all',
-                              onSelected: (val) {
-                                if (val) setState(() => _selectedCategory = 'all');
-                              },
-                            ),
-                            const SizedBox(width: 6),
-                            ...ReceiptCategory.defaults.map((cat) {
-                              final isSelected = _selectedCategory == cat.id;
-                              return Padding(
-                                padding: const EdgeInsets.only(right: 6),
-                                child: ChoiceChip(
-                                  avatar: Icon(cat.icon, size: 14, color: isSelected ? Colors.white : cat.color),
-                                  label: Text(LocaleService.getCategoryName(cat.id, l10n)),
-                                  selected: isSelected,
-                                  selectedColor: cat.color,
-                                  onSelected: (val) {
-                                    setState(() {
-                                      _selectedCategory = val ? cat.id : 'all';
-                                    });
-                                  },
-                                ),
+                    // Category Chips Bar with mouse drag, wheel scroll, and arrow controls
+                    Row(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.chevron_left, size: 20),
+                          tooltip: 'Scroll left',
+                          visualDensity: VisualDensity.compact,
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(minWidth: 28, minHeight: 32),
+                          onPressed: () {
+                            if (_categoryScrollController.hasClients) {
+                              _categoryScrollController.animateTo(
+                                (_categoryScrollController.offset - 200).clamp(0.0, _categoryScrollController.position.maxScrollExtent),
+                                duration: const Duration(milliseconds: 250),
+                                curve: Curves.easeOut,
                               );
-                            }),
-                          ],
+                            }
+                          },
                         ),
-                      ),
+                        Expanded(
+                          child: GestureDetector(
+                            onHorizontalDragUpdate: (details) {
+                              if (_categoryScrollController.hasClients) {
+                                final newOffset = (_categoryScrollController.offset - details.primaryDelta!)
+                                    .clamp(0.0, _categoryScrollController.position.maxScrollExtent);
+                                _categoryScrollController.jumpTo(newOffset);
+                              }
+                            },
+                            child: Listener(
+                              onPointerSignal: (pointerSignal) {
+                                if (pointerSignal is PointerScrollEvent && _categoryScrollController.hasClients) {
+                                  final delta = pointerSignal.scrollDelta.dy != 0
+                                      ? pointerSignal.scrollDelta.dy
+                                      : pointerSignal.scrollDelta.dx;
+                                  final targetOffset = (_categoryScrollController.offset + delta)
+                                      .clamp(0.0, _categoryScrollController.position.maxScrollExtent);
+                                  _categoryScrollController.jumpTo(targetOffset);
+                                }
+                              },
+                              child: SingleChildScrollView(
+                                controller: _categoryScrollController,
+                                scrollDirection: Axis.horizontal,
+                                physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+                                child: Row(
+                                  children: [
+                                    ChoiceChip(
+                                      label: Text(l10n.categoryAll),
+                                      selected: _selectedCategory == 'all',
+                                      onSelected: (val) {
+                                        if (val) setState(() => _selectedCategory = 'all');
+                                      },
+                                    ),
+                                    const SizedBox(width: 6),
+                                    ...ReceiptCategory.defaults.map((cat) {
+                                      final isSelected = _selectedCategory == cat.id;
+                                      return Padding(
+                                        padding: const EdgeInsets.only(right: 6),
+                                        child: ChoiceChip(
+                                          avatar: Icon(cat.icon, size: 14, color: isSelected ? Colors.white : cat.color),
+                                          label: Text(LocaleService.getCategoryName(cat.id, l10n)),
+                                          selected: isSelected,
+                                          selectedColor: cat.color,
+                                          onSelected: (val) {
+                                            setState(() {
+                                              _selectedCategory = val ? cat.id : 'all';
+                                            });
+                                          },
+                                        ),
+                                      );
+                                    }),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.chevron_right, size: 20),
+                          tooltip: 'Scroll right',
+                          visualDensity: VisualDensity.compact,
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(minWidth: 28, minHeight: 32),
+                          onPressed: () {
+                            if (_categoryScrollController.hasClients) {
+                              _categoryScrollController.animateTo(
+                                (_categoryScrollController.offset + 200).clamp(0.0, _categoryScrollController.position.maxScrollExtent),
+                                duration: const Duration(milliseconds: 250),
+                                curve: Curves.easeOut,
+                              );
+                            }
+                          },
+                        ),
+                      ],
                     ),
                   ],
                 ),
