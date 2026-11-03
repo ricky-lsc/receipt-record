@@ -278,10 +278,36 @@ class StorageService {
           .map((item) => Receipt.fromMap(item as Map<String, dynamic>))
           .toList();
 
+      // Auto-migrate legacy base64-stored images to disk files
+      bool migratedAny = false;
+      for (int i = 0; i < receipts.length; i++) {
+        final r = receipts[i];
+        if (r.imageBase64 != null && r.imageBase64!.isNotEmpty) {
+          final fileExists = r.imagePath != null && File(r.imagePath!).existsSync();
+          if (!fileExists) {
+            final savedPath = await saveReceiptImageFile(
+              receiptId: r.id,
+              base64Data: r.imageBase64,
+              merchant: r.merchant,
+              date: r.date,
+            );
+            receipts[i] = r.copyWith(imagePath: savedPath, clearImageBase64: true);
+          } else {
+            receipts[i] = r.copyWith(clearImageBase64: true);
+          }
+          migratedAny = true;
+        }
+      }
+
       // Sort newest date first
       receipts.sort((a, b) => b.date.compareTo(a.date));
 
-      receiptsNotifier.value = receipts;
+      if (migratedAny) {
+        await _persistReceipts(receipts);
+      } else {
+        receiptsNotifier.value = List.unmodifiable(receipts);
+      }
+
       return receipts;
     } catch (e) {
       debugPrint('Error loading receipts: $e');
@@ -293,7 +319,14 @@ class StorageService {
   Future<void> _persistReceipts(List<Receipt> receipts) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final rawData = json.encode(receipts.map((r) => r.toMap()).toList());
+      // Omit imageBase64 to ensure SharedPreferences remains lightweight (< 100 KB)
+      final rawData = json.encode(
+        receipts.map((r) {
+          final map = r.toMap();
+          map.remove('imageBase64');
+          return map;
+        }).toList(),
+      );
       await prefs.setString(_storageKey, rawData);
       receiptsNotifier.value = List.unmodifiable(receipts);
     } catch (e) {
@@ -302,13 +335,32 @@ class StorageService {
   }
 
   Future<void> saveReceipt(Receipt receipt) async {
+    Receipt toSave = receipt;
+
+    // Ensure any image is written to disk and base64 is cleared
+    if (toSave.imageBase64 != null && toSave.imageBase64!.isNotEmpty) {
+      final fileExists = toSave.imagePath != null && File(toSave.imagePath!).existsSync();
+      if (!fileExists) {
+        final savedPath = await saveReceiptImageFile(
+          receiptId: toSave.id,
+          sourcePath: toSave.imagePath,
+          base64Data: toSave.imageBase64,
+          merchant: toSave.merchant,
+          date: toSave.date,
+        );
+        toSave = toSave.copyWith(imagePath: savedPath, clearImageBase64: true);
+      } else {
+        toSave = toSave.copyWith(clearImageBase64: true);
+      }
+    }
+
     final current = List<Receipt>.from(receiptsNotifier.value);
-    final existingIndex = current.indexWhere((r) => r.id == receipt.id);
+    final existingIndex = current.indexWhere((r) => r.id == toSave.id);
 
     if (existingIndex >= 0) {
-      current[existingIndex] = receipt;
+      current[existingIndex] = toSave;
     } else {
-      current.insert(0, receipt);
+      current.insert(0, toSave);
     }
 
     current.sort((a, b) => b.date.compareTo(a.date));

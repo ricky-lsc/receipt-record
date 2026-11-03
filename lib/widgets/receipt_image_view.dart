@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import '../services/storage_service.dart';
 
 class ReceiptImageView extends StatelessWidget {
   final String? imageBase64;
@@ -25,6 +26,24 @@ class ReceiptImageView extends StatelessWidget {
     this.heroTag,
   });
 
+  File? _resolveImageFile() {
+    if (kIsWeb || imagePath == null || imagePath!.isEmpty) return null;
+    final file = File(imagePath!);
+    if (file.existsSync()) return file;
+
+    // Check if relative to custom storage path or default storage
+    final customPath = StorageService.instance.customStoragePathNotifier.value;
+    if (customPath != null && customPath.isNotEmpty) {
+      final relativeFile = File('$customPath/$imagePath');
+      if (relativeFile.existsSync()) return relativeFile;
+
+      final inImagesDir = File('$customPath/receipt_images/${file.uri.pathSegments.last}');
+      if (inImagesDir.existsSync()) return inImagesDir;
+    }
+
+    return null;
+  }
+
   Uint8List? _getImageBytes() {
     if (imageBase64 != null && imageBase64!.isNotEmpty) {
       try {
@@ -37,6 +56,19 @@ class ReceiptImageView extends StatelessWidget {
   }
 
   Widget _buildImageWidget(BuildContext context) {
+    // 1. Prefer physical file on disk (streams directly without keeping in memory)
+    final file = _resolveImageFile();
+    if (file != null) {
+      return Image.file(
+        file,
+        width: width,
+        height: height,
+        fit: fit,
+        errorBuilder: (context, error, stackTrace) => _buildPlaceholder(context),
+      );
+    }
+
+    // 2. Fallback to memory bytes if only base64 is available
     final bytes = _getImageBytes();
     if (bytes != null) {
       return Image.memory(
@@ -46,19 +78,6 @@ class ReceiptImageView extends StatelessWidget {
         fit: fit,
         errorBuilder: (context, error, stackTrace) => _buildPlaceholder(context),
       );
-    }
-
-    if (!kIsWeb && imagePath != null && imagePath!.isNotEmpty) {
-      final file = File(imagePath!);
-      if (file.existsSync()) {
-        return Image.file(
-          file,
-          width: width,
-          height: height,
-          fit: fit,
-          errorBuilder: (context, error, stackTrace) => _buildPlaceholder(context),
-        );
-      }
     }
 
     return _buildPlaceholder(context);
@@ -80,10 +99,10 @@ class ReceiptImageView extends StatelessWidget {
   }
 
   void _showFullScreenImage(BuildContext context) {
-    final bytes = _getImageBytes();
-    final bool hasFile = !kIsWeb && imagePath != null && File(imagePath!).existsSync();
+    final file = _resolveImageFile();
+    final bytes = file == null ? _getImageBytes() : null;
 
-    if (bytes == null && !hasFile) return;
+    if (file == null && bytes == null) return;
 
     showDialog(
       context: context,
@@ -99,9 +118,9 @@ class ReceiptImageView extends StatelessWidget {
               maxScale: 4.5,
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                child: bytes != null
-                    ? Image.memory(bytes, fit: BoxFit.contain)
-                    : Image.file(File(imagePath!), fit: BoxFit.contain),
+                child: file != null
+                    ? Image.file(file, fit: BoxFit.contain)
+                    : Image.memory(bytes!, fit: BoxFit.contain),
               ),
             ),
             Positioned(
@@ -153,38 +172,16 @@ class ReceiptImageView extends StatelessWidget {
     );
 
     if (heroTag != null) {
-      imageContent = Hero(tag: heroTag!, child: imageContent);
+      imageContent = Hero(
+        tag: heroTag!,
+        child: imageContent,
+      );
     }
 
-    if (enableZoomOnTap &&
-        ((imageBase64 != null && imageBase64!.isNotEmpty) ||
-            (!kIsWeb && imagePath != null && imagePath!.isNotEmpty))) {
+    if (enableZoomOnTap) {
       return GestureDetector(
         onTap: () => _showFullScreenImage(context),
-        child: MouseRegion(
-          cursor: SystemMouseCursors.click,
-          child: Stack(
-            children: [
-              imageContent,
-              Positioned(
-                bottom: 6,
-                right: 6,
-                child: Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.5),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: const Icon(
-                    Icons.fullscreen,
-                    color: Colors.white,
-                    size: 16,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
+        child: imageContent,
       );
     }
 

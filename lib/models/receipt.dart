@@ -119,8 +119,10 @@ class Receipt {
     String? notes,
     String? imagePath,
     String? imageBase64,
+    bool clearImageBase64 = false,
     List<ReceiptItem>? items,
     ReceiptSplit? split,
+    bool clearSplit = false,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -136,9 +138,9 @@ class Receipt {
       tipAmount: tipAmount ?? this.tipAmount,
       notes: notes ?? this.notes,
       imagePath: imagePath ?? this.imagePath,
-      imageBase64: imageBase64 ?? this.imageBase64,
+      imageBase64: clearImageBase64 ? null : (imageBase64 ?? this.imageBase64),
       items: items ?? this.items,
-      split: split ?? this.split,
+      split: clearSplit ? null : (split ?? this.split),
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
