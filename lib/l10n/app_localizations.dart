@@ -1551,6 +1551,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No valid receipts found in this file.'**
   String get noValidReceiptsFound;
+
+  /// No description provided for @shareSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Share Summary'**
+  String get shareSummary;
+
+  /// No description provided for @shareSummaryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Share Expense Summary'**
+  String get shareSummaryTitle;
+
+  /// No description provided for @summaryCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Summary copied to clipboard!'**
+  String get summaryCopied;
+
+  /// No description provided for @topCategoriesHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Top Categories'**
+  String get topCategoriesHeader;
+
+  /// No description provided for @saveMarkdownReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Report (.md)'**
+  String get saveMarkdownReport;
+
+  /// No description provided for @shareViaReceiptRecord.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared via Receipt Record'**
+  String get shareViaReceiptRecord;
 }
 
 class _AppLocalizationsDelegate

@@ -739,6 +739,24 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get noValidReceiptsFound => '该文件中未找到有效的收据记录。';
+
+  @override
+  String get shareSummary => '分享统计';
+
+  @override
+  String get shareSummaryTitle => '分享支出统计报告';
+
+  @override
+  String get summaryCopied => '支出统计已复制到剪贴板！';
+
+  @override
+  String get topCategoriesHeader => '主要支出类别';
+
+  @override
+  String get saveMarkdownReport => '保存为报告 (.md)';
+
+  @override
+  String get shareViaReceiptRecord => '由收据记账生成';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -1475,6 +1493,24 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get noValidReceiptsFound => '该文件中未找到有效的收据记录。';
+
+  @override
+  String get shareSummary => '分享统计';
+
+  @override
+  String get shareSummaryTitle => '分享支出统计报告';
+
+  @override
+  String get summaryCopied => '支出统计已复制到剪贴板！';
+
+  @override
+  String get topCategoriesHeader => '主要支出类别';
+
+  @override
+  String get saveMarkdownReport => '保存为报告 (.md)';
+
+  @override
+  String get shareViaReceiptRecord => '由收据记账生成';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -2211,4 +2247,22 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get noValidReceiptsFound => '此檔案中未找到有效的收據記錄。';
+
+  @override
+  String get shareSummary => '分享統計';
+
+  @override
+  String get shareSummaryTitle => '分享支出統計報告';
+
+  @override
+  String get summaryCopied => '支出統計已複製到剪貼簿！';
+
+  @override
+  String get topCategoriesHeader => '主要支出類別';
+
+  @override
+  String get saveMarkdownReport => '儲存為報告 (.md)';
+
+  @override
+  String get shareViaReceiptRecord => '由收據記帳產生';
 }

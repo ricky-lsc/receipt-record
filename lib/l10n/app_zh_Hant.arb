@@ -258,5 +258,12 @@
   "confirmImport": "確認匯入",
   "importSuccess": "收據已成功匯入。",
   "importFailed": "匯入失敗",
-  "noValidReceiptsFound": "此檔案中未找到有效的收據記錄。"
+  "noValidReceiptsFound": "此檔案中未找到有效的收據記錄。",
+
+  "shareSummary": "分享統計",
+  "shareSummaryTitle": "分享支出統計報告",
+  "summaryCopied": "支出統計已複製到剪貼簿！",
+  "topCategoriesHeader": "主要支出類別",
+  "saveMarkdownReport": "儲存為報告 (.md)",
+  "shareViaReceiptRecord": "由收據記帳產生"
 }

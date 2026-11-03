@@ -11,6 +11,7 @@ import '../widgets/category_drilldown_sheet.dart';
 import '../widgets/custom_charts.dart';
 import '../widgets/empty_state.dart';
 import '../widgets/metric_card.dart';
+import '../widgets/share_summary_dialog.dart';
 
 enum SummaryPeriod {
   thisWeek,
@@ -229,6 +230,19 @@ class _SummaryScreenState extends State<SummaryScreen> {
           appBar: AppBar(
             title: Text(l10n.expenseSummary),
             actions: [
+              IconButton(
+                icon: const Icon(Icons.share_outlined),
+                tooltip: l10n.shareSummary,
+                onPressed: () {
+                  final budget = StorageService.instance.budgetNotifier.value;
+                  ShareSummaryDialog.show(
+                    context,
+                    summary: summary,
+                    periodLabel: getSummaryPeriodLabel(_selectedPeriod, l10n, _customRange),
+                    budget: budget,
+                  );
+                },
+              ),
               IconButton(
                 icon: const Icon(Icons.date_range),
                 tooltip: l10n.customRange,

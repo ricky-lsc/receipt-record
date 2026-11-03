@@ -258,5 +258,12 @@
   "confirmImport": "确认导入",
   "importSuccess": "收据已成功导入。",
   "importFailed": "导入失败",
-  "noValidReceiptsFound": "该文件中未找到有效的收据记录。"
+  "noValidReceiptsFound": "该文件中未找到有效的收据记录。",
+
+  "shareSummary": "分享统计",
+  "shareSummaryTitle": "分享支出统计报告",
+  "summaryCopied": "支出统计已复制到剪贴板！",
+  "topCategoriesHeader": "主要支出类别",
+  "saveMarkdownReport": "保存为报告 (.md)",
+  "shareViaReceiptRecord": "由收据记账生成"
 }

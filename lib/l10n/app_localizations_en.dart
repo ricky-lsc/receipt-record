@@ -756,4 +756,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noValidReceiptsFound => 'No valid receipts found in this file.';
+
+  @override
+  String get shareSummary => 'Share Summary';
+
+  @override
+  String get shareSummaryTitle => 'Share Expense Summary';
+
+  @override
+  String get summaryCopied => 'Summary copied to clipboard!';
+
+  @override
+  String get topCategoriesHeader => 'Top Categories';
+
+  @override
+  String get saveMarkdownReport => 'Save Report (.md)';
+
+  @override
+  String get shareViaReceiptRecord => 'Shared via Receipt Record';
 }

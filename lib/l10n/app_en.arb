@@ -258,5 +258,12 @@
   "confirmImport": "Confirm Import",
   "importSuccess": "Receipts imported successfully.",
   "importFailed": "Import failed",
-  "noValidReceiptsFound": "No valid receipts found in this file."
+  "noValidReceiptsFound": "No valid receipts found in this file.",
+
+  "shareSummary": "Share Summary",
+  "shareSummaryTitle": "Share Expense Summary",
+  "summaryCopied": "Summary copied to clipboard!",
+  "topCategoriesHeader": "Top Categories",
+  "saveMarkdownReport": "Save Report (.md)",
+  "shareViaReceiptRecord": "Shared via Receipt Record"
 }
