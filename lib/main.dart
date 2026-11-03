@@ -3,12 +3,14 @@ import 'l10n/app_localizations.dart';
 import 'screens/home_navigation_screen.dart';
 import 'services/locale_service.dart';
 import 'services/storage_service.dart';
+import 'services/theme_service.dart';
 import 'theme/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await StorageService.instance.init();
   await LocaleService.instance.init();
+  await ThemeService.instance.init();
 
   // Remove any previously preloaded sample receipts to ensure a completely clean start
   final current = StorageService.instance.receiptsNotifier.value;
@@ -20,22 +22,8 @@ void main() async {
   runApp(const ReceiptRecordApp());
 }
 
-class ReceiptRecordApp extends StatefulWidget {
+class ReceiptRecordApp extends StatelessWidget {
   const ReceiptRecordApp({super.key});
-
-  @override
-  State<ReceiptRecordApp> createState() => _ReceiptRecordAppState();
-}
-
-class _ReceiptRecordAppState extends State<ReceiptRecordApp> {
-  final ValueNotifier<ThemeMode> _themeModeNotifier =
-      ValueNotifier<ThemeMode>(ThemeMode.system);
-
-  @override
-  void dispose() {
-    _themeModeNotifier.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +31,7 @@ class _ReceiptRecordAppState extends State<ReceiptRecordApp> {
       valueListenable: LocaleService.instance.localeNotifier,
       builder: (context, currentLocale, _) {
         return ValueListenableBuilder<ThemeMode>(
-          valueListenable: _themeModeNotifier,
+          valueListenable: ThemeService.instance.themeModeNotifier,
           builder: (context, currentMode, _) {
             return MaterialApp(
               onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
@@ -55,7 +43,7 @@ class _ReceiptRecordAppState extends State<ReceiptRecordApp> {
               localizationsDelegates: AppLocalizations.localizationsDelegates,
               supportedLocales: AppLocalizations.supportedLocales,
               home: HomeNavigationScreen(
-                themeModeNotifier: _themeModeNotifier,
+                themeModeNotifier: ThemeService.instance.themeModeNotifier,
               ),
             );
           },

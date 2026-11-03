@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
+import '../services/theme_service.dart';
 import '../widgets/cloud_ai_settings_dialog.dart';
 import '../widgets/language_selection_dialog.dart';
 import '../widgets/storage_settings_dialog.dart';
@@ -100,8 +101,7 @@ class _HomeNavigationScreenState extends State<HomeNavigationScreen> {
                           icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
                           tooltip: l10n.toggleThemeTooltip,
                           onPressed: () {
-                            widget.themeModeNotifier.value =
-                                isDark ? ThemeMode.light : ThemeMode.dark;
+                            ThemeService.instance.toggleTheme(isDark);
                           },
                         ),
                       ],
