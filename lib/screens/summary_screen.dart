@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 import '../models/receipt.dart';
 import '../models/receipt_category.dart';
 import '../models/summary_data.dart';
+import '../services/locale_service.dart';
 import '../services/storage_service.dart';
 import '../utils/currency_helper.dart';
 import '../widgets/custom_charts.dart';
@@ -9,13 +11,23 @@ import '../widgets/empty_state.dart';
 import '../widgets/metric_card.dart';
 
 enum SummaryPeriod {
-  all('All Time'),
-  thisMonth('This Month'),
-  last30Days('Last 30 Days'),
-  thisYear('This Year');
+  all,
+  thisMonth,
+  lastMonth,
+  thisYear;
+}
 
-  final String label;
-  const SummaryPeriod(this.label);
+String getSummaryPeriodLabel(SummaryPeriod period, AppLocalizations l10n) {
+  switch (period) {
+    case SummaryPeriod.all:
+      return l10n.filterAll;
+    case SummaryPeriod.thisMonth:
+      return l10n.filterThisMonth;
+    case SummaryPeriod.lastMonth:
+      return l10n.filterLastMonth;
+    case SummaryPeriod.thisYear:
+      return l10n.filterThisYear;
+  }
 }
 
 class SummaryScreen extends StatefulWidget {
@@ -42,9 +54,9 @@ class _SummaryScreenState extends State<SummaryScreen> {
         return receipts;
       case SummaryPeriod.thisMonth:
         return receipts.where((r) => r.date.year == now.year && r.date.month == now.month).toList();
-      case SummaryPeriod.last30Days:
-        final thirtyDaysAgo = now.subtract(const Duration(days: 30));
-        return receipts.where((r) => r.date.isAfter(thirtyDaysAgo)).toList();
+      case SummaryPeriod.lastMonth:
+        final prevMonth = DateTime(now.year, now.month - 1);
+        return receipts.where((r) => r.date.year == prevMonth.year && r.date.month == prevMonth.month).toList();
       case SummaryPeriod.thisYear:
         return receipts.where((r) => r.date.year == now.year).toList();
     }
@@ -52,6 +64,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
@@ -60,12 +73,12 @@ class _SummaryScreenState extends State<SummaryScreen> {
       builder: (context, allReceipts, _) {
         if (allReceipts.isEmpty) {
           return Scaffold(
-            appBar: AppBar(title: const Text('Expense Summary')),
+            appBar: AppBar(title: Text(l10n.expenseSummary)),
             body: EmptyState(
               icon: Icons.analytics_outlined,
-              title: 'No Data for Summary',
-              message: 'Accumulate your receipt photos and records to see comprehensive financial analytics, category charts, and trends.',
-              primaryActionLabel: 'Record a Receipt',
+              title: l10n.noExpenseData,
+              message: l10n.noExpenseDataDesc,
+              primaryActionLabel: l10n.recordReceipt,
               onPrimaryAction: widget.onNavigateToAdd,
             ),
           );
@@ -76,11 +89,11 @@ class _SummaryScreenState extends State<SummaryScreen> {
 
         return Scaffold(
           appBar: AppBar(
-            title: const Text('Expense Summary'),
+            title: Text(l10n.expenseSummary),
             actions: [
               IconButton(
                 icon: const Icon(Icons.file_download_outlined),
-                tooltip: 'Export Report',
+                tooltip: l10n.navExport,
                 onPressed: widget.onNavigateToExport,
               ),
             ],
@@ -97,7 +110,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
                     return Padding(
                       padding: const EdgeInsets.only(right: 8),
                       child: ChoiceChip(
-                        label: Text(period.label),
+                        label: Text(getSummaryPeriodLabel(period, l10n)),
                         selected: isSelected,
                         onSelected: (selected) {
                           if (selected) setState(() => _selectedPeriod = period);
@@ -122,30 +135,30 @@ class _SummaryScreenState extends State<SummaryScreen> {
                     childAspectRatio: 1.35,
                     children: [
                       MetricCard(
-                        title: 'Total Spent',
+                        title: l10n.totalSpent,
                         value: CurrencyHelper.format(summary.totalSpending),
-                        subtitle: '${summary.receiptCount} receipts',
+                        subtitle: '${summary.receiptCount} ${l10n.receiptCountSuffix}',
                         icon: Icons.account_balance_wallet,
                         iconColor: const Color(0xFF0F766E),
                       ),
                       MetricCard(
-                        title: 'Receipts',
+                        title: l10n.navReceipts,
                         value: '${summary.receiptCount}',
-                        subtitle: _selectedPeriod.label,
+                        subtitle: getSummaryPeriodLabel(_selectedPeriod, l10n),
                         icon: Icons.receipt_long,
                         iconColor: const Color(0xFF3B82F6),
                       ),
                       MetricCard(
-                        title: 'Average',
+                        title: l10n.dailyAverage,
                         value: CurrencyHelper.format(summary.averageAmount),
-                        subtitle: 'per receipt',
+                        subtitle: l10n.totalAmount,
                         icon: Icons.query_stats,
                         iconColor: const Color(0xFF8B5CF6),
                       ),
                       MetricCard(
-                        title: 'Largest Bill',
+                        title: l10n.totalAmount,
                         value: CurrencyHelper.format(summary.highestAmount),
-                        subtitle: 'single purchase',
+                        subtitle: l10n.topCategory,
                         icon: Icons.trending_up,
                         iconColor: const Color(0xFFF59E0B),
                       ),
@@ -165,9 +178,9 @@ class _SummaryScreenState extends State<SummaryScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text(
-                            'Spending by Category',
-                            style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                          Text(
+                            l10n.categoryBreakdown,
+                            style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
                           ),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -176,7 +189,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(
-                              '${summary.categorySpending.length} categories',
+                              '${summary.categorySpending.length} ${l10n.category}',
                               style: TextStyle(
                                 fontSize: 11,
                                 color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
@@ -201,13 +214,13 @@ class _SummaryScreenState extends State<SummaryScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Spending Over Time',
-                          style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                        Text(
+                          l10n.spendingOverTime,
+                          style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Monthly totals overview',
+                          l10n.monthlySpending,
                           style: TextStyle(
                             fontSize: 12,
                             color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
@@ -230,9 +243,9 @@ class _SummaryScreenState extends State<SummaryScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Top Merchants',
-                          style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                        Text(
+                          l10n.merchantName,
+                          style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
                         ),
                         const Divider(height: 24),
                         ListView.separated(
@@ -327,9 +340,9 @@ class _SummaryScreenState extends State<SummaryScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Payment Methods',
-                          style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                        Text(
+                          l10n.paymentMethod,
+                          style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
                         ),
                         const Divider(height: 20),
                         Wrap(
@@ -355,7 +368,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
                                   Icon(method.icon, size: 16, color: Theme.of(context).colorScheme.primary),
                                   const SizedBox(width: 8),
                                   Text(
-                                    entry.key,
+                                    LocaleService.getPaymentMethodName(entry.key, l10n),
                                     style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
                                   ),
                                   const SizedBox(width: 8),
@@ -386,7 +399,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
                 child: OutlinedButton.icon(
                   onPressed: widget.onNavigateToExport,
                   icon: const Icon(Icons.download),
-                  label: const Text('Export Summary & Records to File'),
+                  label: Text(l10n.exportReceipts),
                 ),
               ),
               const SizedBox(height: 32),

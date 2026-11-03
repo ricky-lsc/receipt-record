@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'l10n/app_localizations.dart';
 import 'screens/home_navigation_screen.dart';
+import 'services/locale_service.dart';
 import 'services/storage_service.dart';
 import 'theme/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await StorageService.instance.init();
+  await LocaleService.instance.init();
 
   // Remove any previously preloaded sample receipts to ensure a completely clean start
   final current = StorageService.instance.receiptsNotifier.value;
@@ -36,18 +39,26 @@ class _ReceiptRecordAppState extends State<ReceiptRecordApp> {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<ThemeMode>(
-      valueListenable: _themeModeNotifier,
-      builder: (context, currentMode, _) {
-        return MaterialApp(
-          title: 'Receipt Record',
-          debugShowCheckedModeBanner: false,
-          theme: AppTheme.lightTheme,
-          darkTheme: AppTheme.darkTheme,
-          themeMode: currentMode,
-          home: HomeNavigationScreen(
-            themeModeNotifier: _themeModeNotifier,
-          ),
+    return ValueListenableBuilder<Locale?>(
+      valueListenable: LocaleService.instance.localeNotifier,
+      builder: (context, currentLocale, _) {
+        return ValueListenableBuilder<ThemeMode>(
+          valueListenable: _themeModeNotifier,
+          builder: (context, currentMode, _) {
+            return MaterialApp(
+              onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
+              debugShowCheckedModeBanner: false,
+              theme: AppTheme.lightTheme,
+              darkTheme: AppTheme.darkTheme,
+              themeMode: currentMode,
+              locale: currentLocale,
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+              home: HomeNavigationScreen(
+                themeModeNotifier: _themeModeNotifier,
+              ),
+            );
+          },
         );
       },
     );

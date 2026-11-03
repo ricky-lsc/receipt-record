@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../l10n/app_localizations.dart';
 import '../services/glm_receipt_service.dart';
 
 class CloudAiSettingsDialog extends StatefulWidget {
@@ -66,12 +67,13 @@ class _CloudAiSettingsDialogState extends State<CloudAiSettingsDialog> {
   }
 
   Future<void> _testConnection() async {
+    final l10n = AppLocalizations.of(context);
     final key = _keyController.text.trim();
     if (key.isEmpty) {
       setState(() {
-        _testResult = const GlmTestResult(
+        _testResult = GlmTestResult(
           success: false,
-          message: 'Please enter an API key first.',
+          message: l10n.apiKeyHint,
         );
       });
       return;
@@ -96,6 +98,7 @@ class _CloudAiSettingsDialogState extends State<CloudAiSettingsDialog> {
   }
 
   Future<void> _saveSettings() async {
+    final l10n = AppLocalizations.of(context);
     final service = GlmReceiptService.instance;
     await service.saveApiKey(_keyController.text.trim());
     await service.setAiEnabled(_isAiEnabled);
@@ -109,9 +112,9 @@ class _CloudAiSettingsDialogState extends State<CloudAiSettingsDialog> {
     if (!mounted) return;
     Navigator.of(context).pop(true);
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Cloud AI settings saved successfully.'),
-        backgroundColor: Color(0xFF0F766E),
+      SnackBar(
+        content: Text(l10n.settingsSaved),
+        backgroundColor: const Color(0xFF0F766E),
       ),
     );
   }
@@ -127,6 +130,7 @@ class _CloudAiSettingsDialogState extends State<CloudAiSettingsDialog> {
   }
 
   Future<void> _clearKey() async {
+    final l10n = AppLocalizations.of(context);
     setState(() {
       _keyController.clear();
       _testResult = null;
@@ -134,13 +138,14 @@ class _CloudAiSettingsDialogState extends State<CloudAiSettingsDialog> {
     await GlmReceiptService.instance.clearApiKey();
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('API key removed from secure storage.')),
+        SnackBar(content: Text(l10n.keyRemoved)),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
@@ -156,7 +161,6 @@ class _CloudAiSettingsDialogState extends State<CloudAiSettingsDialog> {
                   children: [
                     CircularProgressIndicator(),
                     SizedBox(height: 16),
-                    Text('Loading AI Settings...'),
                   ],
                 ),
               )
@@ -182,20 +186,20 @@ class _CloudAiSettingsDialogState extends State<CloudAiSettingsDialog> {
                           ),
                         ),
                         const SizedBox(width: 12),
-                        const Expanded(
+                        Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Cloud AI Settings',
-                                style: TextStyle(
+                                l10n.cloudAiSettings,
+                                style: const TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
                               Text(
-                                'BYOK • GLM-5.3-Flash Vision',
-                                style: TextStyle(
+                                l10n.byokBadge,
+                                style: const TextStyle(
                                   fontSize: 12,
                                   color: Colors.grey,
                                 ),
@@ -205,7 +209,7 @@ class _CloudAiSettingsDialogState extends State<CloudAiSettingsDialog> {
                         ),
                         IconButton(
                           icon: const Icon(Icons.close),
-                          tooltip: 'Close',
+                          tooltip: l10n.close,
                           onPressed: () => Navigator.of(context).pop(),
                         ),
                       ],
@@ -222,15 +226,15 @@ class _CloudAiSettingsDialogState extends State<CloudAiSettingsDialog> {
                           color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
                         ),
                       ),
-                      child: const Row(
+                      child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Icon(Icons.lock_outline, size: 18, color: Color(0xFF0F766E)),
-                          SizedBox(width: 8),
+                          const Icon(Icons.lock_outline, size: 18, color: Color(0xFF0F766E)),
+                          const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              'Bring Your Own Key (BYOK): Your API key is encrypted on your device (iOS Keychain / Android KeyStore) and only sent directly to Zhipu / BigModel API.',
-                              style: TextStyle(fontSize: 12, height: 1.4),
+                              l10n.byokDescription,
+                              style: const TextStyle(fontSize: 12, height: 1.4),
                             ),
                           ),
                         ],
@@ -241,13 +245,13 @@ class _CloudAiSettingsDialogState extends State<CloudAiSettingsDialog> {
                     // Toggle AI Enabled
                     SwitchListTile(
                       contentPadding: EdgeInsets.zero,
-                      title: const Text(
-                        'Enable Cloud AI Extraction',
-                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                      title: Text(
+                        l10n.enableCloudAi,
+                        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
                       ),
-                      subtitle: const Text(
-                        'Uses GLM-5.3-Flash to extract merchant, items, dates, and amounts',
-                        style: TextStyle(fontSize: 12),
+                      subtitle: Text(
+                        l10n.enableCloudAiSubtitle,
+                        style: const TextStyle(fontSize: 12),
                       ),
                       value: _isAiEnabled,
                       onChanged: (val) => setState(() => _isAiEnabled = val),
@@ -255,9 +259,9 @@ class _CloudAiSettingsDialogState extends State<CloudAiSettingsDialog> {
                     const Divider(height: 24),
 
                     // API Key Field
-                    const Text(
-                      'Zhipu / BigModel API Key',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                    Text(
+                      l10n.apiKeyLabel,
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
                     ),
                     const SizedBox(height: 6),
                     TextField(
@@ -266,25 +270,25 @@ class _CloudAiSettingsDialogState extends State<CloudAiSettingsDialog> {
                       autocorrect: false,
                       enableSuggestions: false,
                       decoration: InputDecoration(
-                        hintText: 'Enter API Key (e.g. 82958f...voER...)',
+                        hintText: l10n.apiKeyHint,
                         prefixIcon: const Icon(Icons.vpn_key_outlined, size: 20),
                         suffixIcon: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             IconButton(
                               icon: Icon(_obscureKey ? Icons.visibility : Icons.visibility_off, size: 20),
-                              tooltip: _obscureKey ? 'Show Key' : 'Hide Key',
+                              tooltip: _obscureKey ? l10n.showKey : l10n.hideKey,
                               onPressed: () => setState(() => _obscureKey = !_obscureKey),
                             ),
                             IconButton(
                               icon: const Icon(Icons.content_paste, size: 20),
-                              tooltip: 'Paste from Clipboard',
+                              tooltip: l10n.pasteFromClipboard,
                               onPressed: _pasteFromClipboard,
                             ),
                             if (_keyController.text.isNotEmpty)
                               IconButton(
                                 icon: const Icon(Icons.clear, size: 20),
-                                tooltip: 'Clear',
+                                tooltip: l10n.close,
                                 onPressed: _clearKey,
                               ),
                           ],
@@ -299,9 +303,9 @@ class _CloudAiSettingsDialogState extends State<CloudAiSettingsDialog> {
                       },
                     ),
                     const SizedBox(height: 4),
-                    const Text(
-                      'Get an API key from open.bigmodel.cn or z.ai platform.',
-                      style: TextStyle(fontSize: 11, color: Colors.grey),
+                    Text(
+                      l10n.apiKeyHelpText,
+                      style: const TextStyle(fontSize: 11, color: Colors.grey),
                     ),
                     const SizedBox(height: 16),
 
@@ -312,9 +316,9 @@ class _CloudAiSettingsDialogState extends State<CloudAiSettingsDialog> {
                         tilePadding: EdgeInsets.zero,
                         childrenPadding: const EdgeInsets.only(bottom: 12),
                         leading: const Icon(Icons.tune, size: 20),
-                        title: const Text(
-                          'Model & Endpoint Settings',
-                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                        title: Text(
+                          l10n.modelAndEndpoint,
+                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
                         ),
                         children: [
                           // Model Name
@@ -325,7 +329,7 @@ class _CloudAiSettingsDialogState extends State<CloudAiSettingsDialog> {
                                 child: TextField(
                                   controller: _modelController,
                                   decoration: InputDecoration(
-                                    labelText: 'Model Name',
+                                    labelText: l10n.modelName,
                                     hintText: 'glm-5.3-flash',
                                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                                     contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -334,7 +338,7 @@ class _CloudAiSettingsDialogState extends State<CloudAiSettingsDialog> {
                               ),
                               const SizedBox(width: 8),
                               PopupMenuButton<String>(
-                                tooltip: 'Select Preset Model',
+                                tooltip: l10n.modelName,
                                 icon: const Icon(Icons.arrow_drop_down_circle_outlined),
                                 onSelected: (val) {
                                   setState(() => _modelController.text = val);
@@ -353,12 +357,12 @@ class _CloudAiSettingsDialogState extends State<CloudAiSettingsDialog> {
                           TextField(
                             controller: _endpointController,
                             decoration: InputDecoration(
-                              labelText: 'API Endpoint',
+                              labelText: l10n.apiEndpoint,
                               hintText: GlmReceiptService.defaultEndpoint,
                               border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                               contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                               suffixIcon: PopupMenuButton<String>(
-                                tooltip: 'Select Region Preset',
+                                tooltip: l10n.apiEndpoint,
                                 icon: const Icon(Icons.public),
                                 onSelected: (val) {
                                   setState(() => _endpointController.text = val);
@@ -432,7 +436,7 @@ class _CloudAiSettingsDialogState extends State<CloudAiSettingsDialog> {
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
                           : const Icon(Icons.network_check, size: 18),
-                      label: Text(_isTesting ? 'Testing connection...' : 'Test API Connection'),
+                      label: Text(_isTesting ? l10n.testingConnection : l10n.testConnection),
                     ),
                     const SizedBox(height: 20),
 
@@ -442,7 +446,7 @@ class _CloudAiSettingsDialogState extends State<CloudAiSettingsDialog> {
                       children: [
                         TextButton(
                           onPressed: () => Navigator.of(context).pop(false),
-                          child: const Text('Cancel'),
+                          child: Text(l10n.cancel),
                         ),
                         const SizedBox(width: 10),
                         ElevatedButton.icon(
@@ -453,7 +457,7 @@ class _CloudAiSettingsDialogState extends State<CloudAiSettingsDialog> {
                           ),
                           onPressed: _saveSettings,
                           icon: const Icon(Icons.check, size: 18),
-                          label: const Text('Save Settings'),
+                          label: Text(l10n.saveSettings),
                         ),
                       ],
                     ),

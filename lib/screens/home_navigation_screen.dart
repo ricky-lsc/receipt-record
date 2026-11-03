@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 import '../widgets/cloud_ai_settings_dialog.dart';
+import '../widgets/language_selection_dialog.dart';
 import 'add_edit_receipt_screen.dart';
 import 'export_screen.dart';
 import 'receipt_list_screen.dart';
@@ -31,6 +33,7 @@ class _HomeNavigationScreenState extends State<HomeNavigationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final isDesktop = MediaQuery.of(context).size.width >= 700;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -60,7 +63,7 @@ class _HomeNavigationScreenState extends State<HomeNavigationScreen> {
                     FloatingActionButton(
                       mini: true,
                       onPressed: _navigateToAddReceipt,
-                      tooltip: 'Take Photo / Add Receipt',
+                      tooltip: l10n.addReceiptTooltip,
                       child: const Icon(Icons.add_a_photo),
                     ),
                   ],
@@ -75,14 +78,20 @@ class _HomeNavigationScreenState extends State<HomeNavigationScreen> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         IconButton(
+                          icon: const Icon(Icons.language),
+                          tooltip: l10n.chooseLanguageTooltip,
+                          onPressed: () => LanguageSelectionDialog.show(context),
+                        ),
+                        const SizedBox(height: 6),
+                        IconButton(
                           icon: const Icon(Icons.auto_awesome),
-                          tooltip: 'Cloud AI Settings (GLM)',
+                          tooltip: l10n.cloudAiSettingsTooltip,
                           onPressed: () => CloudAiSettingsDialog.show(context),
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 6),
                         IconButton(
                           icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
-                          tooltip: 'Toggle Theme',
+                          tooltip: l10n.toggleThemeTooltip,
                           onPressed: () {
                             widget.themeModeNotifier.value =
                                 isDark ? ThemeMode.light : ThemeMode.dark;
@@ -93,21 +102,21 @@ class _HomeNavigationScreenState extends State<HomeNavigationScreen> {
                   ),
                 ),
               ),
-              destinations: const [
+              destinations: [
                 NavigationRailDestination(
-                  icon: Icon(Icons.receipt_long_outlined),
-                  selectedIcon: Icon(Icons.receipt_long),
-                  label: Text('Receipts'),
+                  icon: const Icon(Icons.receipt_long_outlined),
+                  selectedIcon: const Icon(Icons.receipt_long),
+                  label: Text(l10n.navReceipts),
                 ),
                 NavigationRailDestination(
-                  icon: Icon(Icons.analytics_outlined),
-                  selectedIcon: Icon(Icons.analytics),
-                  label: Text('Summary'),
+                  icon: const Icon(Icons.analytics_outlined),
+                  selectedIcon: const Icon(Icons.analytics),
+                  label: Text(l10n.navSummary),
                 ),
                 NavigationRailDestination(
-                  icon: Icon(Icons.file_download_outlined),
-                  selectedIcon: Icon(Icons.file_download),
-                  label: Text('Export'),
+                  icon: const Icon(Icons.file_download_outlined),
+                  selectedIcon: const Icon(Icons.file_download),
+                  label: Text(l10n.navExport),
                 ),
               ],
             ),
@@ -125,21 +134,21 @@ class _HomeNavigationScreenState extends State<HomeNavigationScreen> {
         onDestinationSelected: (index) {
           setState(() => _currentIndex = index);
         },
-        destinations: const [
+        destinations: [
           NavigationDestination(
-            icon: Icon(Icons.receipt_long_outlined),
-            selectedIcon: Icon(Icons.receipt_long),
-            label: 'Receipts',
+            icon: const Icon(Icons.receipt_long_outlined),
+            selectedIcon: const Icon(Icons.receipt_long),
+            label: l10n.navReceipts,
           ),
           NavigationDestination(
-            icon: Icon(Icons.analytics_outlined),
-            selectedIcon: Icon(Icons.analytics),
-            label: 'Summary',
+            icon: const Icon(Icons.analytics_outlined),
+            selectedIcon: const Icon(Icons.analytics),
+            label: l10n.navSummary,
           ),
           NavigationDestination(
-            icon: Icon(Icons.file_download_outlined),
-            selectedIcon: Icon(Icons.file_download),
-            label: 'Export',
+            icon: const Icon(Icons.file_download_outlined),
+            selectedIcon: const Icon(Icons.file_download),
+            label: l10n.navExport,
           ),
         ],
       ),

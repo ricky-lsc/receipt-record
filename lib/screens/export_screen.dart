@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../l10n/app_localizations.dart';
 import '../models/receipt.dart';
 import '../models/receipt_category.dart';
 import '../services/export_service.dart';
+import '../services/locale_service.dart';
 import '../services/storage_service.dart';
 import '../utils/currency_helper.dart';
 
@@ -36,9 +38,10 @@ class _ExportScreenState extends State<ExportScreen> {
   }
 
   Future<void> _handleSaveToFile(List<Receipt> receipts) async {
+    final l10n = AppLocalizations.of(context);
     if (receipts.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No receipts available to export')),
+        SnackBar(content: Text(l10n.noReceiptsFound)),
       );
       return;
     }
@@ -61,14 +64,14 @@ class _ExportScreenState extends State<ExportScreen> {
                   color: result.success ? Colors.green : Colors.amber,
                 ),
                 const SizedBox(width: 8),
-                Text(result.success ? 'Export Successful' : 'File Saved'),
+                Text(result.success ? l10n.exportSuccess : l10n.exportAsFile),
               ],
             ),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(result.message ?? 'Export process completed.'),
+                Text(result.message ?? l10n.exportSuccess),
                 if (result.filePath != null) ...[
                   const SizedBox(height: 12),
                   const Text('File Location:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
@@ -84,7 +87,7 @@ class _ExportScreenState extends State<ExportScreen> {
                 onPressed: () {
                   Clipboard.setData(ClipboardData(text: result.content));
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Copied export data to clipboard!')),
+                    SnackBar(content: Text(l10n.pasteFromClipboard)),
                   );
                 },
                 icon: const Icon(Icons.copy, size: 16),
@@ -92,7 +95,7 @@ class _ExportScreenState extends State<ExportScreen> {
               ),
               ElevatedButton(
                 onPressed: () => Navigator.of(ctx).pop(),
-                child: const Text('Done'),
+                child: Text(l10n.close),
               ),
             ],
           ),
@@ -111,16 +114,18 @@ class _ExportScreenState extends State<ExportScreen> {
   }
 
   void _copyToClipboard(List<Receipt> receipts) {
+    final l10n = AppLocalizations.of(context);
     if (receipts.isEmpty) return;
     final content = _getPreviewContent(receipts);
     Clipboard.setData(ClipboardData(text: content));
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Export content (${_selectedFormat.label}) copied to clipboard!')),
+      SnackBar(content: Text(l10n.exportSuccess)),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return ValueListenableBuilder<List<Receipt>>(
@@ -131,7 +136,7 @@ class _ExportScreenState extends State<ExportScreen> {
 
         return Scaffold(
           appBar: AppBar(
-            title: const Text('Export Receipts'),
+            title: Text(l10n.exportReceipts),
           ),
           body: ListView(
             padding: const EdgeInsets.all(16),
@@ -161,13 +166,13 @@ class _ExportScreenState extends State<ExportScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Export Your Records',
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                          Text(
+                            l10n.exportReceipts,
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            'Download spreadsheet or summary files for accounting, tax filing, or expense reimbursement.',
+                            l10n.exportDescription,
                             style: TextStyle(
                               fontSize: 12,
                               color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
@@ -188,20 +193,20 @@ class _ExportScreenState extends State<ExportScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'DATA SCOPE',
-                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.8, color: Colors.grey),
+                      Text(
+                        l10n.category.toUpperCase(),
+                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.8, color: Colors.grey),
                       ),
                       const SizedBox(height: 10),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Scope: ${_selectedCategory == 'all' ? 'All Receipts' : ReceiptCategory.fromId(_selectedCategory).name}',
+                            '${l10n.category}: ${_selectedCategory == 'all' ? l10n.categoryAll : LocaleService.getCategoryName(_selectedCategory, l10n)}',
                             style: const TextStyle(fontWeight: FontWeight.w600),
                           ),
                           Text(
-                            '${filteredReceipts.length} records • ${CurrencyHelper.format(totalAmount)}',
+                            '${filteredReceipts.length} ${l10n.receiptCountSuffix} • ${CurrencyHelper.format(totalAmount)}',
                             style: TextStyle(
                               fontSize: 12,
                               color: isDark ? const Color(0xFF2DD4BF) : const Color(0xFF0F766E),
@@ -216,7 +221,7 @@ class _ExportScreenState extends State<ExportScreen> {
                         child: Row(
                           children: [
                             ChoiceChip(
-                              label: const Text('All Receipts'),
+                              label: Text(l10n.categoryAll),
                               selected: _selectedCategory == 'all',
                               onSelected: (val) {
                                 if (val) setState(() => _selectedCategory = 'all');
@@ -228,7 +233,7 @@ class _ExportScreenState extends State<ExportScreen> {
                               return Padding(
                                 padding: const EdgeInsets.only(right: 6),
                                 child: ChoiceChip(
-                                  label: Text(cat.name),
+                                  label: Text(LocaleService.getCategoryName(cat.id, l10n)),
                                   selected: isSelected,
                                   onSelected: (val) {
                                     setState(() => _selectedCategory = val ? cat.id : 'all');
@@ -252,9 +257,9 @@ class _ExportScreenState extends State<ExportScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'SELECT FORMAT',
-                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.8, color: Colors.grey),
+                      Text(
+                        l10n.exportFormat.toUpperCase(),
+                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.8, color: Colors.grey),
                       ),
                       const SizedBox(height: 12),
                       RadioGroup<ExportFormat>(
@@ -266,24 +271,24 @@ class _ExportScreenState extends State<ExportScreen> {
                           children: [
                             _buildFormatOption(
                               format: ExportFormat.csv,
-                              title: 'CSV Spreadsheet (.csv)',
-                              subtitle: 'Best for Excel, Numbers, Google Sheets & accounting tools',
+                              title: l10n.csvFormat,
+                              subtitle: l10n.csvFormatDesc,
                               icon: Icons.table_chart,
                               iconColor: Colors.green,
                             ),
                             const Divider(height: 16),
                             _buildFormatOption(
                               format: ExportFormat.markdown,
-                              title: 'Summary Report (.md / .txt)',
-                              subtitle: 'Executive overview with metrics, category breakdown & ledger',
+                              title: 'Markdown / Text (.md)',
+                              subtitle: l10n.exportDescription,
                               icon: Icons.description,
                               iconColor: Colors.blue,
                             ),
                             const Divider(height: 16),
                             _buildFormatOption(
                               format: ExportFormat.json,
-                              title: 'JSON Data Backup (.json)',
-                              subtitle: 'Complete raw record backup with timestamps and line items',
+                              title: l10n.jsonFormat,
+                              subtitle: l10n.jsonFormatDesc,
                               icon: Icons.data_object,
                               iconColor: Colors.amber,
                             ),
@@ -311,7 +316,7 @@ class _ExportScreenState extends State<ExportScreen> {
                                 child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                               )
                             : const Icon(Icons.save_alt),
-                        label: const Text('Save to File'),
+                        label: Text(l10n.exportAsFile),
                       ),
                     ),
                   ),
@@ -321,7 +326,7 @@ class _ExportScreenState extends State<ExportScreen> {
                     child: OutlinedButton.icon(
                       onPressed: () => _copyToClipboard(filteredReceipts),
                       icon: const Icon(Icons.copy),
-                      label: const Text('Copy'),
+                      label: Text(l10n.pasteFromClipboard),
                     ),
                   ),
                 ],
@@ -342,7 +347,7 @@ class _ExportScreenState extends State<ExportScreen> {
                             children: [
                               Icon(Icons.remove_red_eye_outlined, size: 18, color: Theme.of(context).colorScheme.primary),
                               const SizedBox(width: 8),
-                              const Text('Live File Preview', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                              Text(l10n.viewText, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                             ],
                           ),
                           Switch(

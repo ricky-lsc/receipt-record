@@ -1,33 +1,58 @@
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 import '../models/receipt.dart';
 import '../models/receipt_category.dart';
+import '../services/locale_service.dart';
 import '../services/storage_service.dart';
 import '../utils/currency_helper.dart';
 import '../widgets/cloud_ai_settings_dialog.dart';
 import '../widgets/empty_state.dart';
+import '../widgets/language_selection_dialog.dart';
 import '../widgets/receipt_card.dart';
 import 'add_edit_receipt_screen.dart';
 import 'receipt_detail_screen.dart';
 
 enum SortOption {
-  dateDesc('Date: Newest First'),
-  dateAsc('Date: Oldest First'),
-  amountDesc('Amount: High to Low'),
-  amountAsc('Amount: Low to High'),
-  merchantAsc('Merchant: A to Z');
+  dateDesc,
+  dateAsc,
+  amountDesc,
+  amountAsc,
+  merchantAsc;
+}
 
-  final String label;
-  const SortOption(this.label);
+String getSortOptionLabel(SortOption option, AppLocalizations l10n) {
+  switch (option) {
+    case SortOption.dateDesc:
+      return l10n.sortDateDesc;
+    case SortOption.dateAsc:
+      return l10n.sortDateAsc;
+    case SortOption.amountDesc:
+      return l10n.sortAmountDesc;
+    case SortOption.amountAsc:
+      return l10n.sortAmountAsc;
+    case SortOption.merchantAsc:
+      return l10n.sortMerchantAsc;
+  }
 }
 
 enum DateRangeFilter {
-  all('All Time'),
-  thisMonth('This Month'),
-  lastMonth('Last Month'),
-  thisYear('This Year');
+  all,
+  thisMonth,
+  lastMonth,
+  thisYear;
+}
 
-  final String label;
-  const DateRangeFilter(this.label);
+String getDateRangeFilterLabel(DateRangeFilter filter, AppLocalizations l10n) {
+  switch (filter) {
+    case DateRangeFilter.all:
+      return l10n.filterAll;
+    case DateRangeFilter.thisMonth:
+      return l10n.filterThisMonth;
+    case DateRangeFilter.lastMonth:
+      return l10n.filterLastMonth;
+    case DateRangeFilter.thisYear:
+      return l10n.filterThisYear;
+  }
 }
 
 class ReceiptListScreen extends StatefulWidget {
@@ -62,54 +87,57 @@ class _ReceiptListScreenState extends State<ReceiptListScreen> {
         return false;
       }
 
-      // Date Range filter
-      if (_dateFilter == DateRangeFilter.thisMonth) {
-        if (r.date.year != now.year || r.date.month != now.month) return false;
-      } else if (_dateFilter == DateRangeFilter.lastMonth) {
-        final lastMonthDate = DateTime(now.year, now.month - 1, 1);
-        if (r.date.year != lastMonthDate.year || r.date.month != lastMonthDate.month) return false;
-      } else if (_dateFilter == DateRangeFilter.thisYear) {
-        if (r.date.year != now.year) return false;
+      // Date range filter
+      switch (_dateFilter) {
+        case DateRangeFilter.thisMonth:
+          if (r.date.year != now.year || r.date.month != now.month) return false;
+          break;
+        case DateRangeFilter.lastMonth:
+          final prevMonth = DateTime(now.year, now.month - 1);
+          if (r.date.year != prevMonth.year || r.date.month != prevMonth.month) {
+            return false;
+          }
+          break;
+        case DateRangeFilter.thisYear:
+          if (r.date.year != now.year) return false;
+          break;
+        case DateRangeFilter.all:
+          break;
       }
 
-      // Search query filter (merchant, notes, category, item names)
+      // Search query filter (merchant, category, items, notes)
       if (query.isNotEmpty) {
-        final matchesMerchant = r.merchant.toLowerCase().contains(query);
-        final matchesNotes = r.notes?.toLowerCase().contains(query) ?? false;
-        final matchesCategory = r.category.toLowerCase().contains(query);
-        final matchesItems = r.items.any((item) => item.name.toLowerCase().contains(query));
-
-        if (!matchesMerchant && !matchesNotes && !matchesCategory && !matchesItems) {
-          return false;
-        }
+        final inMerchant = r.merchant.toLowerCase().contains(query);
+        final inCategory = r.category.toLowerCase().contains(query);
+        final inNotes = r.notes?.toLowerCase().contains(query) ?? false;
+        final inItems = r.items.any((item) => item.name.toLowerCase().contains(query));
+        return inMerchant || inCategory || inNotes || inItems;
       }
 
       return true;
     }).toList();
 
-    // Sort
-    switch (_currentSort) {
-      case SortOption.dateDesc:
-        filtered.sort((a, b) => b.date.compareTo(a.date));
-        break;
-      case SortOption.dateAsc:
-        filtered.sort((a, b) => a.date.compareTo(b.date));
-        break;
-      case SortOption.amountDesc:
-        filtered.sort((a, b) => b.amount.compareTo(a.amount));
-        break;
-      case SortOption.amountAsc:
-        filtered.sort((a, b) => a.amount.compareTo(b.amount));
-        break;
-      case SortOption.merchantAsc:
-        filtered.sort((a, b) => a.merchant.toLowerCase().compareTo(b.merchant.toLowerCase()));
-        break;
-    }
+    // Sort receipts
+    filtered.sort((a, b) {
+      switch (_currentSort) {
+        case SortOption.dateDesc:
+          return b.date.compareTo(a.date);
+        case SortOption.dateAsc:
+          return a.date.compareTo(b.date);
+        case SortOption.amountDesc:
+          return b.amount.compareTo(a.amount);
+        case SortOption.amountAsc:
+          return a.amount.compareTo(b.amount);
+        case SortOption.merchantAsc:
+          return a.merchant.toLowerCase().compareTo(b.merchant.toLowerCase());
+      }
+    });
 
     return filtered;
   }
 
   void _showSortFilterModal() {
+    final l10n = AppLocalizations.of(context);
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -125,9 +153,9 @@ class _ReceiptListScreenState extends State<ReceiptListScreen> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Sort & Filter Options', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    Text(l10n.sortAndFilter, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 16),
-                    const Text('SORT BY', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey)),
+                    Text(l10n.sortAndFilter.toUpperCase(), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey)),
                     const SizedBox(height: 8),
                     RadioGroup<SortOption>(
                       groupValue: _currentSort,
@@ -143,21 +171,21 @@ class _ReceiptListScreenState extends State<ReceiptListScreen> {
                         children: SortOption.values
                             .map((sort) => RadioListTile<SortOption>(
                                   dense: true,
-                                  title: Text(sort.label),
+                                  title: Text(getSortOptionLabel(sort, l10n)),
                                   value: sort,
                                 ))
                             .toList(),
                       ),
                     ),
                     const Divider(),
-                    const Text('DATE PERIOD', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey)),
+                    Text(l10n.dateRange.toUpperCase(), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey)),
                     const SizedBox(height: 8),
                     Wrap(
                       spacing: 8,
                       children: DateRangeFilter.values.map((df) {
                         final isSelected = _dateFilter == df;
                         return ChoiceChip(
-                          label: Text(df.label),
+                          label: Text(getDateRangeFilterLabel(df, l10n)),
                           selected: isSelected,
                           onSelected: (selected) {
                             if (selected) {
@@ -181,6 +209,7 @@ class _ReceiptListScreenState extends State<ReceiptListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
@@ -192,16 +221,21 @@ class _ReceiptListScreenState extends State<ReceiptListScreen> {
 
         return Scaffold(
           appBar: AppBar(
-            title: const Text('Receipt Records'),
+            title: Text(l10n.receiptRecords),
             actions: [
               IconButton(
+                icon: const Icon(Icons.language),
+                tooltip: l10n.chooseLanguageTooltip,
+                onPressed: () => LanguageSelectionDialog.show(context),
+              ),
+              IconButton(
                 icon: const Icon(Icons.auto_awesome),
-                tooltip: 'Cloud AI Settings (GLM)',
+                tooltip: l10n.cloudAiSettingsTooltip,
                 onPressed: () => CloudAiSettingsDialog.show(context),
               ),
               IconButton(
                 icon: const Icon(Icons.sort),
-                tooltip: 'Sort & Filter',
+                tooltip: l10n.sortAndFilter,
                 onPressed: _showSortFilterModal,
               ),
               if (allReceipts.isNotEmpty)
@@ -212,14 +246,14 @@ class _ReceiptListScreenState extends State<ReceiptListScreen> {
                       final confirm = await showDialog<bool>(
                         context: context,
                         builder: (ctx) => AlertDialog(
-                          title: const Text('Clear All Receipts'),
-                          content: const Text('Are you sure you want to delete all saved receipts?'),
+                          title: Text(l10n.clearAllReceiptsTitle),
+                          content: Text(l10n.clearAllReceiptsConfirm),
                           actions: [
-                            TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
+                            TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: Text(l10n.cancel)),
                             ElevatedButton(
                               style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
                               onPressed: () => Navigator.of(ctx).pop(true),
-                              child: const Text('Clear All'),
+                              child: Text(l10n.clearAll),
                             ),
                           ],
                         ),
@@ -230,13 +264,13 @@ class _ReceiptListScreenState extends State<ReceiptListScreen> {
                     }
                   },
                   itemBuilder: (context) => [
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 'clear',
                       child: Row(
                         children: [
-                          Icon(Icons.delete_sweep, size: 18, color: Colors.red),
-                          SizedBox(width: 8),
-                          Text('Clear All Data', style: TextStyle(color: Colors.red)),
+                          const Icon(Icons.delete_sweep, size: 18, color: Colors.red),
+                          const SizedBox(width: 8),
+                          Text(l10n.clearAllData, style: const TextStyle(color: Colors.red)),
                         ],
                       ),
                     ),
@@ -255,7 +289,7 @@ class _ReceiptListScreenState extends State<ReceiptListScreen> {
                     TextField(
                       controller: _searchController,
                       decoration: InputDecoration(
-                        hintText: 'Search merchant, item, note...',
+                        hintText: l10n.searchPlaceholder,
                         prefixIcon: const Icon(Icons.search, size: 20),
                         suffixIcon: _searchController.text.isNotEmpty
                             ? IconButton(
@@ -277,7 +311,7 @@ class _ReceiptListScreenState extends State<ReceiptListScreen> {
                       child: Row(
                         children: [
                           ChoiceChip(
-                            label: const Text('All Categories'),
+                            label: Text(l10n.categoryAll),
                             selected: _selectedCategory == 'all',
                             onSelected: (val) {
                               if (val) setState(() => _selectedCategory = 'all');
@@ -290,7 +324,7 @@ class _ReceiptListScreenState extends State<ReceiptListScreen> {
                               padding: const EdgeInsets.only(right: 6),
                               child: ChoiceChip(
                                 avatar: Icon(cat.icon, size: 14, color: isSelected ? Colors.white : cat.color),
-                                label: Text(cat.name),
+                                label: Text(LocaleService.getCategoryName(cat.id, l10n)),
                                 selected: isSelected,
                                 selectedColor: cat.color,
                                 onSelected: (val) {
@@ -316,7 +350,7 @@ class _ReceiptListScreenState extends State<ReceiptListScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        '${filteredReceipts.length} ${filteredReceipts.length == 1 ? 'receipt' : 'receipts'}${_dateFilter != DateRangeFilter.all ? ' • ${_dateFilter.label}' : ''}',
+                        '${filteredReceipts.length} ${l10n.receiptCountSuffix}${_dateFilter != DateRangeFilter.all ? ' • ${getDateRangeFilterLabel(_dateFilter, l10n)}' : ''}',
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
@@ -324,7 +358,7 @@ class _ReceiptListScreenState extends State<ReceiptListScreen> {
                         ),
                       ),
                       Text(
-                        'Total: ${CurrencyHelper.format(totalAmount)}',
+                        '${l10n.totalSpent}: ${CurrencyHelper.format(totalAmount)}',
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
@@ -340,10 +374,9 @@ class _ReceiptListScreenState extends State<ReceiptListScreen> {
                 child: allReceipts.isEmpty
                     ? EmptyState(
                         icon: Icons.receipt_long,
-                        title: 'No Receipts Recorded Yet',
-                        message:
-                            'Take a photo of your paper receipt, track items and accumulate records for instant summarization.',
-                        primaryActionLabel: 'Record First Receipt',
+                        title: l10n.noReceiptsFound,
+                        message: l10n.noReceiptsDesc,
+                        primaryActionLabel: l10n.recordReceipt,
                         onPrimaryAction: widget.onNavigateToAdd,
                       )
                     : filteredReceipts.isEmpty
@@ -353,8 +386,10 @@ class _ReceiptListScreenState extends State<ReceiptListScreen> {
                               children: [
                                 const Icon(Icons.search_off, size: 48, color: Colors.grey),
                                 const SizedBox(height: 12),
-                                const Text('No matching receipts found', style: TextStyle(fontWeight: FontWeight.bold)),
-                                const SizedBox(height: 8),
+                                Text(l10n.noMatchingReceipts, style: const TextStyle(fontWeight: FontWeight.bold)),
+                                const SizedBox(height: 4),
+                                Text(l10n.noMatchingReceiptsDesc, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                                const SizedBox(height: 12),
                                 TextButton(
                                   onPressed: () {
                                     setState(() {
@@ -363,7 +398,7 @@ class _ReceiptListScreenState extends State<ReceiptListScreen> {
                                       _dateFilter = DateRangeFilter.all;
                                     });
                                   },
-                                  child: const Text('Reset Search & Filters'),
+                                  child: Text(l10n.categoryAll),
                                 ),
                               ],
                             ),
@@ -394,14 +429,14 @@ class _ReceiptListScreenState extends State<ReceiptListScreen> {
                                   final confirm = await showDialog<bool>(
                                     context: context,
                                     builder: (ctx) => AlertDialog(
-                                      title: const Text('Delete Receipt'),
-                                      content: Text('Delete receipt for "${receipt.merchant}"?'),
+                                      title: Text(l10n.deleteReceiptTitle),
+                                      content: Text('${l10n.deleteReceiptConfirm}\n"${receipt.merchant}"'),
                                       actions: [
-                                        TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
+                                        TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: Text(l10n.cancel)),
                                         ElevatedButton(
                                           style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
                                           onPressed: () => Navigator.of(ctx).pop(true),
-                                          child: const Text('Delete'),
+                                          child: Text(l10n.delete),
                                         ),
                                       ],
                                     ),
@@ -418,7 +453,7 @@ class _ReceiptListScreenState extends State<ReceiptListScreen> {
           ),
           floatingActionButton: FloatingActionButton(
             onPressed: widget.onNavigateToAdd,
-            tooltip: 'Take Photo / Add Receipt',
+            tooltip: l10n.addReceiptTooltip,
             child: const Icon(Icons.add_a_photo),
           ),
         );

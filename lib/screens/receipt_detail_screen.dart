@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../l10n/app_localizations.dart';
 import '../models/receipt.dart';
 import '../models/receipt_category.dart';
+import '../services/locale_service.dart';
 import '../services/storage_service.dart';
 import '../utils/currency_helper.dart';
 import '../utils/date_helper.dart';
@@ -40,20 +42,21 @@ class _ReceiptDetailScreenState extends State<ReceiptDetailScreen> {
   }
 
   Future<void> _confirmDelete() async {
+    final l10n = AppLocalizations.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete Receipt'),
-        content: Text('Are you sure you want to delete the receipt for "${_receipt.merchant}"? This action cannot be undone.'),
+        title: Text(l10n.deleteReceiptTitle),
+        content: Text('${l10n.deleteReceiptConfirm}\n"${_receipt.merchant}"'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Delete'),
+            child: Text(l10n.delete),
           ),
         ],
       ),
@@ -64,7 +67,7 @@ class _ReceiptDetailScreenState extends State<ReceiptDetailScreen> {
       if (mounted) {
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Receipt deleted')),
+          SnackBar(content: Text(l10n.delete)),
         );
       }
     }
@@ -72,22 +75,23 @@ class _ReceiptDetailScreenState extends State<ReceiptDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final payment = PaymentMethod.fromString(_receipt.paymentMethod);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Receipt Details'),
+        title: Text(l10n.receiptDetails),
         actions: [
           IconButton(
             icon: const Icon(Icons.edit_outlined),
-            tooltip: 'Edit Receipt',
+            tooltip: l10n.editReceipt,
             onPressed: _editReceipt,
           ),
           IconButton(
             icon: const Icon(Icons.delete_outline, color: Colors.red),
-            tooltip: 'Delete Receipt',
+            tooltip: l10n.deleteReceiptTitle,
             onPressed: _confirmDelete,
           ),
         ],
@@ -122,12 +126,12 @@ class _ReceiptDetailScreenState extends State<ReceiptDetailScreen> {
                         color: Colors.black54,
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      child: const Row(
+                      child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.zoom_in, color: Colors.white, size: 14),
-                          SizedBox(width: 4),
-                          Text('Tap to Zoom', style: TextStyle(color: Colors.white, fontSize: 12)),
+                          const Icon(Icons.zoom_in, color: Colors.white, size: 14),
+                          const SizedBox(width: 4),
+                          Text(l10n.receiptAttached, style: const TextStyle(color: Colors.white, fontSize: 12)),
                         ],
                       ),
                     ),
@@ -187,7 +191,7 @@ class _ReceiptDetailScreenState extends State<ReceiptDetailScreen> {
                             Icon(payment.icon, size: 14, color: isDark ? Colors.white70 : Colors.black87),
                             const SizedBox(width: 6),
                             Text(
-                              payment.label,
+                              LocaleService.getPaymentMethodName(_receipt.paymentMethod, l10n),
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
@@ -231,12 +235,12 @@ class _ReceiptDetailScreenState extends State<ReceiptDetailScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
-                          'Itemized Bill',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                        Text(
+                          l10n.lineItems,
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                         ),
                         Text(
-                          '${_receipt.items.length} items',
+                          '${_receipt.items.length} ${l10n.receiptCountSuffix}',
                           style: TextStyle(
                             fontSize: 13,
                             color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
@@ -297,14 +301,14 @@ class _ReceiptDetailScreenState extends State<ReceiptDetailScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Payment Summary',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                  Text(
+                    l10n.paymentMethod,
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                   ),
                   const Divider(height: 20),
                   if (_receipt.items.isNotEmpty) ...[
                     _buildSummaryRow(
-                      'Subtotal',
+                      l10n.subtotal,
                       CurrencyHelper.format(_receipt.itemsSubtotal, symbol: _receipt.currency),
                       isDark,
                     ),
@@ -312,7 +316,7 @@ class _ReceiptDetailScreenState extends State<ReceiptDetailScreen> {
                   ],
                   if (_receipt.taxAmount != null && _receipt.taxAmount! > 0) ...[
                     _buildSummaryRow(
-                      'Tax',
+                      l10n.tax,
                       CurrencyHelper.format(_receipt.taxAmount!, symbol: _receipt.currency),
                       isDark,
                     ),
@@ -320,7 +324,7 @@ class _ReceiptDetailScreenState extends State<ReceiptDetailScreen> {
                   ],
                   if (_receipt.tipAmount != null && _receipt.tipAmount! > 0) ...[
                     _buildSummaryRow(
-                      'Tip',
+                      l10n.tip,
                       CurrencyHelper.format(_receipt.tipAmount!, symbol: _receipt.currency),
                       isDark,
                     ),
@@ -328,7 +332,7 @@ class _ReceiptDetailScreenState extends State<ReceiptDetailScreen> {
                   ],
                   const Divider(height: 16),
                   _buildSummaryRow(
-                    'Total Paid',
+                    l10n.total,
                     CurrencyHelper.format(_receipt.amount, symbol: _receipt.currency),
                     isDark,
                     isBold: true,
@@ -347,13 +351,13 @@ class _ReceiptDetailScreenState extends State<ReceiptDetailScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Row(
+                    Row(
                       children: [
-                        Icon(Icons.notes, size: 18),
-                        SizedBox(width: 8),
+                        const Icon(Icons.notes, size: 18),
+                        const SizedBox(width: 8),
                         Text(
-                          'Notes',
-                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                          l10n.notes,
+                          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
                         ),
                       ],
                     ),
@@ -380,11 +384,11 @@ class _ReceiptDetailScreenState extends State<ReceiptDetailScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Record ID: ${_receipt.id.substring(0, 8)}',
+                  'ID: ${_receipt.id.substring(0, 8)}',
                   style: TextStyle(fontSize: 11, color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8)),
                 ),
                 Text(
-                  'Created: ${DateFormat('yyyy-MM-dd').format(_receipt.createdAt)}',
+                  DateFormat('yyyy-MM-dd').format(_receipt.createdAt),
                   style: TextStyle(fontSize: 11, color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8)),
                 ),
               ],

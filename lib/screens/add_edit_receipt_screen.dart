@@ -5,10 +5,12 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
+import '../l10n/app_localizations.dart';
 import '../models/receipt.dart';
 import '../models/receipt_category.dart';
 import '../models/receipt_item.dart';
 import '../services/glm_receipt_service.dart';
+import '../services/locale_service.dart';
 import '../services/ocr_service.dart';
 import '../services/sample_data_service.dart';
 import '../services/storage_service.dart';
@@ -50,16 +52,16 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
   final ImagePicker _picker = ImagePicker();
 
   final List<String> _commonMerchants = [
-    'Trader Joe\'s',
-    'Whole Foods',
     'Costco',
+    'Trader Joe\'s',
     'Target',
-    'Walmart',
+    'Whole Foods',
     'Starbucks',
-    'Apple Store',
+    'Walmart',
     'Amazon',
-    'Shell Gas',
-    'Chevron',
+    'Shell',
+    'CVS Pharmacy',
+    'Home Depot',
   ];
 
   @override
@@ -69,17 +71,18 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
       final r = widget.existingReceipt!;
       _merchantController.text = r.merchant;
       _amountController.text = r.amount.toStringAsFixed(2);
-      if (r.taxAmount != null) _taxController.text = r.taxAmount!.toStringAsFixed(2);
-      if (r.tipAmount != null) _tipController.text = r.tipAmount!.toStringAsFixed(2);
-      if (r.notes != null) _notesController.text = r.notes!;
+      _currency = r.currency;
       _selectedDate = r.date;
       _selectedCategory = r.category;
       _selectedPaymentMethod = r.paymentMethod;
-      _currency = r.currency;
       _imagePath = r.imagePath;
       _imageBase64 = r.imageBase64;
+      if (r.taxAmount != null) _taxController.text = r.taxAmount!.toStringAsFixed(2);
+      if (r.tipAmount != null) _tipController.text = r.tipAmount!.toStringAsFixed(2);
+      if (r.notes != null) _notesController.text = r.notes!;
       _items.addAll(r.items);
-      if (r.items.isNotEmpty || r.taxAmount != null || r.notes != null) {
+
+      if (_items.isNotEmpty || r.taxAmount != null || r.tipAmount != null || r.notes != null) {
         _showAdvanced = true;
       }
     }
@@ -96,6 +99,7 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
   }
 
   Future<void> _pickImage(ImageSource source) async {
+    final l10n = AppLocalizations.of(context);
     try {
       final XFile? pickedFile = await _picker.pickImage(
         source: source,
@@ -121,18 +125,16 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
           final selectFile = await showDialog<bool>(
             context: context,
             builder: (ctx) => AlertDialog(
-              title: const Text('Camera Not Available'),
-              content: const Text(
-                'Camera is not available on this platform or simulator.\n\nWould you like to select a receipt photo from files instead?',
-              ),
+              title: Text(l10n.cameraNotAvailable),
+              content: Text(l10n.cameraNotAvailableDesc),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(ctx).pop(false),
-                  child: const Text('Cancel'),
+                  child: Text(l10n.cancel),
                 ),
                 ElevatedButton(
                   onPressed: () => Navigator.of(ctx).pop(true),
-                  child: const Text('Choose from Files'),
+                  child: Text(l10n.chooseFromFiles),
                 ),
               ],
             ),
@@ -165,6 +167,7 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
   }
 
   Future<void> _runAiExtraction([String? path]) async {
+    final l10n = AppLocalizations.of(context);
     final glm = GlmReceiptService.instance;
     final hasKey = await glm.hasApiKey();
 
@@ -173,23 +176,21 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
       final shouldConfigure = await showDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: const Row(
+          title: Row(
             children: [
-              Icon(Icons.auto_awesome, color: Color(0xFF0F766E)),
-              SizedBox(width: 8),
-              Text('Configure Cloud AI'),
+              const Icon(Icons.auto_awesome, color: Color(0xFF0F766E)),
+              const SizedBox(width: 8),
+              Text(l10n.configureCloudAiTitle),
             ],
           ),
-          content: const Text(
-            'GLM-5.3-Flash Cloud AI requires your API key for receipt extraction (BYOK).\n\nWould you like to enter your API key, or use on-device OCR instead?',
-          ),
+          content: Text(l10n.configureCloudAiDesc),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.of(ctx).pop(false);
                 _runOcrExtraction(path);
               },
-              child: const Text('Use On-Device OCR'),
+              child: Text(l10n.useOnDeviceOcr),
             ),
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
@@ -198,7 +199,7 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
               ),
               onPressed: () => Navigator.of(ctx).pop(true),
               icon: const Icon(Icons.vpn_key, size: 16),
-              label: const Text('Configure Key'),
+              label: Text(l10n.configureKey),
             ),
           ],
         ),
@@ -228,19 +229,19 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Row(
             children: [
-              SizedBox(
+              const SizedBox(
                 width: 16,
                 height: 16,
                 child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
               ),
-              SizedBox(width: 12),
-              Text('Extracting with GLM-5.3-Flash Cloud AI...'),
+              const SizedBox(width: 12),
+              Text(l10n.extractingWithAi),
             ],
           ),
-          duration: Duration(seconds: 4),
+          duration: const Duration(seconds: 4),
         ),
       );
     }
@@ -302,7 +303,7 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    'Extracted via GLM-5.3-Flash: ${extracted.merchant ?? 'Receipt'}${itemCount > 0 ? ' ($itemCount items)' : ''} • $_currency${extracted.totalAmount?.toStringAsFixed(2) ?? ''}',
+                    '${l10n.dataExtracted}: ${extracted.merchant ?? 'Receipt'}${itemCount > 0 ? ' ($itemCount)' : ''} • $_currency${extracted.totalAmount?.toStringAsFixed(2) ?? ''}',
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
@@ -310,7 +311,7 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
             ),
             action: (_rawOcrText != null && _rawOcrText!.isNotEmpty)
                 ? SnackBarAction(
-                    label: 'View Raw',
+                    label: l10n.viewRaw,
                     textColor: Colors.white,
                     onPressed: _showRawOcrDialog,
                   )
@@ -320,9 +321,9 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('GLM AI did not detect clear receipt data. You can enter details manually or try On-Device OCR.'),
-            duration: Duration(seconds: 3),
+          SnackBar(
+            content: Text(l10n.noReceiptDataDetected),
+            duration: const Duration(seconds: 3),
           ),
         );
       }
@@ -333,9 +334,9 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             backgroundColor: Colors.deepOrange,
-            content: Text('GLM AI error: $e'),
+            content: Text('${l10n.dataExtracted} error: $e'),
             action: SnackBarAction(
-              label: 'Run On-Device OCR',
+              label: l10n.runOnDeviceOcr,
               textColor: Colors.white,
               onPressed: () => _runOcrExtraction(targetPath),
             ),
@@ -354,6 +355,7 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
   }
 
   Future<void> _runOcrExtraction([String? path]) async {
+    final l10n = AppLocalizations.of(context);
     String? targetPath = path ?? _imagePath;
     File? tempFile;
 
@@ -375,19 +377,19 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
     setState(() => _isOcrScanning = true);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Row(
             children: [
-              SizedBox(
+              const SizedBox(
                 width: 16,
                 height: 16,
                 child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
               ),
-              SizedBox(width: 12),
-              Text('Scanning receipt on-device...'),
+              const SizedBox(width: 12),
+              Text(l10n.scanningOnDevice),
             ],
           ),
-          duration: Duration(seconds: 2),
+          duration: const Duration(seconds: 2),
         ),
       );
     }
@@ -445,7 +447,7 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    'Extracted: ${extracted.merchant ?? 'Receipt'} • $_currency${extracted.totalAmount?.toStringAsFixed(2) ?? ''}',
+                    '${l10n.dataExtracted}: ${extracted.merchant ?? 'Receipt'} • $_currency${extracted.totalAmount?.toStringAsFixed(2) ?? ''}',
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
@@ -453,7 +455,7 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
             ),
             action: (_rawOcrText != null && _rawOcrText!.isNotEmpty)
                 ? SnackBarAction(
-                    label: 'View Text',
+                    label: l10n.viewText,
                     textColor: Colors.white,
                     onPressed: _showRawOcrDialog,
                   )
@@ -463,9 +465,9 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Receipt image attached. Enter details below.'),
-            duration: Duration(seconds: 2),
+          SnackBar(
+            content: Text(l10n.receiptAttached),
+            duration: const Duration(seconds: 2),
           ),
         );
       }
@@ -482,15 +484,16 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
   }
 
   void _showRawOcrDialog() {
+    final l10n = AppLocalizations.of(context);
     if (_rawOcrText == null || _rawOcrText!.isEmpty) return;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.document_scanner, size: 20),
-            SizedBox(width: 8),
-            Text('Scanned Text'),
+            const Icon(Icons.document_scanner, size: 20),
+            const SizedBox(width: 8),
+            Text(l10n.scannedText),
           ],
         ),
         content: SizedBox(
@@ -505,7 +508,7 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Close'),
+            child: Text(l10n.close),
           ),
         ],
       ),
@@ -513,6 +516,7 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
   }
 
   Future<void> _generateSampleReceiptImage() async {
+    final l10n = AppLocalizations.of(context);
     setState(() => _isLoading = true);
     try {
       final merchant = _merchantController.text.trim().isNotEmpty
@@ -554,9 +558,9 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Generated receipt photo added!'),
-            duration: Duration(seconds: 2),
+          SnackBar(
+            content: Text(l10n.receiptAttached),
+            duration: const Duration(seconds: 2),
           ),
         );
       }
@@ -568,6 +572,7 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
   }
 
   void _showImageSourceDialog() {
+    final l10n = AppLocalizations.of(context);
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -580,11 +585,11 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 child: Text(
-                  'Add Receipt Photo',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  l10n.takePhotoOrUpload,
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ),
               const SizedBox(height: 12),
@@ -597,8 +602,8 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
                   ),
                   child: const Icon(Icons.camera_alt, color: Colors.teal),
                 ),
-                title: const Text('Take Photo with Camera'),
-                subtitle: const Text('Use your device camera to capture receipt'),
+                title: Text(l10n.takePhoto),
+                subtitle: Text(l10n.photoUploadSubtitle),
                 onTap: () {
                   Navigator.of(ctx).pop();
                   _pickImage(ImageSource.camera);
@@ -613,8 +618,8 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
                   ),
                   child: const Icon(Icons.photo_library, color: Colors.blue),
                 ),
-                title: const Text('Choose from Gallery / Files'),
-                subtitle: const Text('Select an existing photo from storage'),
+                title: Text(l10n.chooseFromGallery),
+                subtitle: Text(l10n.photoUploadSubtitle),
                 onTap: () {
                   Navigator.of(ctx).pop();
                   _pickImage(ImageSource.gallery);
@@ -629,8 +634,8 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
                   ),
                   child: const Icon(Icons.auto_awesome, color: Colors.amber),
                 ),
-                title: const Text('Generate Simulated Receipt Photo'),
-                subtitle: const Text('Render a realistic receipt photo for this entry'),
+                title: Text(l10n.generateSamplePhoto),
+                subtitle: Text(l10n.photoUploadSubtitle),
                 onTap: () {
                   Navigator.of(ctx).pop();
                   _generateSampleReceiptImage();
@@ -647,7 +652,7 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
                     ),
                     child: const Icon(Icons.delete_outline, color: Colors.red),
                   ),
-                  title: const Text('Remove Photo', style: TextStyle(color: Colors.red)),
+                  title: Text(l10n.delete, style: const TextStyle(color: Colors.red)),
                   onTap: () {
                     Navigator.of(ctx).pop();
                     setState(() {
@@ -691,6 +696,7 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
   }
 
   void _addItemDialog() {
+    final l10n = AppLocalizations.of(context);
     final nameCtrl = TextEditingController();
     final qtyCtrl = TextEditingController(text: '1');
     final priceCtrl = TextEditingController();
@@ -698,14 +704,14 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Add Line Item'),
+        title: Text(l10n.addItem),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: nameCtrl,
               autofocus: true,
-              decoration: const InputDecoration(labelText: 'Item Name', hintText: 'e.g. Organic Milk'),
+              decoration: InputDecoration(labelText: l10n.itemName, hintText: 'e.g. Organic Milk'),
             ),
             const SizedBox(height: 12),
             Row(
@@ -715,7 +721,7 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
                   child: TextField(
                     controller: qtyCtrl,
                     keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(labelText: 'Qty'),
+                    decoration: InputDecoration(labelText: l10n.quantity),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -724,7 +730,7 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
                   child: TextField(
                     controller: priceCtrl,
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    decoration: InputDecoration(labelText: 'Price ($_currency)'),
+                    decoration: InputDecoration(labelText: '${l10n.unitPrice} ($_currency)'),
                   ),
                 ),
               ],
@@ -734,7 +740,7 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () {
@@ -753,7 +759,7 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
                 Navigator.of(ctx).pop();
               }
             },
-            child: const Text('Add'),
+            child: Text(l10n.addItem),
           ),
         ],
       ),
@@ -769,7 +775,7 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
       _amountController.text = total.toStringAsFixed(2);
     });
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Updated amount to $_currency${total.toStringAsFixed(2)} from items')),
+      SnackBar(content: Text('$_currency${total.toStringAsFixed(2)}')),
     );
   }
 
@@ -813,17 +819,18 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final isEditing = widget.existingReceipt != null;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(isEditing ? 'Edit Receipt' : 'Record Receipt'),
+        title: Text(isEditing ? l10n.editReceipt : l10n.recordReceipt),
         actions: [
           IconButton(
             icon: const Icon(Icons.auto_awesome),
-            tooltip: 'Cloud AI Settings (GLM-5.3-Flash)',
+            tooltip: l10n.cloudAiSettingsTooltip,
             onPressed: () => CloudAiSettingsDialog.show(context),
           ),
           Padding(
@@ -837,7 +844,7 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
                       child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                     )
                   : const Icon(Icons.check, size: 18),
-              label: Text(isEditing ? 'Update' : 'Save'),
+              label: Text(isEditing ? l10n.update : l10n.save),
             ),
           ),
         ],
@@ -902,7 +909,7 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
                                           size: 14,
                                         ),
                                         const SizedBox(width: 4),
-                                        const Text('Data Extracted', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)),
+                                        Text(l10n.dataExtracted, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)),
                                       ],
                                     ),
                                   ),
@@ -917,12 +924,12 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
                                   color: Colors.black54,
                                   borderRadius: BorderRadius.circular(16),
                                 ),
-                                child: const Row(
+                                child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Icon(Icons.photo_camera, color: Colors.white, size: 14),
-                                    SizedBox(width: 4),
-                                    Text('Receipt Attached', style: TextStyle(color: Colors.white, fontSize: 12)),
+                                    const Icon(Icons.photo_camera, color: Colors.white, size: 14),
+                                    const SizedBox(width: 4),
+                                    Text(l10n.receiptAttached, style: const TextStyle(color: Colors.white, fontSize: 12)),
                                   ],
                                 ),
                               ),
@@ -938,8 +945,8 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
                                       const SizedBox(height: 10),
                                       Text(
                                         _isAiExtracting
-                                            ? 'Extracting with GLM-5.3-Flash Cloud AI...'
-                                            : 'Scanning receipt on-device...',
+                                            ? l10n.extractingWithAi
+                                            : l10n.scanningOnDevice,
                                         style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                                       ),
                                     ],
@@ -963,7 +970,7 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
                                         ),
                                         onPressed: _showImageSourceDialog,
                                         icon: const Icon(Icons.refresh, size: 16),
-                                        label: const Text('Change'),
+                                        label: Text(l10n.changePhoto),
                                       ),
                                       const SizedBox(width: 6),
                                       TextButton.icon(
@@ -975,7 +982,7 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
                                             ? null
                                             : () => _runAiExtraction(),
                                         icon: const Icon(Icons.auto_awesome, size: 16),
-                                        label: const Text('AI Extract'),
+                                        label: Text(l10n.aiExtract),
                                       ),
                                       const SizedBox(width: 6),
                                       TextButton.icon(
@@ -987,7 +994,7 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
                                             ? null
                                             : () => _runOcrExtraction(),
                                         icon: const Icon(Icons.document_scanner, size: 16),
-                                        label: const Text('OCR'),
+                                        label: Text(l10n.scanOcr),
                                       ),
                                     ],
                                   ),
@@ -999,7 +1006,7 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
                                           backgroundColor: Colors.black54,
                                           foregroundColor: Colors.white,
                                         ),
-                                        tooltip: 'Cloud AI Settings',
+                                        tooltip: l10n.cloudAiSettings,
                                         onPressed: () => CloudAiSettingsDialog.show(context),
                                         icon: const Icon(Icons.tune, size: 16),
                                       ),
@@ -1041,16 +1048,16 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
                               ),
                             ),
                             const SizedBox(height: 12),
-                            const Text(
-                              'Take Photo or Upload Receipt',
-                              style: TextStyle(
+                            Text(
+                              l10n.takePhotoOrUpload,
+                              style: const TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              'Camera, gallery, or generate sample',
+                              l10n.photoUploadSubtitle,
                               style: TextStyle(
                                 fontSize: 12,
                                 color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
@@ -1071,7 +1078,7 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'TOTAL AMOUNT',
+                      l10n.totalAmount,
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
@@ -1099,9 +1106,11 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
                                 DropdownMenuItem(value: '\$', child: Text('\$ USD')),
                                 DropdownMenuItem(value: '€', child: Text('€ EUR')),
                                 DropdownMenuItem(value: '£', child: Text('£ GBP')),
-                                DropdownMenuItem(value: '¥', child: Text('¥ JPY')),
+                                DropdownMenuItem(value: '¥', child: Text('¥ JPY/CNY')),
                                 DropdownMenuItem(value: 'CA\$', child: Text('CA\$ CAD')),
                                 DropdownMenuItem(value: 'A\$', child: Text('A\$ AUD')),
+                                DropdownMenuItem(value: 'NT\$', child: Text('NT\$ TWD')),
+                                DropdownMenuItem(value: 'HK\$', child: Text('HK\$ HKD')),
                               ],
                               onChanged: (val) {
                                 if (val != null) setState(() => _currency = val);
@@ -1125,7 +1134,7 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
                             ),
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
-                                return 'Please enter amount';
+                                return l10n.merchantRequired;
                               }
                               final num = double.tryParse(value.trim());
                               if (num == null || num <= 0) {
@@ -1153,14 +1162,14 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
                     TextFormField(
                       controller: _merchantController,
                       textCapitalization: TextCapitalization.words,
-                      decoration: const InputDecoration(
-                        labelText: 'Merchant / Store Name',
-                        hintText: 'e.g. Costco, Trader Joe\'s, Shell',
-                        prefixIcon: Icon(Icons.storefront),
+                      decoration: InputDecoration(
+                        labelText: l10n.merchantName,
+                        hintText: l10n.merchantPlaceholder,
+                        prefixIcon: const Icon(Icons.storefront),
                       ),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return 'Please enter merchant name';
+                          return l10n.merchantRequired;
                         }
                         return null;
                       },
@@ -1206,8 +1215,8 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
                         ),
                         child: const Icon(Icons.calendar_today, color: Colors.blue, size: 20),
                       ),
-                      title: const Text('Date & Time', style: TextStyle(fontWeight: FontWeight.w600)),
-                      subtitle: Text(DateFormat('EEEE, MMM d, yyyy • h:mm a').format(_selectedDate)),
+                      title: Text(l10n.date, style: const TextStyle(fontWeight: FontWeight.w600)),
+                      subtitle: Text(DateFormat('yyyy-MM-dd • h:mm a').format(_selectedDate)),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: _selectDate,
                     ),
@@ -1216,9 +1225,9 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
                     // Payment Method Dropdown
                     DropdownButtonFormField<String>(
                       initialValue: _selectedPaymentMethod,
-                      decoration: const InputDecoration(
-                        labelText: 'Payment Method',
-                        prefixIcon: Icon(Icons.payment),
+                      decoration: InputDecoration(
+                        labelText: l10n.paymentMethod,
+                        prefixIcon: const Icon(Icons.payment),
                       ),
                       items: PaymentMethod.values.map((method) {
                         return DropdownMenuItem(
@@ -1227,7 +1236,7 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
                             children: [
                               Icon(method.icon, size: 18),
                               const SizedBox(width: 8),
-                              Text(method.label),
+                              Text(LocaleService.getPaymentMethodName(method.label, l10n)),
                             ],
                           ),
                         );
@@ -1250,7 +1259,7 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'CATEGORY',
+                      l10n.category,
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
@@ -1272,7 +1281,7 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
                             color: isSelected ? Colors.white : cat.color,
                           ),
                           label: Text(
-                            cat.name,
+                            LocaleService.getCategoryName(cat.id, l10n),
                             style: TextStyle(
                               color: isSelected ? Colors.white : null,
                               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
@@ -1300,14 +1309,14 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
                   initiallyExpanded: _showAdvanced,
                   onExpansionChanged: (exp) => setState(() => _showAdvanced = exp),
                   leading: const Icon(Icons.tune),
-                  title: const Text(
-                    'Optional Details & Line Items',
-                    style: TextStyle(fontWeight: FontWeight.w600),
+                  title: Text(
+                    l10n.advancedDetails,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
                   subtitle: Text(
                     _items.isNotEmpty
-                        ? '${_items.length} items added'
-                        : 'Tax, tip, itemized breakdown, notes',
+                        ? '${_items.length} ${l10n.receiptCountSuffix}'
+                        : '${l10n.tax}, ${l10n.tip}, ${l10n.lineItems}, ${l10n.notes}',
                     style: TextStyle(fontSize: 12, color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
                   ),
                   children: [
@@ -1323,7 +1332,7 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
                                   controller: _taxController,
                                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                   decoration: InputDecoration(
-                                    labelText: 'Tax ($_currency)',
+                                    labelText: '${l10n.tax} ($_currency)',
                                     hintText: '0.00',
                                   ),
                                 ),
@@ -1334,7 +1343,7 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
                                   controller: _tipController,
                                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                   decoration: InputDecoration(
-                                    labelText: 'Tip ($_currency)',
+                                    labelText: '${l10n.tip} ($_currency)',
                                     hintText: '0.00',
                                   ),
                                 ),
@@ -1346,14 +1355,14 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text(
-                                'Line Items',
-                                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                              Text(
+                                l10n.lineItems,
+                                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                               ),
                               TextButton.icon(
                                 onPressed: _addItemDialog,
                                 icon: const Icon(Icons.add, size: 16),
-                                label: const Text('Add Item'),
+                                label: Text(l10n.addItem),
                               ),
                             ],
                           ),
@@ -1369,7 +1378,7 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
                                   dense: true,
                                   contentPadding: EdgeInsets.zero,
                                   title: Text(item.name, style: const TextStyle(fontWeight: FontWeight.w500)),
-                                  subtitle: Text('Qty ${item.quantity} × $_currency${item.unitPrice.toStringAsFixed(2)}'),
+                                  subtitle: Text('${l10n.quantity} ${item.quantity} × $_currency${item.unitPrice.toStringAsFixed(2)}'),
                                   trailing: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
@@ -1394,7 +1403,7 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
                               child: TextButton.icon(
                                 onPressed: _calculateTotalFromItems,
                                 icon: const Icon(Icons.calculate, size: 16),
-                                label: const Text('Update Total from Items'),
+                                label: Text(l10n.subtotal),
                               ),
                             ),
                           ],
@@ -1403,9 +1412,9 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
                           TextFormField(
                             controller: _notesController,
                             maxLines: 3,
-                            decoration: const InputDecoration(
-                              labelText: 'Notes / Remarks',
-                              hintText: 'e.g. Business lunch with client, warranty info',
+                            decoration: InputDecoration(
+                              labelText: l10n.notes,
+                              hintText: l10n.notesPlaceholder,
                               alignLabelWithHint: true,
                             ),
                           ),
@@ -1428,7 +1437,7 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
                 child: _isLoading
                     ? const CircularProgressIndicator(color: Colors.white)
                     : Text(
-                        isEditing ? 'Update Receipt' : 'Save Receipt Record',
+                        isEditing ? l10n.update : l10n.save,
                         style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                       ),
               ),

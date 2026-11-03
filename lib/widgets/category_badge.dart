@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 import '../models/receipt_category.dart';
+import '../services/locale_service.dart';
 
 class CategoryBadge extends StatelessWidget {
   final String categoryId;
@@ -13,6 +15,7 @@ class CategoryBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final category = ReceiptCategory.fromId(categoryId);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -59,7 +62,7 @@ class CategoryBadge extends StatelessWidget {
           ),
           const SizedBox(width: 5),
           Text(
-            category.name,
+            LocaleService.getCategoryName(categoryId, l10n),
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,

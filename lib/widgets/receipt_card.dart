@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 import '../models/receipt.dart';
 import '../models/receipt_category.dart';
+import '../services/locale_service.dart';
 import '../utils/currency_helper.dart';
 import '../utils/date_helper.dart';
 import 'category_badge.dart';
@@ -22,6 +24,7 @@ class ReceiptCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final payment = PaymentMethod.fromString(receipt.paymentMethod);
@@ -113,7 +116,7 @@ class ReceiptCard extends StatelessWidget {
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
-                              '${receipt.items.length} ${receipt.items.length == 1 ? 'item' : 'items'}',
+                              '${receipt.items.length} ${l10n.receiptCountSuffix}',
                               style: TextStyle(
                                 fontSize: 11,
                                 color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
@@ -154,7 +157,7 @@ class ReceiptCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        payment.label.split(' ').first,
+                        LocaleService.getPaymentMethodName(receipt.paymentMethod, l10n),
                         style: TextStyle(
                           fontSize: 11,
                           color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
@@ -181,24 +184,24 @@ class ReceiptCard extends StatelessWidget {
                   },
                   itemBuilder: (context) => [
                     if (onEdit != null)
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         value: 'edit',
                         child: Row(
                           children: [
-                            Icon(Icons.edit_outlined, size: 18),
-                            SizedBox(width: 8),
-                            Text('Edit'),
+                            const Icon(Icons.edit_outlined, size: 18),
+                            const SizedBox(width: 8),
+                            Text(l10n.edit),
                           ],
                         ),
                       ),
                     if (onDelete != null)
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         value: 'delete',
                         child: Row(
                           children: [
-                            Icon(Icons.delete_outline, size: 18, color: Colors.red),
-                            SizedBox(width: 8),
-                            Text('Delete', style: TextStyle(color: Colors.red)),
+                            const Icon(Icons.delete_outline, size: 18, color: Colors.red),
+                            const SizedBox(width: 8),
+                            Text(l10n.delete, style: const TextStyle(color: Colors.red)),
                           ],
                         ),
                       ),
