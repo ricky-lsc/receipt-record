@@ -242,11 +242,6 @@ class _SummaryScreenState extends State<SummaryScreen> {
                   );
                 },
               ),
-              IconButton(
-                icon: const Icon(Icons.date_range),
-                tooltip: l10n.customRange,
-                onPressed: _pickCustomDateRange,
-              ),
               if (widget.themeModeNotifier != null)
                 IconButton(
                   icon: const Icon(Icons.settings_outlined),
