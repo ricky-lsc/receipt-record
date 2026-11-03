@@ -492,4 +492,88 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get viewAll => 'View All';
+
+  @override
+  String get splitBill => 'Split Bill';
+
+  @override
+  String get splitBillTitle => 'Split Receipt Bill';
+
+  @override
+  String get numberOfPeople => 'Number of People';
+
+  @override
+  String get personName => 'Person Name';
+
+  @override
+  String get participant => 'Participant';
+
+  @override
+  String get me => 'Me';
+
+  @override
+  String get equalSplit => 'Equal Split';
+
+  @override
+  String get customSplit => 'Custom Split';
+
+  @override
+  String get fineTuneAmounts => 'Fine-Tune Amounts';
+
+  @override
+  String get fineTuneSubtitle =>
+      'Adjust individual shares if someone pays more or less';
+
+  @override
+  String get receiptTotal => 'Receipt Total';
+
+  @override
+  String get totalAllocated => 'Allocated';
+
+  @override
+  String get remainingBalance => 'Remaining';
+
+  @override
+  String get overAllocated => 'Over by';
+
+  @override
+  String get balanced => 'Balanced';
+
+  @override
+  String get distributeRemaining => 'Auto-Balance';
+
+  @override
+  String get copyBreakdown => 'Copy Breakdown';
+
+  @override
+  String get copiedToClipboard => 'Split breakdown copied to clipboard!';
+
+  @override
+  String get saveSplit => 'Save Split';
+
+  @override
+  String get splitSaved => 'Receipt split saved successfully.';
+
+  @override
+  String splitBadge(Object count) {
+    return 'Split ($count)';
+  }
+
+  @override
+  String get addPerson => 'Add Person';
+
+  @override
+  String get removePerson => 'Remove';
+
+  @override
+  String get clearSplit => 'Clear Split';
+
+  @override
+  String get clearSplitConfirm => 'Remove bill split for this receipt?';
+
+  @override
+  String get markPaid => 'Paid';
+
+  @override
+  String get markUnpaid => 'Unpaid';
 }

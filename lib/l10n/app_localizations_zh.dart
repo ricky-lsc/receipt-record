@@ -481,6 +481,89 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get viewAll => '查看全部';
+
+  @override
+  String get splitBill => 'AA分摊';
+
+  @override
+  String get splitBillTitle => '收据分摊分账';
+
+  @override
+  String get numberOfPeople => '分摊人数';
+
+  @override
+  String get personName => '姓名';
+
+  @override
+  String get participant => '分摊人';
+
+  @override
+  String get me => '我';
+
+  @override
+  String get equalSplit => '平均分摊';
+
+  @override
+  String get customSplit => '自定微调';
+
+  @override
+  String get fineTuneAmounts => '调整各自金额';
+
+  @override
+  String get fineTuneSubtitle => '可根据消费情况微调各自分摊金额';
+
+  @override
+  String get receiptTotal => '收据总额';
+
+  @override
+  String get totalAllocated => '已分摊';
+
+  @override
+  String get remainingBalance => '待分配';
+
+  @override
+  String get overAllocated => '超出';
+
+  @override
+  String get balanced => '已平衡';
+
+  @override
+  String get distributeRemaining => '自动平账';
+
+  @override
+  String get copyBreakdown => '复制明细';
+
+  @override
+  String get copiedToClipboard => '分账明细已复制到剪贴板！';
+
+  @override
+  String get saveSplit => '保存分账';
+
+  @override
+  String get splitSaved => '收据分账已成功保存。';
+
+  @override
+  String splitBadge(Object count) {
+    return '分摊 ($count人)';
+  }
+
+  @override
+  String get addPerson => '增加分摊人';
+
+  @override
+  String get removePerson => '移除';
+
+  @override
+  String get clearSplit => '清除分账';
+
+  @override
+  String get clearSplitConfirm => '确定要清除本收据的分账记录吗？';
+
+  @override
+  String get markPaid => '已付';
+
+  @override
+  String get markUnpaid => '未付';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -959,6 +1042,89 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get viewAll => '查看全部';
+
+  @override
+  String get splitBill => 'AA分摊';
+
+  @override
+  String get splitBillTitle => '收据分摊分账';
+
+  @override
+  String get numberOfPeople => '分摊人数';
+
+  @override
+  String get personName => '姓名';
+
+  @override
+  String get participant => '分摊人';
+
+  @override
+  String get me => '我';
+
+  @override
+  String get equalSplit => '平均分摊';
+
+  @override
+  String get customSplit => '自定微调';
+
+  @override
+  String get fineTuneAmounts => '调整各自金额';
+
+  @override
+  String get fineTuneSubtitle => '可根据消费情况微调各自分摊金额';
+
+  @override
+  String get receiptTotal => '收据总额';
+
+  @override
+  String get totalAllocated => '已分摊';
+
+  @override
+  String get remainingBalance => '待分配';
+
+  @override
+  String get overAllocated => '超出';
+
+  @override
+  String get balanced => '已平衡';
+
+  @override
+  String get distributeRemaining => '自动平账';
+
+  @override
+  String get copyBreakdown => '复制明细';
+
+  @override
+  String get copiedToClipboard => '分账明细已复制到剪贴板！';
+
+  @override
+  String get saveSplit => '保存分账';
+
+  @override
+  String get splitSaved => '收据分账已成功保存。';
+
+  @override
+  String splitBadge(Object count) {
+    return '分摊 ($count人)';
+  }
+
+  @override
+  String get addPerson => '增加分摊人';
+
+  @override
+  String get removePerson => '移除';
+
+  @override
+  String get clearSplit => '清除分账';
+
+  @override
+  String get clearSplitConfirm => '确定要清除本收据的分账记录吗？';
+
+  @override
+  String get markPaid => '已付';
+
+  @override
+  String get markUnpaid => '未付';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -1437,4 +1603,87 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get viewAll => '查看全部';
+
+  @override
+  String get splitBill => '分帳分攤';
+
+  @override
+  String get splitBillTitle => '收據分帳分攤';
+
+  @override
+  String get numberOfPeople => '分攤人數';
+
+  @override
+  String get personName => '姓名';
+
+  @override
+  String get participant => '分攤者';
+
+  @override
+  String get me => '我';
+
+  @override
+  String get equalSplit => '平均分攤';
+
+  @override
+  String get customSplit => '自訂微調';
+
+  @override
+  String get fineTuneAmounts => '調整各自金額';
+
+  @override
+  String get fineTuneSubtitle => '可依照個別消費微調各自分攤金額';
+
+  @override
+  String get receiptTotal => '收據總額';
+
+  @override
+  String get totalAllocated => '已分攤';
+
+  @override
+  String get remainingBalance => '待分配';
+
+  @override
+  String get overAllocated => '超出';
+
+  @override
+  String get balanced => '已平衡';
+
+  @override
+  String get distributeRemaining => '自動平帳';
+
+  @override
+  String get copyBreakdown => '複製明細';
+
+  @override
+  String get copiedToClipboard => '分帳明細已複製到剪貼簿！';
+
+  @override
+  String get saveSplit => '儲存分帳';
+
+  @override
+  String get splitSaved => '收據分帳已成功儲存。';
+
+  @override
+  String splitBadge(Object count) {
+    return '分帳 ($count人)';
+  }
+
+  @override
+  String get addPerson => '新增分攤者';
+
+  @override
+  String get removePerson => '移除';
+
+  @override
+  String get clearSplit => '清除分帳';
+
+  @override
+  String get clearSplitConfirm => '確定要清除此收據的分帳記錄嗎？';
+
+  @override
+  String get markPaid => '已付';
+
+  @override
+  String get markUnpaid => '未付';
 }

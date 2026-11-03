@@ -1041,6 +1041,168 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'View All'**
   String get viewAll;
+
+  /// No description provided for @splitBill.
+  ///
+  /// In en, this message translates to:
+  /// **'Split Bill'**
+  String get splitBill;
+
+  /// No description provided for @splitBillTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Split Receipt Bill'**
+  String get splitBillTitle;
+
+  /// No description provided for @numberOfPeople.
+  ///
+  /// In en, this message translates to:
+  /// **'Number of People'**
+  String get numberOfPeople;
+
+  /// No description provided for @personName.
+  ///
+  /// In en, this message translates to:
+  /// **'Person Name'**
+  String get personName;
+
+  /// No description provided for @participant.
+  ///
+  /// In en, this message translates to:
+  /// **'Participant'**
+  String get participant;
+
+  /// No description provided for @me.
+  ///
+  /// In en, this message translates to:
+  /// **'Me'**
+  String get me;
+
+  /// No description provided for @equalSplit.
+  ///
+  /// In en, this message translates to:
+  /// **'Equal Split'**
+  String get equalSplit;
+
+  /// No description provided for @customSplit.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom Split'**
+  String get customSplit;
+
+  /// No description provided for @fineTuneAmounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Fine-Tune Amounts'**
+  String get fineTuneAmounts;
+
+  /// No description provided for @fineTuneSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust individual shares if someone pays more or less'**
+  String get fineTuneSubtitle;
+
+  /// No description provided for @receiptTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt Total'**
+  String get receiptTotal;
+
+  /// No description provided for @totalAllocated.
+  ///
+  /// In en, this message translates to:
+  /// **'Allocated'**
+  String get totalAllocated;
+
+  /// No description provided for @remainingBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining'**
+  String get remainingBalance;
+
+  /// No description provided for @overAllocated.
+  ///
+  /// In en, this message translates to:
+  /// **'Over by'**
+  String get overAllocated;
+
+  /// No description provided for @balanced.
+  ///
+  /// In en, this message translates to:
+  /// **'Balanced'**
+  String get balanced;
+
+  /// No description provided for @distributeRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-Balance'**
+  String get distributeRemaining;
+
+  /// No description provided for @copyBreakdown.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy Breakdown'**
+  String get copyBreakdown;
+
+  /// No description provided for @copiedToClipboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Split breakdown copied to clipboard!'**
+  String get copiedToClipboard;
+
+  /// No description provided for @saveSplit.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Split'**
+  String get saveSplit;
+
+  /// No description provided for @splitSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt split saved successfully.'**
+  String get splitSaved;
+
+  /// No description provided for @splitBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Split ({count})'**
+  String splitBadge(Object count);
+
+  /// No description provided for @addPerson.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Person'**
+  String get addPerson;
+
+  /// No description provided for @removePerson.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get removePerson;
+
+  /// No description provided for @clearSplit.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear Split'**
+  String get clearSplit;
+
+  /// No description provided for @clearSplitConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove bill split for this receipt?'**
+  String get clearSplitConfirm;
+
+  /// No description provided for @markPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid'**
+  String get markPaid;
+
+  /// No description provided for @markUnpaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Unpaid'**
+  String get markUnpaid;
 }
 
 class _AppLocalizationsDelegate

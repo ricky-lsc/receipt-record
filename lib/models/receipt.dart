@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'receipt_item.dart';
+import 'receipt_split.dart';
 
 class Receipt {
   final String id;
@@ -15,6 +16,7 @@ class Receipt {
   final String? imagePath;
   final String? imageBase64;
   final List<ReceiptItem> items;
+  final ReceiptSplit? split;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -32,6 +34,7 @@ class Receipt {
     this.imagePath,
     this.imageBase64,
     this.items = const [],
+    this.split,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -39,6 +42,8 @@ class Receipt {
   bool get hasImage =>
       (imageBase64 != null && imageBase64!.isNotEmpty) ||
       (imagePath != null && imagePath!.isNotEmpty);
+
+  bool get isSplit => split != null && split!.participants.length > 1;
 
   double get itemsSubtotal =>
       items.fold(0.0, (sum, item) => sum + item.totalPrice);
@@ -58,6 +63,7 @@ class Receipt {
       'imagePath': imagePath,
       'imageBase64': imageBase64,
       'items': items.map((x) => x.toMap()).toList(),
+      'split': split?.toMap(),
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
     };
@@ -83,6 +89,9 @@ class Receipt {
               ?.map((item) => ReceiptItem.fromMap(item as Map<String, dynamic>))
               .toList() ??
           const [],
+      split: map['split'] != null && map['split'] is Map<String, dynamic>
+          ? ReceiptSplit.fromMap(map['split'] as Map<String, dynamic>)
+          : null,
       createdAt: map['createdAt'] != null
           ? DateTime.tryParse(map['createdAt'] as String) ?? DateTime.now()
           : DateTime.now(),
@@ -111,6 +120,7 @@ class Receipt {
     String? imagePath,
     String? imageBase64,
     List<ReceiptItem>? items,
+    ReceiptSplit? split,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -128,6 +138,7 @@ class Receipt {
       imagePath: imagePath ?? this.imagePath,
       imageBase64: imageBase64 ?? this.imageBase64,
       items: items ?? this.items,
+      split: split ?? this.split,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

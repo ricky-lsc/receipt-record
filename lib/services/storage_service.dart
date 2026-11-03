@@ -83,6 +83,14 @@ class StorageService {
     receiptsNotifier.value = [];
   }
 
+  Receipt? getReceipt(String id) {
+    try {
+      return receiptsNotifier.value.firstWhere((r) => r.id == id);
+    } catch (_) {
+      return null;
+    }
+  }
+
   Future<void> importReceipts(List<Receipt> newReceipts, {bool overwrite = false}) async {
     if (overwrite) {
       final sorted = List<Receipt>.from(newReceipts)

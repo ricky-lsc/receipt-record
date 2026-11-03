@@ -125,6 +125,31 @@ class ReceiptCard extends StatelessWidget {
                             ),
                           ),
                         ],
+                        if (receipt.isSplit) ...[
+                          const SizedBox(width: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF0F766E).withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.call_split, size: 10, color: Color(0xFF0F766E)),
+                                const SizedBox(width: 3),
+                                Text(
+                                  '${receipt.split!.participants.length}',
+                                  style: const TextStyle(
+                                    fontSize: 10,
+                                    color: Color(0xFF0F766E),
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ],

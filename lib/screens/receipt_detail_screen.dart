@@ -9,6 +9,7 @@ import '../utils/currency_helper.dart';
 import '../utils/date_helper.dart';
 import '../widgets/category_badge.dart';
 import '../widgets/receipt_image_view.dart';
+import '../widgets/split_bill_dialog.dart';
 import 'add_edit_receipt_screen.dart';
 
 class ReceiptDetailScreen extends StatefulWidget {
@@ -27,6 +28,13 @@ class _ReceiptDetailScreenState extends State<ReceiptDetailScreen> {
   void initState() {
     super.initState();
     _receipt = widget.receipt;
+  }
+
+  Future<void> _splitBill() async {
+    final updated = await SplitBillDialog.show(context, _receipt);
+    if (updated != null && mounted) {
+      setState(() => _receipt = updated);
+    }
   }
 
   Future<void> _editReceipt() async {
@@ -84,6 +92,11 @@ class _ReceiptDetailScreenState extends State<ReceiptDetailScreen> {
       appBar: AppBar(
         title: Text(l10n.receiptDetails),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.call_split),
+            tooltip: l10n.splitBill,
+            onPressed: _splitBill,
+          ),
           IconButton(
             icon: const Icon(Icons.edit_outlined),
             tooltip: l10n.editReceipt,
@@ -342,6 +355,116 @@ class _ReceiptDetailScreenState extends State<ReceiptDetailScreen> {
             ),
           ),
           const SizedBox(height: 16),
+
+          // Bill Split Section
+          if (_receipt.isSplit) ...[
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(18),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Icon(Icons.call_split, color: Theme.of(context).colorScheme.primary, size: 18),
+                            ),
+                            const SizedBox(width: 10),
+                            Text(
+                              l10n.splitBillTitle,
+                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                            ),
+                          ],
+                        ),
+                        TextButton.icon(
+                          onPressed: _splitBill,
+                          icon: const Icon(Icons.edit, size: 14),
+                          label: Text(l10n.edit),
+                        ),
+                      ],
+                    ),
+                    const Divider(height: 16),
+                    ListView.separated(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: _receipt.split!.participants.length,
+                      separatorBuilder: (_, _) => const SizedBox(height: 8),
+                      itemBuilder: (context, i) {
+                        final p = _receipt.split!.participants[i];
+                        return Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(
+                                    p.isPaid ? Icons.check_circle : Icons.radio_button_unchecked,
+                                    size: 16,
+                                    color: p.isPaid ? const Color(0xFF0F766E) : Colors.grey,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    p.name.isNotEmpty ? p.name : '${l10n.participant} ${i + 1}',
+                                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                                  ),
+                                  if (p.isPaid) ...[
+                                    const SizedBox(width: 6),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFF0F766E).withValues(alpha: 0.12),
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Text(
+                                        l10n.markPaid,
+                                        style: const TextStyle(fontSize: 10, color: Color(0xFF0F766E), fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                              Text(
+                                CurrencyHelper.format(p.amount, symbol: _receipt.currency),
+                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+          ] else ...[
+            OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size.fromHeight(48),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+              onPressed: _splitBill,
+              icon: const Icon(Icons.call_split),
+              label: Text(l10n.splitBill),
+            ),
+            const SizedBox(height: 16),
+          ],
 
           // Notes / Remarks (if present)
           if (_receipt.notes != null && _receipt.notes!.isNotEmpty) ...[
