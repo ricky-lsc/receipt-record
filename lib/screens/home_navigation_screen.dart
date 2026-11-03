@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/cloud_ai_settings_dialog.dart';
 import 'add_edit_receipt_screen.dart';
 import 'export_screen.dart';
 import 'receipt_list_screen.dart';
@@ -70,13 +71,24 @@ class _HomeNavigationScreenState extends State<HomeNavigationScreen> {
                   alignment: Alignment.bottomCenter,
                   child: Padding(
                     padding: const EdgeInsets.only(bottom: 20),
-                    child: IconButton(
-                      icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
-                      tooltip: 'Toggle Theme',
-                      onPressed: () {
-                        widget.themeModeNotifier.value =
-                            isDark ? ThemeMode.light : ThemeMode.dark;
-                      },
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.auto_awesome),
+                          tooltip: 'Cloud AI Settings (GLM)',
+                          onPressed: () => CloudAiSettingsDialog.show(context),
+                        ),
+                        const SizedBox(height: 8),
+                        IconButton(
+                          icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
+                          tooltip: 'Toggle Theme',
+                          onPressed: () {
+                            widget.themeModeNotifier.value =
+                                isDark ? ThemeMode.light : ThemeMode.dark;
+                          },
+                        ),
+                      ],
                     ),
                   ),
                 ),

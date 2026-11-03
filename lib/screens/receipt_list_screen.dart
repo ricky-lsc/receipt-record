@@ -3,6 +3,7 @@ import '../models/receipt.dart';
 import '../models/receipt_category.dart';
 import '../services/storage_service.dart';
 import '../utils/currency_helper.dart';
+import '../widgets/cloud_ai_settings_dialog.dart';
 import '../widgets/empty_state.dart';
 import '../widgets/receipt_card.dart';
 import 'add_edit_receipt_screen.dart';
@@ -193,6 +194,11 @@ class _ReceiptListScreenState extends State<ReceiptListScreen> {
           appBar: AppBar(
             title: const Text('Receipt Records'),
             actions: [
+              IconButton(
+                icon: const Icon(Icons.auto_awesome),
+                tooltip: 'Cloud AI Settings (GLM)',
+                onPressed: () => CloudAiSettingsDialog.show(context),
+              ),
               IconButton(
                 icon: const Icon(Icons.sort),
                 tooltip: 'Sort & Filter',

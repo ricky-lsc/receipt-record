@@ -8,9 +8,11 @@ import 'package:uuid/uuid.dart';
 import '../models/receipt.dart';
 import '../models/receipt_category.dart';
 import '../models/receipt_item.dart';
+import '../services/glm_receipt_service.dart';
 import '../services/ocr_service.dart';
 import '../services/sample_data_service.dart';
 import '../services/storage_service.dart';
+import '../widgets/cloud_ai_settings_dialog.dart';
 import '../widgets/receipt_image_view.dart';
 
 class AddEditReceiptScreen extends StatefulWidget {
@@ -39,6 +41,7 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
   String? _imageBase64;
   bool _isLoading = false;
   bool _isOcrScanning = false;
+  bool _isAiExtracting = false;
   String? _rawOcrText;
 
   final List<ReceiptItem> _items = [];
@@ -108,8 +111,8 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
           _imageBase64 = base64Encode(bytes);
         });
 
-        // Run On-Device OCR Extraction
-        await _runOcrExtraction(pickedFile.path);
+        // Run intelligent extraction (Cloud AI with On-Device OCR fallback)
+        await _extractReceiptData(pickedFile.path);
       }
     } catch (e) {
       debugPrint('Error picking image: $e');
@@ -145,6 +148,207 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
             ),
           );
         }
+      }
+    }
+  }
+
+  Future<void> _extractReceiptData([String? path]) async {
+    final glm = GlmReceiptService.instance;
+    final hasKey = await glm.hasApiKey();
+    final isEnabled = await glm.isAiEnabled();
+
+    if (hasKey && isEnabled) {
+      await _runAiExtraction(path);
+    } else {
+      await _runOcrExtraction(path);
+    }
+  }
+
+  Future<void> _runAiExtraction([String? path]) async {
+    final glm = GlmReceiptService.instance;
+    final hasKey = await glm.hasApiKey();
+
+    if (!hasKey) {
+      if (!mounted) return;
+      final shouldConfigure = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Row(
+            children: [
+              Icon(Icons.auto_awesome, color: Color(0xFF0F766E)),
+              SizedBox(width: 8),
+              Text('Configure Cloud AI'),
+            ],
+          ),
+          content: const Text(
+            'GLM-5.3-Flash Cloud AI requires your API key for receipt extraction (BYOK).\n\nWould you like to enter your API key, or use on-device OCR instead?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(ctx).pop(false);
+                _runOcrExtraction(path);
+              },
+              child: const Text('Use On-Device OCR'),
+            ),
+            ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF0F766E),
+                foregroundColor: Colors.white,
+              ),
+              onPressed: () => Navigator.of(ctx).pop(true),
+              icon: const Icon(Icons.vpn_key, size: 16),
+              label: const Text('Configure Key'),
+            ),
+          ],
+        ),
+      );
+
+      if (shouldConfigure == true && mounted) {
+        final saved = await CloudAiSettingsDialog.show(context);
+        if (saved == true && mounted && await glm.hasApiKey()) {
+          // Key was saved, proceed with extraction
+        } else {
+          return;
+        }
+      } else {
+        return;
+      }
+    }
+
+    final targetPath = path ?? _imagePath;
+    if (targetPath == null && (_imageBase64 == null || _imageBase64!.isEmpty)) {
+      return;
+    }
+
+    setState(() {
+      _isOcrScanning = true;
+      _isAiExtracting = true;
+    });
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Row(
+            children: [
+              SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+              ),
+              SizedBox(width: 12),
+              Text('Extracting with GLM-5.3-Flash Cloud AI...'),
+            ],
+          ),
+          duration: Duration(seconds: 4),
+        ),
+      );
+    }
+
+    try {
+      final extracted = await glm.extractReceipt(
+        imagePath: targetPath,
+        base64Image: _imageBase64,
+      );
+      _rawOcrText = extracted.rawText;
+
+      if (!mounted) return;
+
+      bool anyFieldUpdated = false;
+
+      setState(() {
+        if (extracted.merchant != null && extracted.merchant!.isNotEmpty) {
+          _merchantController.text = extracted.merchant!;
+          anyFieldUpdated = true;
+        }
+        if (extracted.totalAmount != null && extracted.totalAmount! > 0) {
+          _amountController.text = extracted.totalAmount!.toStringAsFixed(2);
+          anyFieldUpdated = true;
+        }
+        if (extracted.taxAmount != null && extracted.taxAmount! > 0) {
+          _taxController.text = extracted.taxAmount!.toStringAsFixed(2);
+          _showAdvanced = true;
+          anyFieldUpdated = true;
+        }
+        if (extracted.tipAmount != null && extracted.tipAmount! > 0) {
+          _tipController.text = extracted.tipAmount!.toStringAsFixed(2);
+          _showAdvanced = true;
+          anyFieldUpdated = true;
+        }
+        if (extracted.date != null) {
+          _selectedDate = extracted.date!;
+          anyFieldUpdated = true;
+        }
+        if (extracted.category != null && extracted.category != 'other') {
+          _selectedCategory = extracted.category!;
+        }
+        if (extracted.items.isNotEmpty) {
+          _items.clear();
+          _items.addAll(extracted.items);
+          _showAdvanced = true;
+          anyFieldUpdated = true;
+        }
+      });
+
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      if (anyFieldUpdated) {
+        final itemCount = extracted.items.length;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: const Color(0xFF0F766E),
+            content: Row(
+              children: [
+                const Icon(Icons.auto_awesome, color: Colors.white, size: 20),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'Extracted via GLM-5.3-Flash: ${extracted.merchant ?? 'Receipt'}${itemCount > 0 ? ' ($itemCount items)' : ''} • $_currency${extracted.totalAmount?.toStringAsFixed(2) ?? ''}',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
+            ),
+            action: (_rawOcrText != null && _rawOcrText!.isNotEmpty)
+                ? SnackBarAction(
+                    label: 'View Raw',
+                    textColor: Colors.white,
+                    onPressed: _showRawOcrDialog,
+                  )
+                : null,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('GLM AI did not detect clear receipt data. You can enter details manually or try On-Device OCR.'),
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint('GLM AI extraction error: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: Colors.deepOrange,
+            content: Text('GLM AI error: $e'),
+            action: SnackBarAction(
+              label: 'Run On-Device OCR',
+              textColor: Colors.white,
+              onPressed: () => _runOcrExtraction(targetPath),
+            ),
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isOcrScanning = false;
+          _isAiExtracting = false;
+        });
       }
     }
   }
@@ -617,6 +821,11 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
       appBar: AppBar(
         title: Text(isEditing ? 'Edit Receipt' : 'Record Receipt'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.auto_awesome),
+            tooltip: 'Cloud AI Settings (GLM-5.3-Flash)',
+            onPressed: () => CloudAiSettingsDialog.show(context),
+          ),
           Padding(
             padding: const EdgeInsets.only(right: 12),
             child: ElevatedButton.icon(
@@ -682,12 +891,18 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
                                       color: const Color(0xFF0F766E).withValues(alpha: 0.85),
                                       borderRadius: BorderRadius.circular(16),
                                     ),
-                                    child: const Row(
+                                    child: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        Icon(Icons.check, color: Colors.white, size: 14),
-                                        SizedBox(width: 4),
-                                        Text('OCR Scanned', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)),
+                                        Icon(
+                                          _rawOcrText!.contains('"merchant"') || _rawOcrText!.contains('GLM')
+                                              ? Icons.auto_awesome
+                                              : Icons.check,
+                                          color: Colors.white,
+                                          size: 14,
+                                        ),
+                                        const SizedBox(width: 4),
+                                        const Text('Data Extracted', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)),
                                       ],
                                     ),
                                   ),
@@ -712,18 +927,20 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
                                 ),
                               ),
                             ),
-                            if (_isOcrScanning)
+                            if (_isOcrScanning || _isAiExtracting)
                               Container(
                                 color: Colors.black54,
-                                child: const Center(
+                                child: Center(
                                   child: Column(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      CircularProgressIndicator(color: Colors.white),
-                                      SizedBox(height: 10),
+                                      const CircularProgressIndicator(color: Colors.white),
+                                      const SizedBox(height: 10),
                                       Text(
-                                        'Scanning receipt on-device...',
-                                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                        _isAiExtracting
+                                            ? 'Extracting with GLM-5.3-Flash Cloud AI...'
+                                            : 'Scanning receipt on-device...',
+                                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                                       ),
                                     ],
                                   ),
@@ -748,31 +965,60 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
                                         icon: const Icon(Icons.refresh, size: 16),
                                         label: const Text('Change'),
                                       ),
-                                      const SizedBox(width: 8),
+                                      const SizedBox(width: 6),
                                       TextButton.icon(
                                         style: TextButton.styleFrom(
-                                          backgroundColor: const Color(0xFF0F766E).withValues(alpha: 0.85),
+                                          backgroundColor: const Color(0xFF0F766E),
                                           foregroundColor: Colors.white,
                                         ),
-                                        onPressed: _isOcrScanning ? null : () => _runOcrExtraction(),
+                                        onPressed: (_isOcrScanning || _isAiExtracting)
+                                            ? null
+                                            : () => _runAiExtraction(),
+                                        icon: const Icon(Icons.auto_awesome, size: 16),
+                                        label: const Text('AI Extract'),
+                                      ),
+                                      const SizedBox(width: 6),
+                                      TextButton.icon(
+                                        style: TextButton.styleFrom(
+                                          backgroundColor: Colors.black54,
+                                          foregroundColor: Colors.white,
+                                        ),
+                                        onPressed: (_isOcrScanning || _isAiExtracting)
+                                            ? null
+                                            : () => _runOcrExtraction(),
                                         icon: const Icon(Icons.document_scanner, size: 16),
-                                        label: const Text('Scan OCR'),
+                                        label: const Text('OCR'),
                                       ),
                                     ],
                                   ),
-                                  IconButton(
-                                    style: IconButton.styleFrom(
-                                      backgroundColor: Colors.red.withValues(alpha: 0.7),
-                                      foregroundColor: Colors.white,
-                                    ),
-                                    onPressed: () {
-                                      setState(() {
-                                        _imageBase64 = null;
-                                        _imagePath = null;
-                                        _rawOcrText = null;
-                                      });
-                                    },
-                                    icon: const Icon(Icons.delete_outline, size: 18),
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      IconButton(
+                                        style: IconButton.styleFrom(
+                                          backgroundColor: Colors.black54,
+                                          foregroundColor: Colors.white,
+                                        ),
+                                        tooltip: 'Cloud AI Settings',
+                                        onPressed: () => CloudAiSettingsDialog.show(context),
+                                        icon: const Icon(Icons.tune, size: 16),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      IconButton(
+                                        style: IconButton.styleFrom(
+                                          backgroundColor: Colors.red.withValues(alpha: 0.7),
+                                          foregroundColor: Colors.white,
+                                        ),
+                                        onPressed: () {
+                                          setState(() {
+                                            _imageBase64 = null;
+                                            _imagePath = null;
+                                            _rawOcrText = null;
+                                          });
+                                        },
+                                        icon: const Icon(Icons.delete_outline, size: 18),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
