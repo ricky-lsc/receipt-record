@@ -5,6 +5,7 @@ import 'package:file_selector/file_selector.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:uuid/uuid.dart';
 import '../models/receipt.dart';
 import '../models/receipt_category.dart';
 import '../models/summary_data.dart';
@@ -31,6 +32,20 @@ class ExportResult {
     required this.success,
     this.filePath,
     required this.content,
+    this.message,
+  });
+}
+
+class ImportResult {
+  final bool success;
+  final List<Receipt> receipts;
+  final String format;
+  final String? message;
+
+  const ImportResult({
+    required this.success,
+    this.receipts = const [],
+    this.format = 'JSON',
     this.message,
   });
 }
@@ -237,5 +252,167 @@ class ExportService {
       content: content,
       message: 'File save cancelled or unavailable. You can copy the content to clipboard.',
     );
+  }
+
+  /// Parses JSON content into a list of Receipts
+  static List<Receipt> parseJson(String jsonString) {
+    final decoded = json.decode(jsonString);
+    final List<dynamic> list;
+    if (decoded is Map && decoded['receipts'] != null) {
+      list = decoded['receipts'] as List<dynamic>;
+    } else if (decoded is List) {
+      list = decoded;
+    } else {
+      throw const FormatException('Invalid JSON backup format. Expected a list of receipts or a backup snapshot.');
+    }
+
+    return list
+        .map((item) => Receipt.fromMap(item as Map<String, dynamic>))
+        .toList();
+  }
+
+  /// Parses CSV content into a list of Receipts
+  static List<Receipt> parseCsv(String csvString) {
+    final rows = const CsvDecoder().convert(csvString);
+    if (rows.length < 2) {
+      throw const FormatException('CSV file is empty or missing headers.');
+    }
+
+    final headers = rows[0].map((h) => h.toString().trim().toLowerCase()).toList();
+    final idIdx = headers.indexOf('id');
+    final dateIdx = headers.indexOf('date');
+    final merchIdx = headers.indexOf('merchant');
+    final catIdx = headers.indexOf('category');
+    final payIdx = headers.indexOf('payment method');
+    final amtIdx = headers.indexOf('amount');
+    final currIdx = headers.indexOf('currency');
+    final taxIdx = headers.indexOf('tax');
+    final tipIdx = headers.indexOf('tip');
+    final notesIdx = headers.indexOf('notes');
+
+    if (merchIdx == -1 || amtIdx == -1) {
+      throw const FormatException('CSV missing required columns (Merchant, Amount).');
+    }
+
+    const uuid = Uuid();
+    final List<Receipt> receipts = [];
+
+    for (int i = 1; i < rows.length; i++) {
+      final row = rows[i];
+      if (row.isEmpty) continue;
+
+      final merchant = row[merchIdx].toString().trim();
+      if (merchant.isEmpty) continue;
+
+      final amountStr = row[amtIdx].toString().replaceAll(RegExp(r'[^\d.]'), '');
+      final amount = double.tryParse(amountStr) ?? 0.0;
+
+      final id = (idIdx != -1 && idIdx < row.length && row[idIdx].toString().trim().isNotEmpty)
+          ? row[idIdx].toString().trim()
+          : uuid.v4();
+
+      DateTime date = DateTime.now();
+      if (dateIdx != -1 && dateIdx < row.length) {
+        final parsed = DateTime.tryParse(row[dateIdx].toString().trim());
+        if (parsed != null) date = parsed;
+      }
+
+      String category = 'other';
+      if (catIdx != -1 && catIdx < row.length) {
+        category = ReceiptCategory.fromId(row[catIdx].toString().trim()).id;
+      }
+
+      String payment = 'Credit Card';
+      if (payIdx != -1 && payIdx < row.length) {
+        final rawPay = row[payIdx].toString().trim();
+        if (rawPay.isNotEmpty) payment = rawPay;
+      }
+
+      String currency = '\$';
+      if (currIdx != -1 && currIdx < row.length) {
+        final rawCurr = row[currIdx].toString().trim();
+        if (rawCurr.isNotEmpty) currency = rawCurr;
+      }
+
+      double? tax;
+      if (taxIdx != -1 && taxIdx < row.length) {
+        tax = double.tryParse(row[taxIdx].toString().replaceAll(RegExp(r'[^\d.]'), ''));
+      }
+
+      double? tip;
+      if (tipIdx != -1 && tipIdx < row.length) {
+        tip = double.tryParse(row[tipIdx].toString().replaceAll(RegExp(r'[^\d.]'), ''));
+      }
+
+      String? notes;
+      if (notesIdx != -1 && notesIdx < row.length) {
+        final rawNotes = row[notesIdx].toString().trim();
+        if (rawNotes.isNotEmpty) notes = rawNotes;
+      }
+
+      receipts.add(Receipt(
+        id: id,
+        merchant: merchant,
+        amount: amount,
+        currency: currency,
+        date: date,
+        category: category,
+        paymentMethod: payment,
+        taxAmount: tax,
+        tipAmount: tip,
+        notes: notes,
+        createdAt: date,
+        updatedAt: DateTime.now(),
+      ));
+    }
+
+    return receipts;
+  }
+
+  /// Opens file picker to choose a backup file and parses it
+  static Future<ImportResult> pickAndParseBackupFile() async {
+    try {
+      const typeGroup = XTypeGroup(
+        label: 'Receipt Backups (*.json, *.csv)',
+        extensions: ['json', 'csv'],
+      );
+
+      final XFile? file = await openFile(
+        acceptedTypeGroups: const [typeGroup],
+      );
+
+      if (file == null) {
+        return const ImportResult(
+          success: false,
+          message: 'No file selected.',
+        );
+      }
+
+      final content = await file.readAsString();
+      final lowerName = file.name.toLowerCase();
+
+      List<Receipt> receipts;
+      String format = 'JSON';
+
+      if (lowerName.endsWith('.csv')) {
+        format = 'CSV';
+        receipts = parseCsv(content);
+      } else {
+        receipts = parseJson(content);
+      }
+
+      return ImportResult(
+        success: true,
+        receipts: receipts,
+        format: format,
+        message: 'Loaded ${receipts.length} receipts from ${file.name}',
+      );
+    } catch (e) {
+      debugPrint('Error picking/parsing backup file: $e');
+      return ImportResult(
+        success: false,
+        message: 'Failed to parse backup file: $e',
+      );
+    }
   }
 }

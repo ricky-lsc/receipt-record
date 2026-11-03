@@ -697,6 +697,48 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get currentPath => '当前存储路径';
+
+  @override
+  String get importReceipts => '导入与恢复';
+
+  @override
+  String get importBackup => '导入备份文件';
+
+  @override
+  String get importDescription => '从 JSON 备份文件或 CSV 表格恢复收据数据。';
+
+  @override
+  String get selectBackupFile => '选择备份文件';
+
+  @override
+  String get importPreview => '导入预览';
+
+  @override
+  String get importMode => '导入处理方式';
+
+  @override
+  String get importMerge => '合并保留现有记录';
+
+  @override
+  String get importMergeDesc => '保留现有收据，并追加合并文件中的记录';
+
+  @override
+  String get importOverwrite => '覆盖清空并导入';
+
+  @override
+  String get importOverwriteDesc => '清空现有收据并完全恢复文件中的记录';
+
+  @override
+  String get confirmImport => '确认导入';
+
+  @override
+  String get importSuccess => '收据已成功导入。';
+
+  @override
+  String get importFailed => '导入失败';
+
+  @override
+  String get noValidReceiptsFound => '该文件中未找到有效的收据记录。';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -1391,6 +1433,48 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get currentPath => '当前存储路径';
+
+  @override
+  String get importReceipts => '导入与恢复';
+
+  @override
+  String get importBackup => '导入备份文件';
+
+  @override
+  String get importDescription => '从 JSON 备份文件或 CSV 表格恢复收据数据。';
+
+  @override
+  String get selectBackupFile => '选择备份文件';
+
+  @override
+  String get importPreview => '导入预览';
+
+  @override
+  String get importMode => '导入处理方式';
+
+  @override
+  String get importMerge => '合并保留现有记录';
+
+  @override
+  String get importMergeDesc => '保留现有收据，并追加合并文件中的记录';
+
+  @override
+  String get importOverwrite => '覆盖清空并导入';
+
+  @override
+  String get importOverwriteDesc => '清空现有收据并完全恢复文件中的记录';
+
+  @override
+  String get confirmImport => '确认导入';
+
+  @override
+  String get importSuccess => '收据已成功导入。';
+
+  @override
+  String get importFailed => '导入失败';
+
+  @override
+  String get noValidReceiptsFound => '该文件中未找到有效的收据记录。';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -2085,4 +2169,46 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get currentPath => '目前儲存路徑';
+
+  @override
+  String get importReceipts => '匯入與復原';
+
+  @override
+  String get importBackup => '匯入備份檔案';
+
+  @override
+  String get importDescription => '從 JSON 備份檔案或 CSV 試算表復原收據資料。';
+
+  @override
+  String get selectBackupFile => '選擇備份檔案';
+
+  @override
+  String get importPreview => '匯入預覽';
+
+  @override
+  String get importMode => '匯入處理方式';
+
+  @override
+  String get importMerge => '合併保留現有記錄';
+
+  @override
+  String get importMergeDesc => '保留現有收據，並追加合併檔案中的記錄';
+
+  @override
+  String get importOverwrite => '覆蓋清空並匯入';
+
+  @override
+  String get importOverwriteDesc => '清空現有收據並完全復原檔案中的記錄';
+
+  @override
+  String get confirmImport => '確認匯入';
+
+  @override
+  String get importSuccess => '收據已成功匯入。';
+
+  @override
+  String get importFailed => '匯入失敗';
+
+  @override
+  String get noValidReceiptsFound => '此檔案中未找到有效的收據記錄。';
 }

@@ -243,5 +243,20 @@
   "migrateReceipts": "遷移現有收據資料",
   "migrateReceiptsDesc": "將目前的所有收據相片與備份資料拷貝至新目錄",
   "folderNotSelected": "未選擇資料夾",
-  "currentPath": "目前儲存路徑"
+  "currentPath": "目前儲存路徑",
+
+  "importReceipts": "匯入與復原",
+  "importBackup": "匯入備份檔案",
+  "importDescription": "從 JSON 備份檔案或 CSV 試算表復原收據資料。",
+  "selectBackupFile": "選擇備份檔案",
+  "importPreview": "匯入預覽",
+  "importMode": "匯入處理方式",
+  "importMerge": "合併保留現有記錄",
+  "importMergeDesc": "保留現有收據，並追加合併檔案中的記錄",
+  "importOverwrite": "覆蓋清空並匯入",
+  "importOverwriteDesc": "清空現有收據並完全復原檔案中的記錄",
+  "confirmImport": "確認匯入",
+  "importSuccess": "收據已成功匯入。",
+  "importFailed": "匯入失敗",
+  "noValidReceiptsFound": "此檔案中未找到有效的收據記錄。"
 }

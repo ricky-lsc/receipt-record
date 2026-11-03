@@ -243,5 +243,20 @@
   "migrateReceipts": "Migrate Existing Receipts",
   "migrateReceiptsDesc": "Copy all current receipts and photos into this folder",
   "folderNotSelected": "No folder selected",
-  "currentPath": "Current Path"
+  "currentPath": "Current Path",
+
+  "importReceipts": "Import & Restore",
+  "importBackup": "Import Backup",
+  "importDescription": "Restore receipts from a JSON backup file or CSV spreadsheet.",
+  "selectBackupFile": "Select Backup File",
+  "importPreview": "Import Preview",
+  "importMode": "Import Strategy",
+  "importMerge": "Merge with Existing",
+  "importMergeDesc": "Keep current receipts and add any new ones from file",
+  "importOverwrite": "Overwrite All Records",
+  "importOverwriteDesc": "Delete current receipts and restore exact file contents",
+  "confirmImport": "Confirm Import",
+  "importSuccess": "Receipts imported successfully.",
+  "importFailed": "Import failed",
+  "noValidReceiptsFound": "No valid receipts found in this file."
 }

@@ -711,4 +711,49 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get currentPath => 'Current Path';
+
+  @override
+  String get importReceipts => 'Import & Restore';
+
+  @override
+  String get importBackup => 'Import Backup';
+
+  @override
+  String get importDescription =>
+      'Restore receipts from a JSON backup file or CSV spreadsheet.';
+
+  @override
+  String get selectBackupFile => 'Select Backup File';
+
+  @override
+  String get importPreview => 'Import Preview';
+
+  @override
+  String get importMode => 'Import Strategy';
+
+  @override
+  String get importMerge => 'Merge with Existing';
+
+  @override
+  String get importMergeDesc =>
+      'Keep current receipts and add any new ones from file';
+
+  @override
+  String get importOverwrite => 'Overwrite All Records';
+
+  @override
+  String get importOverwriteDesc =>
+      'Delete current receipts and restore exact file contents';
+
+  @override
+  String get confirmImport => 'Confirm Import';
+
+  @override
+  String get importSuccess => 'Receipts imported successfully.';
+
+  @override
+  String get importFailed => 'Import failed';
+
+  @override
+  String get noValidReceiptsFound => 'No valid receipts found in this file.';
 }

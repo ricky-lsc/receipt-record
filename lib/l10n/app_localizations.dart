@@ -1467,6 +1467,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Current Path'**
   String get currentPath;
+
+  /// No description provided for @importReceipts.
+  ///
+  /// In en, this message translates to:
+  /// **'Import & Restore'**
+  String get importReceipts;
+
+  /// No description provided for @importBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'Import Backup'**
+  String get importBackup;
+
+  /// No description provided for @importDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore receipts from a JSON backup file or CSV spreadsheet.'**
+  String get importDescription;
+
+  /// No description provided for @selectBackupFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Backup File'**
+  String get selectBackupFile;
+
+  /// No description provided for @importPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Import Preview'**
+  String get importPreview;
+
+  /// No description provided for @importMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Import Strategy'**
+  String get importMode;
+
+  /// No description provided for @importMerge.
+  ///
+  /// In en, this message translates to:
+  /// **'Merge with Existing'**
+  String get importMerge;
+
+  /// No description provided for @importMergeDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep current receipts and add any new ones from file'**
+  String get importMergeDesc;
+
+  /// No description provided for @importOverwrite.
+  ///
+  /// In en, this message translates to:
+  /// **'Overwrite All Records'**
+  String get importOverwrite;
+
+  /// No description provided for @importOverwriteDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete current receipts and restore exact file contents'**
+  String get importOverwriteDesc;
+
+  /// No description provided for @confirmImport.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Import'**
+  String get confirmImport;
+
+  /// No description provided for @importSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipts imported successfully.'**
+  String get importSuccess;
+
+  /// No description provided for @importFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Import failed'**
+  String get importFailed;
+
+  /// No description provided for @noValidReceiptsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No valid receipts found in this file.'**
+  String get noValidReceiptsFound;
 }
 
 class _AppLocalizationsDelegate

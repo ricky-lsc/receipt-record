@@ -152,12 +152,15 @@ void main() {
 
       // Tap Set Budget
       await tester.tap(find.text('Set Budget'));
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
 
       expect(find.text('Budget Amount'), findsOneWidget);
       await tester.enterText(find.byType(TextField), '1000');
+      await tester.pump();
       await tester.tap(find.text('Save'));
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
 
       expect(StorageService.instance.budgetNotifier.value, 1000.0);
       expect(find.text('\$250.00 / \$1,000.00'), findsOneWidget);

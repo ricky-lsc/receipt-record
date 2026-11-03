@@ -7,6 +7,7 @@ import '../services/export_service.dart';
 import '../services/locale_service.dart';
 import '../services/storage_service.dart';
 import '../utils/currency_helper.dart';
+import '../widgets/import_preview_dialog.dart';
 
 class ExportScreen extends StatefulWidget {
   const ExportScreen({super.key});
@@ -137,6 +138,13 @@ class _ExportScreenState extends State<ExportScreen> {
         return Scaffold(
           appBar: AppBar(
             title: Text(l10n.exportReceipts),
+            actions: [
+              TextButton.icon(
+                onPressed: () => ImportPreviewDialog.pickAndShow(context),
+                icon: const Icon(Icons.file_upload_outlined, size: 18),
+                label: Text(l10n.importBackup),
+              ),
+            ],
           ),
           body: ListView(
             padding: const EdgeInsets.all(16),
@@ -330,6 +338,56 @@ class _ExportScreenState extends State<ExportScreen> {
                     ),
                   ),
                 ],
+              ),
+              const SizedBox(height: 16),
+
+              // Import & Restore Card
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.withValues(alpha: 0.12),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.restore_page_outlined, color: Colors.blue, size: 24),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              l10n.importReceipts,
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              l10n.importDescription,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue,
+                          foregroundColor: Colors.white,
+                        ),
+                        onPressed: () => ImportPreviewDialog.pickAndShow(context),
+                        icon: const Icon(Icons.file_upload, size: 16),
+                        label: Text(l10n.importBackup),
+                      ),
+                    ],
+                  ),
+                ),
               ),
               const SizedBox(height: 16),
 

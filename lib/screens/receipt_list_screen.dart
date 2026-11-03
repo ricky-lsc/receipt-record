@@ -7,6 +7,7 @@ import '../services/storage_service.dart';
 import '../utils/currency_helper.dart';
 import '../widgets/cloud_ai_settings_dialog.dart';
 import '../widgets/empty_state.dart';
+import '../widgets/import_preview_dialog.dart';
 import '../widgets/language_selection_dialog.dart';
 import '../widgets/receipt_card.dart';
 import '../widgets/storage_settings_dialog.dart';
@@ -244,32 +245,44 @@ class _ReceiptListScreenState extends State<ReceiptListScreen> {
                 tooltip: l10n.sortAndFilter,
                 onPressed: _showSortFilterModal,
               ),
-              if (allReceipts.isNotEmpty)
-                PopupMenuButton<String>(
-                  icon: const Icon(Icons.more_vert),
-                  onSelected: (val) async {
-                    if (val == 'clear') {
-                      final confirm = await showDialog<bool>(
-                        context: context,
-                        builder: (ctx) => AlertDialog(
-                          title: Text(l10n.clearAllReceiptsTitle),
-                          content: Text(l10n.clearAllReceiptsConfirm),
-                          actions: [
-                            TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: Text(l10n.cancel)),
-                            ElevatedButton(
-                              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                              onPressed: () => Navigator.of(ctx).pop(true),
-                              child: Text(l10n.clearAll),
-                            ),
-                          ],
-                        ),
-                      );
-                      if (confirm == true) {
-                        await StorageService.instance.clearAll();
-                      }
+              PopupMenuButton<String>(
+                icon: const Icon(Icons.more_vert),
+                onSelected: (val) async {
+                  if (val == 'import') {
+                    await ImportPreviewDialog.pickAndShow(context);
+                  } else if (val == 'clear') {
+                    final confirm = await showDialog<bool>(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: Text(l10n.clearAllReceiptsTitle),
+                        content: Text(l10n.clearAllReceiptsConfirm),
+                        actions: [
+                          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: Text(l10n.cancel)),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                            onPressed: () => Navigator.of(ctx).pop(true),
+                            child: Text(l10n.clearAll),
+                          ),
+                        ],
+                      ),
+                    );
+                    if (confirm == true) {
+                      await StorageService.instance.clearAll();
                     }
-                  },
-                  itemBuilder: (context) => [
+                  }
+                },
+                itemBuilder: (context) => [
+                  PopupMenuItem(
+                    value: 'import',
+                    child: Row(
+                      children: [
+                        const Icon(Icons.file_upload_outlined, size: 18),
+                        const SizedBox(width: 8),
+                        Text(l10n.importBackup),
+                      ],
+                    ),
+                  ),
+                  if (allReceipts.isNotEmpty)
                     PopupMenuItem(
                       value: 'clear',
                       child: Row(
@@ -280,8 +293,8 @@ class _ReceiptListScreenState extends State<ReceiptListScreen> {
                         ],
                       ),
                     ),
-                  ],
-                ),
+                ],
+              ),
             ],
           ),
           body: Column(

@@ -166,7 +166,6 @@ class _SummaryScreenState extends State<SummaryScreen> {
             TextField(
               controller: ctrl,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              autofocus: true,
               decoration: InputDecoration(
                 labelText: l10n.budgetAmount,
                 prefixText: '\$ ',
