@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
+import '../widgets/export_receipts_dialog.dart';
 import '../widgets/quick_receipt_action_sheet.dart';
-import 'export_screen.dart';
 import 'receipt_list_screen.dart';
 import 'summary_screen.dart';
 
@@ -22,9 +22,7 @@ class _HomeNavigationScreenState extends State<HomeNavigationScreen> {
   }
 
   void _navigateToExport() {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const ExportScreen()),
-    );
+    ExportReceiptsDialog.show(context);
   }
 
   @override

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
-import '../screens/export_screen.dart';
 import '../services/glm_receipt_service.dart';
 import '../services/locale_service.dart';
 import '../services/storage_service.dart';
 import '../services/theme_service.dart';
 import 'cloud_ai_settings_dialog.dart';
+import 'export_receipts_dialog.dart';
 import 'import_preview_dialog.dart';
 import 'language_selection_dialog.dart';
 import 'storage_settings_dialog.dart';
@@ -250,9 +250,7 @@ class _AppSettingsDialogState extends State<AppSettingsDialog> {
                             trailing: const Icon(Icons.chevron_right, size: 20),
                             onTap: () {
                               Navigator.of(context).pop();
-                              Navigator.of(context).push(
-                                MaterialPageRoute(builder: (_) => const ExportScreen()),
-                              );
+                              ExportReceiptsDialog.show(context);
                             },
                           ),
                           const Divider(height: 1),

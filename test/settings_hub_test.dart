@@ -4,6 +4,7 @@ import 'package:receipt_record/l10n/app_localizations.dart';
 import 'package:receipt_record/services/locale_service.dart';
 import 'package:receipt_record/services/storage_service.dart';
 import 'package:receipt_record/widgets/app_settings_dialog.dart';
+import 'package:receipt_record/widgets/export_receipts_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -65,6 +66,34 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
       expect(find.byType(AppSettingsDialog), findsNothing);
+    });
+
+    testWidgets('Tapping Export Receipts inside Settings opens ExportReceiptsDialog modal', (tester) async {
+      final themeNotifier = ValueNotifier<ThemeMode>(ThemeMode.system);
+
+      await tester.pumpWidget(
+        buildTestApp(
+          Builder(builder: (context) {
+            return ElevatedButton(
+              onPressed: () => AppSettingsDialog.show(context, themeNotifier),
+              child: const Text('Open Settings'),
+            );
+          }),
+        ),
+      );
+
+      await tester.tap(find.text('Open Settings'));
+      await tester.pumpAndSettle();
+
+      await tester.drag(find.byType(ListView), const Offset(0, -300));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Export Receipts'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ExportReceiptsDialog), findsOneWidget);
+      expect(find.text('Export as File'), findsOneWidget);
+      expect(find.text('CSV (Spreadsheet / Excel)'), findsOneWidget);
     });
   });
 }
