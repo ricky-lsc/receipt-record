@@ -266,5 +266,10 @@
   "topCategoriesHeader": "主要支出類別",
   "saveMarkdownReport": "儲存為報告 (.md)",
   "shareViaReceiptRecord": "由收據記帳產生",
-  "photoAttachedTip": "相片已加入。可手動填寫資訊或點擊「AI 辨識」。"
+  "photoAttachedTip": "相片已加入。可手動填寫資訊或點擊「AI 辨識」。",
+
+  "manualEntry": "手動記帳（無相片）",
+  "manualEntrySubtitle": "直接手動填寫店家與金額",
+  "takePhotoSubtitle": "拍攝紙本收據或發票",
+  "chooseFromGallerySubtitle": "從相簿中選取收據相片"
 }

@@ -760,6 +760,18 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get photoAttachedTip => '照片已添加。可手动填写信息或点击“AI 提取”。';
+
+  @override
+  String get manualEntry => '手动记账（无照片）';
+
+  @override
+  String get manualEntrySubtitle => '直接手动填写商家与金额';
+
+  @override
+  String get takePhotoSubtitle => '拍摄纸质小票或发票';
+
+  @override
+  String get chooseFromGallerySubtitle => '从相册中选择收据照片';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -1517,6 +1529,18 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get photoAttachedTip => '照片已添加。可手动填写信息或点击“AI 提取”。';
+
+  @override
+  String get manualEntry => '手动记账（无照片）';
+
+  @override
+  String get manualEntrySubtitle => '直接手动填写商家与金额';
+
+  @override
+  String get takePhotoSubtitle => '拍摄纸质小票或发票';
+
+  @override
+  String get chooseFromGallerySubtitle => '从相册中选择收据照片';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -2274,4 +2298,16 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get photoAttachedTip => '相片已加入。可手動填寫資訊或點擊「AI 辨識」。';
+
+  @override
+  String get manualEntry => '手動記帳（無相片）';
+
+  @override
+  String get manualEntrySubtitle => '直接手動填寫店家與金額';
+
+  @override
+  String get takePhotoSubtitle => '拍攝紙本收據或發票';
+
+  @override
+  String get chooseFromGallerySubtitle => '從相簿中選取收據相片';
 }

@@ -1593,6 +1593,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Photo attached. Fill details by hand or tap AI Extract.'**
   String get photoAttachedTip;
+
+  /// No description provided for @manualEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'Manual Entry (No Photo)'**
+  String get manualEntry;
+
+  /// No description provided for @manualEntrySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Type merchant and amount by hand'**
+  String get manualEntrySubtitle;
+
+  /// No description provided for @takePhotoSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Snap a photo of your paper receipt'**
+  String get takePhotoSubtitle;
+
+  /// No description provided for @chooseFromGallerySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select an existing photo from device'**
+  String get chooseFromGallerySubtitle;
 }
 
 class _AppLocalizationsDelegate

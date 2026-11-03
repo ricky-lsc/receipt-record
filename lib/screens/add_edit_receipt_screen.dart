@@ -19,8 +19,13 @@ import '../widgets/receipt_image_view.dart';
 
 class AddEditReceiptScreen extends StatefulWidget {
   final Receipt? existingReceipt;
+  final String? initialImagePath;
 
-  const AddEditReceiptScreen({super.key, this.existingReceipt});
+  const AddEditReceiptScreen({
+    super.key,
+    this.existingReceipt,
+    this.initialImagePath,
+  });
 
   @override
   State<AddEditReceiptScreen> createState() => _AddEditReceiptScreenState();
@@ -67,6 +72,10 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
   @override
   void initState() {
     super.initState();
+    if (widget.initialImagePath != null && widget.initialImagePath!.isNotEmpty) {
+      _imagePath = widget.initialImagePath;
+      _loadInitialImageBytes(widget.initialImagePath!);
+    }
     if (widget.existingReceipt != null) {
       final r = widget.existingReceipt!;
       _merchantController.text = r.merchant;
@@ -85,6 +94,22 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
       if (_items.isNotEmpty || r.taxAmount != null || r.tipAmount != null || r.notes != null) {
         _showAdvanced = true;
       }
+    }
+  }
+
+  Future<void> _loadInitialImageBytes(String path) async {
+    try {
+      final file = File(path);
+      if (await file.exists()) {
+        final bytes = await file.readAsBytes();
+        if (mounted) {
+          setState(() {
+            _imageBase64 = base64Encode(bytes);
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint('Error loading initial image bytes: $e');
     }
   }
 

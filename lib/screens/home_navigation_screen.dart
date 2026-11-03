@@ -3,8 +3,8 @@ import '../l10n/app_localizations.dart';
 import '../services/theme_service.dart';
 import '../widgets/cloud_ai_settings_dialog.dart';
 import '../widgets/language_selection_dialog.dart';
+import '../widgets/quick_receipt_action_sheet.dart';
 import '../widgets/storage_settings_dialog.dart';
-import 'add_edit_receipt_screen.dart';
 import 'export_screen.dart';
 import 'receipt_list_screen.dart';
 import 'summary_screen.dart';
@@ -22,11 +22,7 @@ class _HomeNavigationScreenState extends State<HomeNavigationScreen> {
   int _currentIndex = 0;
 
   void _navigateToAddReceipt() {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => const AddEditReceiptScreen(),
-      ),
-    );
+    QuickReceiptActionSheet.show(context);
   }
 
   void _navigateToExport() {

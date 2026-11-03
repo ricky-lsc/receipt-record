@@ -266,5 +266,10 @@
   "topCategoriesHeader": "主要支出类别",
   "saveMarkdownReport": "保存为报告 (.md)",
   "shareViaReceiptRecord": "由收据记账生成",
-  "photoAttachedTip": "照片已添加。可手动填写信息或点击“AI 提取”。"
+  "photoAttachedTip": "照片已添加。可手动填写信息或点击“AI 提取”。",
+
+  "manualEntry": "手动记账（无照片）",
+  "manualEntrySubtitle": "直接手动填写商家与金额",
+  "takePhotoSubtitle": "拍摄纸质小票或发票",
+  "chooseFromGallerySubtitle": "从相册中选择收据照片"
 }

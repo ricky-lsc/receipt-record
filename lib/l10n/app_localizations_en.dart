@@ -778,4 +778,17 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get photoAttachedTip =>
       'Photo attached. Fill details by hand or tap AI Extract.';
+
+  @override
+  String get manualEntry => 'Manual Entry (No Photo)';
+
+  @override
+  String get manualEntrySubtitle => 'Type merchant and amount by hand';
+
+  @override
+  String get takePhotoSubtitle => 'Snap a photo of your paper receipt';
+
+  @override
+  String get chooseFromGallerySubtitle =>
+      'Select an existing photo from device';
 }
