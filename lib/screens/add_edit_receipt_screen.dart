@@ -487,6 +487,7 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
   }
 
   void _showRawOcrDialog() {
+    if (!mounted) return;
     final l10n = AppLocalizations.of(context);
     if (_rawOcrText == null || _rawOcrText!.isEmpty) return;
     showDialog(
@@ -836,6 +837,7 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
     await StorageService.instance.saveReceipt(receipt);
 
     if (mounted) {
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
       setState(() => _isLoading = false);
       Navigator.of(context).pop(receipt);
     }
