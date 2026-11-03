@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:receipt_record/l10n/app_localizations.dart';
 import 'package:receipt_record/models/receipt.dart';
 import 'package:receipt_record/models/receipt_split.dart';
+import 'package:receipt_record/screens/add_edit_receipt_screen.dart';
 import 'package:receipt_record/screens/receipt_detail_screen.dart';
 import 'package:receipt_record/services/locale_service.dart';
 import 'package:receipt_record/services/storage_service.dart';
@@ -95,7 +96,7 @@ void main() {
         buildTestApp(
           Builder(builder: (context) {
             return ElevatedButton(
-              onPressed: () => SplitBillDialog.show(context, receipt),
+              onPressed: () => SplitBillDialog.show(context, receipt: receipt),
               child: const Text('Open'),
             );
           }),
@@ -130,7 +131,7 @@ void main() {
         buildTestApp(
           Builder(builder: (context) {
             return ElevatedButton(
-              onPressed: () => SplitBillDialog.show(context, receipt),
+              onPressed: () => SplitBillDialog.show(context, receipt: receipt),
               child: const Text('Open'),
             );
           }),
@@ -167,7 +168,7 @@ void main() {
         buildTestApp(
           Builder(builder: (context) {
             return ElevatedButton(
-              onPressed: () => SplitBillDialog.show(context, receipt),
+              onPressed: () => SplitBillDialog.show(context, receipt: receipt),
               child: const Text('Open'),
             );
           }),
@@ -249,6 +250,31 @@ void main() {
 
       expect(find.byIcon(Icons.call_split), findsOneWidget);
       expect(find.text('3'), findsOneWidget);
+    });
+
+    testWidgets('AddEditReceiptScreen allows splitting bill directly on creation', (tester) async {
+      await tester.pumpWidget(buildTestApp(const AddEditReceiptScreen()));
+      await tester.pumpAndSettle();
+
+      // Enter receipt amount
+      await tester.enterText(find.byType(TextFormField).first, '90');
+      await tester.pumpAndSettle();
+
+      // Scroll until Split Bill is visible
+      await tester.scrollUntilVisible(
+        find.text('Split Bill'),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Split Bill'), findsWidgets);
+      await tester.tap(find.text('Split Bill').first);
+      await tester.pumpAndSettle();
+
+      expect(find.byType(SplitBillDialog), findsOneWidget);
+      expect(find.text('Equal Split'), findsOneWidget);
+      expect(find.text('45.00'), findsNWidgets(2));
     });
   });
 }

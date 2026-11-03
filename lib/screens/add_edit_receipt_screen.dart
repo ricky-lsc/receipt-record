@@ -10,13 +10,16 @@ import '../l10n/app_localizations.dart';
 import '../models/receipt.dart';
 import '../models/receipt_category.dart';
 import '../models/receipt_item.dart';
+import '../models/receipt_split.dart';
 import '../services/currency_service.dart';
 import '../services/glm_receipt_service.dart';
 import '../services/locale_service.dart';
 import '../services/sample_data_service.dart';
 import '../services/storage_service.dart';
+import '../utils/currency_helper.dart';
 import '../widgets/cloud_ai_settings_dialog.dart';
 import '../widgets/receipt_image_view.dart';
+import '../widgets/split_bill_dialog.dart';
 
 class AddEditReceiptScreen extends StatefulWidget {
   final Receipt? existingReceipt;
@@ -59,6 +62,7 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
   String? _rawOcrText;
 
   final List<ReceiptItem> _items = [];
+  ReceiptSplit? _split;
   bool _showAdvanced = false;
 
   final ImagePicker _picker = ImagePicker();
@@ -101,6 +105,7 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
       _baseCurrency = r.baseCurrency ?? _baseCurrency;
       _exchangeRate = r.exchangeRate;
       _convertedAmount = r.convertedAmount;
+      _split = r.split;
       if (_exchangeRate != null) {
         _rateController.text = _exchangeRate!.toString();
       }
@@ -112,9 +117,30 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
       if (r.notes != null) _notesController.text = r.notes!;
       _items.addAll(r.items);
 
-      if (_items.isNotEmpty || r.taxAmount != null || r.tipAmount != null || r.notes != null || r.isForeignCurrency) {
+      if (_items.isNotEmpty || r.taxAmount != null || r.tipAmount != null || r.notes != null || r.isForeignCurrency || r.isSplit) {
         _showAdvanced = true;
       }
+    }
+  }
+
+  Future<void> _openSplitDialog() async {
+    final amount = double.tryParse(_amountController.text.trim()) ?? 0.0;
+    if (amount <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter an amount > 0 first')),
+      );
+      return;
+    }
+    final result = await SplitBillDialog.show(
+      context,
+      totalAmount: amount,
+      currency: _currency,
+      initialSplit: _split,
+    );
+    if (result != null && mounted) {
+      setState(() {
+        _split = result.participants.length > 1 ? result : null;
+      });
     }
   }
 
@@ -826,7 +852,7 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
       imagePath: finalImagePath,
       imageBase64: _imageBase64,
       items: _items,
-      split: widget.existingReceipt?.split,
+      split: _split,
       baseCurrency: _baseCurrency,
       exchangeRate: _currency == _baseCurrency ? 1.0 : _exchangeRate,
       convertedAmount: _currency == _baseCurrency ? amount : _convertedAmount,
@@ -1375,6 +1401,133 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
                         );
                       }).toList(),
                     ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Split Bill Section Card
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF0F766E).withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: const Icon(Icons.call_split, color: Color(0xFF0F766E), size: 18),
+                            ),
+                            const SizedBox(width: 10),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  l10n.splitBillTitle,
+                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                                ),
+                                Text(
+                                  _split != null && _split!.participants.length > 1
+                                      ? '${_split!.participants.length} (${l10n.splitBill})'
+                                      : l10n.numberOfPeople,
+                                  style: const TextStyle(fontSize: 11, color: Colors.grey),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        if (_split != null && _split!.participants.length > 1)
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.edit, size: 18),
+                                tooltip: l10n.edit,
+                                visualDensity: VisualDensity.compact,
+                                onPressed: _openSplitDialog,
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.delete_outline, size: 18, color: Colors.red),
+                                tooltip: l10n.clearSplit,
+                                visualDensity: VisualDensity.compact,
+                                onPressed: () => setState(() => _split = null),
+                              ),
+                            ],
+                          ),
+                      ],
+                    ),
+                    if (_split != null && _split!.participants.length > 1) ...[
+                      const SizedBox(height: 12),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF0FDFA),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: isDark ? const Color(0xFF334155) : const Color(0xFF99F6E4),
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  '${l10n.netPersonal}:',
+                                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                                ),
+                                Text(
+                                  CurrencyHelper.formatWithCode(_split!.myShare, _currency),
+                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF0F766E)),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 4),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  '${l10n.unsettledFromFriends}:',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                                  ),
+                                ),
+                                Text(
+                                  CurrencyHelper.formatWithCode(_split!.otherSharesTotal, _currency),
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ] else ...[
+                      const SizedBox(height: 10),
+                      OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          minimumSize: const Size.fromHeight(40),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        ),
+                        onPressed: _openSplitDialog,
+                        icon: const Icon(Icons.person_add_outlined, size: 16),
+                        label: Text(l10n.splitBill),
+                      ),
+                    ],
                   ],
                 ),
               ),

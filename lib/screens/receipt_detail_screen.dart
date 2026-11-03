@@ -9,7 +9,6 @@ import '../utils/currency_helper.dart';
 import '../utils/date_helper.dart';
 import '../widgets/category_badge.dart';
 import '../widgets/receipt_image_view.dart';
-import '../widgets/split_bill_dialog.dart';
 import 'add_edit_receipt_screen.dart';
 
 class ReceiptDetailScreen extends StatefulWidget {
@@ -28,13 +27,6 @@ class _ReceiptDetailScreenState extends State<ReceiptDetailScreen> {
   void initState() {
     super.initState();
     _receipt = widget.receipt;
-  }
-
-  Future<void> _splitBill() async {
-    final updated = await SplitBillDialog.show(context, _receipt);
-    if (updated != null && mounted) {
-      setState(() => _receipt = updated);
-    }
   }
 
   Future<void> _editReceipt() async {
@@ -92,11 +84,6 @@ class _ReceiptDetailScreenState extends State<ReceiptDetailScreen> {
       appBar: AppBar(
         title: Text(l10n.receiptDetails),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.call_split),
-            tooltip: l10n.splitBill,
-            onPressed: _splitBill,
-          ),
           IconButton(
             icon: const Icon(Icons.edit_outlined),
             tooltip: l10n.editReceipt,
@@ -406,7 +393,7 @@ class _ReceiptDetailScreenState extends State<ReceiptDetailScreen> {
                           ],
                         ),
                         TextButton.icon(
-                          onPressed: _splitBill,
+                          onPressed: _editReceipt,
                           icon: const Icon(Icons.edit, size: 14),
                           label: Text(l10n.edit),
                         ),
@@ -472,17 +459,6 @@ class _ReceiptDetailScreenState extends State<ReceiptDetailScreen> {
                   ],
                 ),
               ),
-            ),
-            const SizedBox(height: 16),
-          ] else ...[
-            OutlinedButton.icon(
-              style: OutlinedButton.styleFrom(
-                minimumSize: const Size.fromHeight(48),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-              ),
-              onPressed: _splitBill,
-              icon: const Icon(Icons.call_split),
-              label: Text(l10n.splitBill),
             ),
             const SizedBox(height: 16),
           ],

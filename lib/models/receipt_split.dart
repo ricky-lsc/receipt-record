@@ -56,6 +56,13 @@ class ReceiptSplit {
   double get totalAllocated =>
       participants.fold(0.0, (sum, p) => sum + p.amount);
 
+  double get myShare =>
+      participants.isNotEmpty ? participants.first.amount : 0.0;
+
+  double get otherSharesTotal => participants.length > 1
+      ? participants.skip(1).fold(0.0, (sum, p) => sum + p.amount)
+      : 0.0;
+
   Map<String, dynamic> toMap() => {
         'participants': participants.map((p) => p.toMap()).toList(),
         'isCustomized': isCustomized,

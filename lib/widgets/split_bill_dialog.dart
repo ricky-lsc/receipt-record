@@ -10,15 +10,39 @@ import '../services/storage_service.dart';
 import '../utils/currency_helper.dart';
 
 class SplitBillDialog extends StatefulWidget {
-  final Receipt receipt;
+  final double totalAmount;
+  final String currency;
+  final ReceiptSplit? initialSplit;
+  final Receipt? receipt;
 
-  const SplitBillDialog({super.key, required this.receipt});
+  const SplitBillDialog({
+    super.key,
+    required this.totalAmount,
+    this.currency = 'USD',
+    this.initialSplit,
+    this.receipt,
+  });
 
-  static Future<Receipt?> show(BuildContext context, Receipt receipt) {
-    return showDialog<Receipt>(
+  static Future<ReceiptSplit?> show(
+    BuildContext context, {
+    double? totalAmount,
+    String? currency,
+    ReceiptSplit? initialSplit,
+    Receipt? receipt,
+  }) {
+    final effectiveTotal = totalAmount ?? receipt?.amount ?? 0.0;
+    final effectiveCurrency = currency ?? receipt?.currency ?? 'USD';
+    final effectiveSplit = initialSplit ?? receipt?.split;
+
+    return showDialog<ReceiptSplit>(
       context: context,
       barrierDismissible: true,
-      builder: (_) => SplitBillDialog(receipt: receipt),
+      builder: (_) => SplitBillDialog(
+        totalAmount: effectiveTotal,
+        currency: effectiveCurrency,
+        initialSplit: effectiveSplit,
+        receipt: receipt,
+      ),
     );
   }
 
@@ -35,7 +59,7 @@ class _SplitBillDialogState extends State<SplitBillDialog> {
   @override
   void initState() {
     super.initState();
-    final existingSplit = widget.receipt.split;
+    final existingSplit = widget.initialSplit ?? widget.receipt?.split;
     if (existingSplit != null && existingSplit.participants.isNotEmpty) {
       _participants = existingSplit.participants
           .map((p) => p.copyWith())
@@ -62,7 +86,7 @@ class _SplitBillDialogState extends State<SplitBillDialog> {
   List<SplitParticipant> _createDefaultParticipants(int count) {
     final list = <SplitParticipant>[];
     const uuid = Uuid();
-    final total = widget.receipt.amount;
+    final total = widget.totalAmount;
     final share = count > 0 ? (total / count) : 0.0;
 
     for (int i = 0; i < count; i++) {
@@ -109,7 +133,7 @@ class _SplitBillDialogState extends State<SplitBillDialog> {
 
   void _recalculateEqualSplit() {
     if (_participants.isEmpty) return;
-    final total = widget.receipt.amount;
+    final total = widget.totalAmount;
     final share = double.parse((total / _participants.length).toStringAsFixed(2));
 
     for (int i = 0; i < _participants.length; i++) {
@@ -164,7 +188,7 @@ class _SplitBillDialogState extends State<SplitBillDialog> {
   }
 
   void _autoBalanceRemainder() {
-    final total = widget.receipt.amount;
+    final total = widget.totalAmount;
     if (_participants.length <= 1) return;
 
     // Allocate remaining to everyone except the first participant ("Me")
@@ -189,18 +213,20 @@ class _SplitBillDialogState extends State<SplitBillDialog> {
   double get _totalAllocated =>
       _participants.fold(0.0, (sum, p) => sum + p.amount);
 
-  double get _difference => widget.receipt.amount - _totalAllocated;
+  double get _difference => widget.totalAmount - _totalAllocated;
 
   String _generateShareText(AppLocalizations l10n) {
     final buffer = StringBuffer();
-    final dateStr = DateFormat('yyyy-MM-dd').format(widget.receipt.date);
-    buffer.writeln('🧾 ${l10n.splitBillTitle}: ${widget.receipt.merchant}');
-    buffer.writeln('📅 $dateStr • ${l10n.total}: ${CurrencyHelper.format(widget.receipt.amount, symbol: widget.receipt.currency)}');
+    final date = widget.receipt?.date ?? DateTime.now();
+    final dateStr = DateFormat('yyyy-MM-dd').format(date);
+    final merchant = widget.receipt?.merchant ?? '';
+    buffer.writeln('🧾 ${l10n.splitBillTitle}${merchant.isNotEmpty ? ': $merchant' : ''}');
+    buffer.writeln('📅 $dateStr • ${l10n.total}: ${CurrencyHelper.format(widget.totalAmount, symbol: widget.currency)}');
     buffer.writeln('--------------------------------');
 
     for (final p in _participants) {
       final status = p.isPaid ? ' (${l10n.markPaid})' : '';
-      buffer.writeln('• ${p.name.isNotEmpty ? p.name : l10n.participant}: ${CurrencyHelper.format(p.amount, symbol: widget.receipt.currency)}$status');
+      buffer.writeln('• ${p.name.isNotEmpty ? p.name : l10n.participant}: ${CurrencyHelper.format(p.amount, symbol: widget.currency)}$status');
     }
 
     buffer.writeln('--------------------------------');
@@ -226,11 +252,13 @@ class _SplitBillDialogState extends State<SplitBillDialog> {
       participants: _participants,
       isCustomized: _isCustomized,
     );
-    final updatedReceipt = widget.receipt.copyWith(split: split);
-    await StorageService.instance.saveReceipt(updatedReceipt);
+    if (widget.receipt != null) {
+      final updatedReceipt = widget.receipt!.copyWith(split: split);
+      await StorageService.instance.saveReceipt(updatedReceipt);
+    }
 
     if (mounted) {
-      Navigator.of(context).pop(updatedReceipt);
+      Navigator.of(context).pop(split);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(l10n.splitSaved),
@@ -261,10 +289,12 @@ class _SplitBillDialogState extends State<SplitBillDialog> {
     );
 
     if (confirm == true && mounted) {
-      final updatedReceipt = widget.receipt.copyWith(split: null);
-      await StorageService.instance.saveReceipt(updatedReceipt);
+      if (widget.receipt != null) {
+        final updatedReceipt = widget.receipt!.copyWith(clearSplit: true);
+        await StorageService.instance.saveReceipt(updatedReceipt);
+      }
       if (mounted) {
-        Navigator.of(context).pop(updatedReceipt);
+        Navigator.of(context).pop(const ReceiptSplit(participants: []));
       }
     }
   }
@@ -274,8 +304,8 @@ class _SplitBillDialogState extends State<SplitBillDialog> {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final currency = widget.receipt.currency;
-    final totalAmount = widget.receipt.amount;
+    final currency = widget.currency;
+    final totalAmount = widget.totalAmount;
     final allocated = _totalAllocated;
     final diff = _difference;
     final isBalanced = diff.abs() < 0.05;
@@ -318,7 +348,7 @@ class _SplitBillDialogState extends State<SplitBillDialog> {
                           ),
                         ),
                         Text(
-                          '${widget.receipt.merchant} • ${CurrencyHelper.format(totalAmount, symbol: currency)}',
+                          '${widget.receipt != null && widget.receipt!.merchant.isNotEmpty ? '${widget.receipt!.merchant} • ' : ''}${CurrencyHelper.format(totalAmount, symbol: currency)}',
                           style: const TextStyle(
                             fontSize: 13,
                             color: Colors.grey,
@@ -605,7 +635,7 @@ class _SplitBillDialogState extends State<SplitBillDialog> {
                     runSpacing: 8,
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
-                      if (widget.receipt.split != null)
+                      if (widget.receipt?.split != null || widget.initialSplit != null)
                         TextButton(
                           onPressed: () => _clearSplit(l10n),
                           child: Text(l10n.clearSplit, style: const TextStyle(color: Colors.red)),
