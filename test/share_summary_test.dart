@@ -95,7 +95,6 @@ void main() {
         buildTestApp(
           SummaryScreen(
             onNavigateToAdd: () {},
-            onNavigateToExport: () {},
           ),
         ),
       );

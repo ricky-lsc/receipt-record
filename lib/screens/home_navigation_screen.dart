@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
-import '../widgets/export_receipts_dialog.dart';
 import '../widgets/quick_receipt_action_sheet.dart';
 import 'receipt_list_screen.dart';
 import 'summary_screen.dart';
@@ -21,10 +20,6 @@ class _HomeNavigationScreenState extends State<HomeNavigationScreen> {
     QuickReceiptActionSheet.show(context);
   }
 
-  void _navigateToExport() {
-    ExportReceiptsDialog.show(context);
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -36,7 +31,6 @@ class _HomeNavigationScreenState extends State<HomeNavigationScreen> {
       ),
       SummaryScreen(
         onNavigateToAdd: _navigateToAddReceipt,
-        onNavigateToExport: _navigateToExport,
         themeModeNotifier: widget.themeModeNotifier,
       ),
     ];

@@ -141,7 +141,6 @@ void main() {
         buildTestApp(
           SummaryScreen(
             onNavigateToAdd: () {},
-            onNavigateToExport: () {},
           ),
         ),
       );
@@ -186,7 +185,6 @@ void main() {
         buildTestApp(
           SummaryScreen(
             onNavigateToAdd: () {},
-            onNavigateToExport: () {},
           ),
         ),
       );

@@ -53,13 +53,11 @@ String getSummaryPeriodLabel(
 
 class SummaryScreen extends StatefulWidget {
   final VoidCallback onNavigateToAdd;
-  final VoidCallback onNavigateToExport;
   final ValueNotifier<ThemeMode>? themeModeNotifier;
 
   const SummaryScreen({
     super.key,
     required this.onNavigateToAdd,
-    required this.onNavigateToExport,
     this.themeModeNotifier,
   });
 
@@ -248,11 +246,6 @@ class _SummaryScreenState extends State<SummaryScreen> {
                 icon: const Icon(Icons.date_range),
                 tooltip: l10n.customRange,
                 onPressed: _pickCustomDateRange,
-              ),
-              IconButton(
-                icon: const Icon(Icons.file_download_outlined),
-                tooltip: l10n.navExport,
-                onPressed: widget.onNavigateToExport,
               ),
               if (widget.themeModeNotifier != null)
                 IconButton(
@@ -895,18 +888,6 @@ class _SummaryScreenState extends State<SummaryScreen> {
                 ),
                 const SizedBox(height: 24),
               ],
-
-              // Export Button CTA
-              SizedBox(
-                width: double.infinity,
-                height: 48,
-                child: OutlinedButton.icon(
-                  onPressed: widget.onNavigateToExport,
-                  icon: const Icon(Icons.download),
-                  label: Text(l10n.exportReceipts),
-                ),
-              ),
-              const SizedBox(height: 32),
             ],
           ),
         );
