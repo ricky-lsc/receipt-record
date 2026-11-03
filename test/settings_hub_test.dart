@@ -94,6 +94,13 @@ void main() {
       expect(find.byType(ExportReceiptsDialog), findsOneWidget);
       expect(find.text('Export as File'), findsOneWidget);
       expect(find.text('CSV (Spreadsheet / Excel)'), findsOneWidget);
+
+      // Closing Export dialog returns to Settings
+      await tester.tap(find.byIcon(Icons.close).last);
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ExportReceiptsDialog), findsNothing);
+      expect(find.byType(AppSettingsDialog), findsOneWidget);
     });
   });
 }

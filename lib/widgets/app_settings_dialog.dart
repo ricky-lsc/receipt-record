@@ -339,10 +339,7 @@ class _AppSettingsDialogState extends State<AppSettingsDialog> {
                             title: Text(l10n.exportReceipts, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
                             subtitle: Text(l10n.exportDescription, style: const TextStyle(fontSize: 12)),
                             trailing: const Icon(Icons.chevron_right, size: 20),
-                            onTap: () {
-                              Navigator.of(context).pop();
-                              ExportReceiptsDialog.show(context);
-                            },
+                            onTap: () => ExportReceiptsDialog.show(context),
                           ),
                           const Divider(height: 1),
 
