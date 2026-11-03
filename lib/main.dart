@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'l10n/app_localizations.dart';
 import 'screens/home_navigation_screen.dart';
@@ -5,6 +6,18 @@ import 'services/locale_service.dart';
 import 'services/storage_service.dart';
 import 'services/theme_service.dart';
 import 'theme/app_theme.dart';
+
+class AppScrollBehavior extends MaterialScrollBehavior {
+  const AppScrollBehavior();
+
+  @override
+  Set<PointerDeviceKind> get dragDevices => {
+    PointerDeviceKind.touch,
+    PointerDeviceKind.mouse,
+    PointerDeviceKind.stylus,
+    PointerDeviceKind.trackpad,
+  };
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,6 +49,7 @@ class ReceiptRecordApp extends StatelessWidget {
             return MaterialApp(
               onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
               debugShowCheckedModeBanner: false,
+              scrollBehavior: const AppScrollBehavior(),
               theme: AppTheme.lightTheme,
               darkTheme: AppTheme.darkTheme,
               themeMode: currentMode,

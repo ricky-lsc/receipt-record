@@ -1112,6 +1112,7 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
                     const SizedBox(height: 10),
                     SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
+                      physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
                       child: Row(
                         children: _commonMerchants.map((merchant) {
                           return Padding(

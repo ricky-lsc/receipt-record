@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
 import '../models/receipt.dart';
@@ -72,6 +73,7 @@ class ReceiptListScreen extends StatefulWidget {
 
 class _ReceiptListScreenState extends State<ReceiptListScreen> {
   final TextEditingController _searchController = TextEditingController();
+  final ScrollController _categoryScrollController = ScrollController();
   String _selectedCategory = 'all';
   SortOption _currentSort = SortOption.dateDesc;
   DateRangeFilter _dateFilter = DateRangeFilter.all;
@@ -79,6 +81,7 @@ class _ReceiptListScreenState extends State<ReceiptListScreen> {
   @override
   void dispose() {
     _searchController.dispose();
+    _categoryScrollController.dispose();
     super.dispose();
   }
 
@@ -325,36 +328,47 @@ class _ReceiptListScreenState extends State<ReceiptListScreen> {
                     ),
                     const SizedBox(height: 10),
                     // Category Chips Bar
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: [
-                          ChoiceChip(
-                            label: Text(l10n.categoryAll),
-                            selected: _selectedCategory == 'all',
-                            onSelected: (val) {
-                              if (val) setState(() => _selectedCategory = 'all');
-                            },
-                          ),
-                          const SizedBox(width: 6),
-                          ...ReceiptCategory.defaults.map((cat) {
-                            final isSelected = _selectedCategory == cat.id;
-                            return Padding(
-                              padding: const EdgeInsets.only(right: 6),
-                              child: ChoiceChip(
-                                avatar: Icon(cat.icon, size: 14, color: isSelected ? Colors.white : cat.color),
-                                label: Text(LocaleService.getCategoryName(cat.id, l10n)),
-                                selected: isSelected,
-                                selectedColor: cat.color,
-                                onSelected: (val) {
-                                  setState(() {
-                                    _selectedCategory = val ? cat.id : 'all';
-                                  });
-                                },
-                              ),
-                            );
-                          }),
-                        ],
+                    Listener(
+                      onPointerSignal: (pointerSignal) {
+                        if (pointerSignal is PointerScrollEvent && _categoryScrollController.hasClients) {
+                          final targetOffset = (_categoryScrollController.offset + pointerSignal.scrollDelta.dy)
+                              .clamp(0.0, _categoryScrollController.position.maxScrollExtent);
+                          _categoryScrollController.jumpTo(targetOffset);
+                        }
+                      },
+                      child: SingleChildScrollView(
+                        controller: _categoryScrollController,
+                        scrollDirection: Axis.horizontal,
+                        physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+                        child: Row(
+                          children: [
+                            ChoiceChip(
+                              label: Text(l10n.categoryAll),
+                              selected: _selectedCategory == 'all',
+                              onSelected: (val) {
+                                if (val) setState(() => _selectedCategory = 'all');
+                              },
+                            ),
+                            const SizedBox(width: 6),
+                            ...ReceiptCategory.defaults.map((cat) {
+                              final isSelected = _selectedCategory == cat.id;
+                              return Padding(
+                                padding: const EdgeInsets.only(right: 6),
+                                child: ChoiceChip(
+                                  avatar: Icon(cat.icon, size: 14, color: isSelected ? Colors.white : cat.color),
+                                  label: Text(LocaleService.getCategoryName(cat.id, l10n)),
+                                  selected: isSelected,
+                                  selectedColor: cat.color,
+                                  onSelected: (val) {
+                                    setState(() {
+                                      _selectedCategory = val ? cat.id : 'all';
+                                    });
+                                  },
+                                ),
+                              );
+                            }),
+                          ],
+                        ),
                       ),
                     ),
                   ],

@@ -270,6 +270,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
               // Period Filter Selector Chips
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
+                physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
                 child: Row(
                   children: SummaryPeriod.values.map((period) {
                     final isSelected = _selectedPeriod == period;

@@ -226,6 +226,7 @@ class _ExportScreenState extends State<ExportScreen> {
                       const SizedBox(height: 10),
                       SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
+                        physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
                         child: Row(
                           children: [
                             ChoiceChip(
