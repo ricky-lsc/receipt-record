@@ -67,42 +67,37 @@ class _HomeNavigationScreenState extends State<HomeNavigationScreen> {
                   ],
                 ),
               ),
-              trailing: Expanded(
-                child: Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: 20),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.language),
-                          tooltip: l10n.chooseLanguageTooltip,
-                          onPressed: () => LanguageSelectionDialog.show(context),
-                        ),
-                        const SizedBox(height: 6),
-                        IconButton(
-                          icon: const Icon(Icons.auto_awesome),
-                          tooltip: l10n.cloudAiSettingsTooltip,
-                          onPressed: () => CloudAiSettingsDialog.show(context),
-                        ),
-                        const SizedBox(height: 6),
-                        IconButton(
-                          icon: const Icon(Icons.folder_shared_outlined),
-                          tooltip: l10n.storageSettings,
-                          onPressed: () => StorageSettingsDialog.show(context),
-                        ),
-                        const SizedBox(height: 6),
-                        IconButton(
-                          icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
-                          tooltip: l10n.toggleThemeTooltip,
-                          onPressed: () {
-                            ThemeService.instance.toggleTheme(isDark);
-                          },
-                        ),
-                      ],
+              trailing: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.language),
+                      tooltip: l10n.chooseLanguageTooltip,
+                      onPressed: () => LanguageSelectionDialog.show(context),
                     ),
-                  ),
+                    const SizedBox(height: 6),
+                    IconButton(
+                      icon: const Icon(Icons.auto_awesome),
+                      tooltip: l10n.cloudAiSettingsTooltip,
+                      onPressed: () => CloudAiSettingsDialog.show(context),
+                    ),
+                    const SizedBox(height: 6),
+                    IconButton(
+                      icon: const Icon(Icons.folder_shared_outlined),
+                      tooltip: l10n.storageSettings,
+                      onPressed: () => StorageSettingsDialog.show(context),
+                    ),
+                    const SizedBox(height: 6),
+                    IconButton(
+                      icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
+                      tooltip: l10n.toggleThemeTooltip,
+                      onPressed: () {
+                        ThemeService.instance.toggleTheme(isDark);
+                      },
+                    ),
+                  ],
                 ),
               ),
               destinations: [

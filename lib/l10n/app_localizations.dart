@@ -1617,6 +1617,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Select an existing photo from device'**
   String get chooseFromGallerySubtitle;
+
+  /// No description provided for @copyToClipboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy to Clipboard'**
+  String get copyToClipboard;
 }
 
 class _AppLocalizationsDelegate

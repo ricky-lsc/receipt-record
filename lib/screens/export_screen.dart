@@ -334,7 +334,7 @@ class _ExportScreenState extends State<ExportScreen> {
                     child: OutlinedButton.icon(
                       onPressed: () => _copyToClipboard(filteredReceipts),
                       icon: const Icon(Icons.copy),
-                      label: Text(l10n.pasteFromClipboard),
+                      label: Text(l10n.copyToClipboard),
                     ),
                   ),
                 ],

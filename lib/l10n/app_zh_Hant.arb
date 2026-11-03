@@ -271,5 +271,6 @@
   "manualEntry": "手動記帳（無相片）",
   "manualEntrySubtitle": "直接手動填寫店家與金額",
   "takePhotoSubtitle": "拍攝紙本收據或發票",
-  "chooseFromGallerySubtitle": "從相簿中選取收據相片"
+  "chooseFromGallerySubtitle": "從相簿中選取收據相片",
+  "copyToClipboard": "複製到剪貼簿"
 }

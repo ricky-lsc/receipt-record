@@ -271,5 +271,6 @@
   "manualEntry": "Manual Entry (No Photo)",
   "manualEntrySubtitle": "Type merchant and amount by hand",
   "takePhotoSubtitle": "Snap a photo of your paper receipt",
-  "chooseFromGallerySubtitle": "Select an existing photo from device"
+  "chooseFromGallerySubtitle": "Select an existing photo from device",
+  "copyToClipboard": "Copy to Clipboard"
 }

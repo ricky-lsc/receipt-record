@@ -772,6 +772,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get chooseFromGallerySubtitle => '从相册中选择收据照片';
+
+  @override
+  String get copyToClipboard => '复制到剪贴板';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -1541,6 +1544,9 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get chooseFromGallerySubtitle => '从相册中选择收据照片';
+
+  @override
+  String get copyToClipboard => '复制到剪贴板';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -2310,4 +2316,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get chooseFromGallerySubtitle => '從相簿中選取收據相片';
+
+  @override
+  String get copyToClipboard => '複製到剪貼簿';
 }

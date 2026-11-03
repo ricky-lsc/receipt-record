@@ -791,4 +791,7 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get chooseFromGallerySubtitle =>
       'Select an existing photo from device';
+
+  @override
+  String get copyToClipboard => 'Copy to Clipboard';
 }
