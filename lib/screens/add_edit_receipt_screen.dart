@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
@@ -135,6 +136,32 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
 
   Future<void> _pickImage(ImageSource source) async {
     final l10n = AppLocalizations.of(context);
+    final isDesktop = !kIsWeb && (Platform.isLinux || Platform.isWindows || Platform.isMacOS);
+
+    if (source == ImageSource.camera && isDesktop) {
+      final selectFile = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text(l10n.cameraNotAvailable),
+          content: Text(l10n.cameraNotAvailableDesc),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: Text(l10n.cancel),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(ctx).pop(true),
+              child: Text(l10n.chooseFromFiles),
+            ),
+          ],
+        ),
+      );
+      if (selectFile == true && mounted) {
+        _pickImage(ImageSource.gallery);
+      }
+      return;
+    }
+
     try {
       final XFile? pickedFile = await _picker.pickImage(
         source: source,
@@ -166,7 +193,6 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
         }
       }
     } catch (e) {
-      debugPrint('Error picking image: $e');
       if (mounted) {
         if (source == ImageSource.camera) {
           final selectFile = await showDialog<bool>(

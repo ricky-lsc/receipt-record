@@ -471,6 +471,7 @@ class _ReceiptListScreenState extends State<ReceiptListScreen> {
             ],
           ),
           floatingActionButton: FloatingActionButton(
+            heroTag: 'receipt_list_fab',
             onPressed: widget.onNavigateToAdd,
             tooltip: l10n.addReceiptTooltip,
             child: const Icon(Icons.add_a_photo),

@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../l10n/app_localizations.dart';
@@ -117,6 +119,33 @@ class QuickReceiptActionSheet {
 
   static Future<void> _pickAndNavigate(BuildContext context, ImageSource source) async {
     final l10n = AppLocalizations.of(context);
+    final isDesktop = !kIsWeb && (Platform.isLinux || Platform.isWindows || Platform.isMacOS);
+
+    // Desktop platforms lack camera capture delegate in image_picker; prompt file picker
+    if (source == ImageSource.camera && isDesktop) {
+      final selectFile = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text(l10n.cameraNotAvailable),
+          content: Text(l10n.cameraNotAvailableDesc),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: Text(l10n.cancel),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(ctx).pop(true),
+              child: Text(l10n.chooseFromFiles),
+            ),
+          ],
+        ),
+      );
+      if (selectFile == true && context.mounted) {
+        await _pickAndNavigate(context, ImageSource.gallery);
+      }
+      return;
+    }
+
     try {
       final XFile? pickedFile = await _picker.pickImage(
         source: source,
@@ -135,30 +164,26 @@ class QuickReceiptActionSheet {
         );
       }
     } catch (e) {
-      debugPrint('Error picking image in QuickReceiptActionSheet: $e');
-      if (context.mounted) {
-        if (source == ImageSource.camera) {
-          // Camera not supported fallback
-          final selectFile = await showDialog<bool>(
-            context: context,
-            builder: (ctx) => AlertDialog(
-              title: Text(l10n.cameraNotAvailable),
-              content: Text(l10n.cameraNotAvailableDesc),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(ctx).pop(false),
-                  child: Text(l10n.cancel),
-                ),
-                ElevatedButton(
-                  onPressed: () => Navigator.of(ctx).pop(true),
-                  child: Text(l10n.chooseFromFiles),
-                ),
-              ],
-            ),
-          );
-          if (selectFile == true && context.mounted) {
-            _pickAndNavigate(context, ImageSource.gallery);
-          }
+      if (source == ImageSource.camera && context.mounted) {
+        final selectFile = await showDialog<bool>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: Text(l10n.cameraNotAvailable),
+            content: Text(l10n.cameraNotAvailableDesc),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(false),
+                child: Text(l10n.cancel),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.of(ctx).pop(true),
+                child: Text(l10n.chooseFromFiles),
+              ),
+            ],
+          ),
+        );
+        if (selectFile == true && context.mounted) {
+          await _pickAndNavigate(context, ImageSource.gallery);
         }
       }
     }

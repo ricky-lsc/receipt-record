@@ -59,6 +59,7 @@ class _HomeNavigationScreenState extends State<HomeNavigationScreen> {
                 child: Column(
                   children: [
                     FloatingActionButton(
+                      heroTag: 'nav_rail_fab',
                       mini: true,
                       onPressed: _navigateToAddReceipt,
                       tooltip: l10n.addReceiptTooltip,
