@@ -105,6 +105,32 @@ class ReceiptImageView extends StatelessWidget {
     if (file == null && bytes == null) return;
 
     final TransformationController transformController = TransformationController();
+    TapDownDetails? doubleTapDetails;
+
+    void zoomAroundPoint(Offset focalPoint, double scaleFactor) {
+      final currentMatrix = transformController.value;
+      final currentScale = currentMatrix.getMaxScaleOnAxis();
+      final targetScale = (currentScale * scaleFactor).clamp(0.5, 8.0);
+      final factor = targetScale / currentScale;
+
+      final matrix = Matrix4.translationValues(focalPoint.dx, focalPoint.dy, 0.0)
+        ..multiply(Matrix4.diagonal3Values(factor, factor, 1.0))
+        ..multiply(Matrix4.translationValues(-focalPoint.dx, -focalPoint.dy, 0.0))
+        ..multiply(currentMatrix);
+
+      transformController.value = matrix;
+    }
+
+    void handleDoubleTap(Size viewportSize) {
+      final currentScale = transformController.value.getMaxScaleOnAxis();
+      if (currentScale > 1.2) {
+        transformController.value = Matrix4.identity();
+      } else {
+        final focal = doubleTapDetails?.localPosition ??
+            Offset(viewportSize.width / 2, viewportSize.height / 2);
+        zoomAroundPoint(focal, 2.5);
+      }
+    }
 
     showDialog(
       context: context,
@@ -118,16 +144,20 @@ class ReceiptImageView extends StatelessWidget {
             fit: StackFit.expand,
             alignment: Alignment.center,
             children: [
-              // Full-screen interactive pan and zoom
-              InteractiveViewer(
-                transformationController: transformController,
-                minScale: 0.5,
-                maxScale: 8.0,
-                boundaryMargin: const EdgeInsets.all(double.infinity),
-                child: Center(
-                  child: file != null
-                      ? Image.file(file, fit: BoxFit.contain)
-                      : Image.memory(bytes!, fit: BoxFit.contain),
+              // Full-screen interactive pan and focal-point zoom
+              GestureDetector(
+                onDoubleTapDown: (details) => doubleTapDetails = details,
+                onDoubleTap: () => handleDoubleTap(MediaQuery.of(ctx).size),
+                child: InteractiveViewer(
+                  transformationController: transformController,
+                  minScale: 0.5,
+                  maxScale: 8.0,
+                  boundaryMargin: const EdgeInsets.all(double.infinity),
+                  child: Center(
+                    child: file != null
+                        ? Image.file(file, fit: BoxFit.contain)
+                        : Image.memory(bytes!, fit: BoxFit.contain),
+                  ),
                 ),
               ),
 
@@ -163,9 +193,8 @@ class ReceiptImageView extends StatelessWidget {
                         icon: const Icon(Icons.zoom_out, color: Colors.white, size: 20),
                         tooltip: 'Zoom Out',
                         onPressed: () {
-                          final matrix = transformController.value.clone();
-                          matrix.multiply(Matrix4.diagonal3Values(0.8, 0.8, 1.0));
-                          transformController.value = matrix;
+                          final size = MediaQuery.of(ctx).size;
+                          zoomAroundPoint(Offset(size.width / 2, size.height / 2), 0.8);
                         },
                       ),
                       const SizedBox(width: 4),
@@ -180,9 +209,8 @@ class ReceiptImageView extends StatelessWidget {
                         icon: const Icon(Icons.zoom_in, color: Colors.white, size: 20),
                         tooltip: 'Zoom In',
                         onPressed: () {
-                          final matrix = transformController.value.clone();
-                          matrix.multiply(Matrix4.diagonal3Values(1.25, 1.25, 1.0));
-                          transformController.value = matrix;
+                          final size = MediaQuery.of(ctx).size;
+                          zoomAroundPoint(Offset(size.width / 2, size.height / 2), 1.25);
                         },
                       ),
                     ],
