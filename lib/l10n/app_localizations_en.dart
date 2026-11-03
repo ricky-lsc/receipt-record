@@ -815,4 +815,23 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dataManagement => 'Data Management';
+
+  @override
+  String get defaultCurrency => 'Default Currency';
+
+  @override
+  String get defaultCurrencySubtitle =>
+      'Base currency for summaries, charts, and budget';
+
+  @override
+  String get foreignCurrencyConversion => 'Currency Conversion';
+
+  @override
+  String get exchangeRate => 'Exchange Rate';
+
+  @override
+  String get convertedTo => 'Converted Amount';
+
+  @override
+  String get liveRateFetched => 'Live exchange rate updated';
 }

@@ -10,6 +10,7 @@ import '../l10n/app_localizations.dart';
 import '../models/receipt.dart';
 import '../models/receipt_category.dart';
 import '../models/receipt_item.dart';
+import '../services/currency_service.dart';
 import '../services/glm_receipt_service.dart';
 import '../services/locale_service.dart';
 import '../services/sample_data_service.dart';
@@ -42,7 +43,13 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
   DateTime _selectedDate = DateTime.now();
   String _selectedCategory = 'groceries';
   String _selectedPaymentMethod = 'Credit Card';
-  String _currency = '\$';
+  String _currency = 'USD';
+  String _baseCurrency = 'USD';
+  double? _exchangeRate;
+  double? _convertedAmount;
+  final TextEditingController _rateController = TextEditingController();
+  final TextEditingController _convertedAmountController = TextEditingController();
+  bool _isFetchingRate = false;
 
   String? _imagePath;
   String? _imageBase64;
@@ -73,6 +80,10 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
   void initState() {
     super.initState();
     _checkAiKeyAvailability();
+    _baseCurrency = CurrencyService.instance.defaultCurrencyNotifier.value;
+    _currency = widget.existingReceipt?.currency ?? _baseCurrency;
+    _amountController.addListener(_recalculateConvertedAmount);
+
     if (widget.initialImagePath != null && widget.initialImagePath!.isNotEmpty) {
       _imagePath = widget.initialImagePath;
       _loadInitialImageBytes(widget.initialImagePath!);
@@ -87,12 +98,21 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
       _selectedPaymentMethod = r.paymentMethod;
       _imagePath = r.imagePath;
       _imageBase64 = r.imageBase64;
+      _baseCurrency = r.baseCurrency ?? _baseCurrency;
+      _exchangeRate = r.exchangeRate;
+      _convertedAmount = r.convertedAmount;
+      if (_exchangeRate != null) {
+        _rateController.text = _exchangeRate!.toString();
+      }
+      if (_convertedAmount != null) {
+        _convertedAmountController.text = _convertedAmount!.toStringAsFixed(2);
+      }
       if (r.taxAmount != null) _taxController.text = r.taxAmount!.toStringAsFixed(2);
       if (r.tipAmount != null) _tipController.text = r.tipAmount!.toStringAsFixed(2);
       if (r.notes != null) _notesController.text = r.notes!;
       _items.addAll(r.items);
 
-      if (_items.isNotEmpty || r.taxAmount != null || r.tipAmount != null || r.notes != null) {
+      if (_items.isNotEmpty || r.taxAmount != null || r.tipAmount != null || r.notes != null || r.isForeignCurrency) {
         _showAdvanced = true;
       }
     }
@@ -116,18 +136,78 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
 
   Future<void> _checkAiKeyAvailability() async {
     final hasKey = await GlmReceiptService.instance.hasApiKey();
-    final isEnabled = await GlmReceiptService.instance.isAiEnabled();
     if (mounted) {
       setState(() {
-        _hasAiKey = hasKey && isEnabled;
+        _hasAiKey = hasKey;
       });
+    }
+  }
+
+  Future<void> _onCurrencyChanged(String newCurrency) async {
+    setState(() => _currency = newCurrency);
+    if (newCurrency == _baseCurrency) {
+      setState(() {
+        _exchangeRate = 1.0;
+        _convertedAmount = null;
+        _rateController.clear();
+        _convertedAmountController.clear();
+      });
+      return;
+    }
+
+    setState(() => _isFetchingRate = true);
+    final rate = await CurrencyService.instance.getExchangeRate(
+      from: newCurrency,
+      to: _baseCurrency,
+    );
+    if (!mounted) return;
+    setState(() {
+      _isFetchingRate = false;
+      _exchangeRate = rate;
+      _rateController.text = rate.toStringAsFixed(rate < 0.01 ? 6 : 4);
+      _recalculateConvertedAmount();
+    });
+  }
+
+  void _recalculateConvertedAmount() {
+    if (_currency == _baseCurrency) return;
+    final orig = double.tryParse(_amountController.text.trim()) ?? 0.0;
+    if (_exchangeRate != null && _exchangeRate! > 0) {
+      final converted = orig * _exchangeRate!;
+      _convertedAmount = converted;
+      _convertedAmountController.text = converted.toStringAsFixed(2);
+    }
+  }
+
+  void _onRateChanged(String val) {
+    final r = double.tryParse(val.trim());
+    if (r != null && r > 0) {
+      _exchangeRate = r;
+      final orig = double.tryParse(_amountController.text.trim()) ?? 0.0;
+      final converted = orig * r;
+      _convertedAmount = converted;
+      _convertedAmountController.text = converted.toStringAsFixed(2);
+    }
+  }
+
+  void _onConvertedAmountChanged(String val) {
+    final conv = double.tryParse(val.trim());
+    final orig = double.tryParse(_amountController.text.trim()) ?? 0.0;
+    if (conv != null && conv > 0 && orig > 0) {
+      _convertedAmount = conv;
+      final newRate = conv / orig;
+      _exchangeRate = newRate;
+      _rateController.text = newRate.toStringAsFixed(newRate < 0.01 ? 6 : 4);
     }
   }
 
   @override
   void dispose() {
+    _amountController.removeListener(_recalculateConvertedAmount);
     _merchantController.dispose();
     _amountController.dispose();
+    _rateController.dispose();
+    _convertedAmountController.dispose();
     _taxController.dispose();
     _tipController.dispose();
     _notesController.dispose();
@@ -746,6 +826,9 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
       imageBase64: _imageBase64,
       items: _items,
       split: widget.existingReceipt?.split,
+      baseCurrency: _baseCurrency,
+      exchangeRate: _currency == _baseCurrency ? 1.0 : _exchangeRate,
+      convertedAmount: _currency == _baseCurrency ? amount : _convertedAmount,
       createdAt: widget.existingReceipt?.createdAt ?? now,
       updatedAt: now,
     );
@@ -1037,18 +1120,14 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
                           child: DropdownButtonHideUnderline(
                             child: DropdownButton<String>(
                               value: _currency,
-                              items: const [
-                                DropdownMenuItem(value: '\$', child: Text('\$ USD')),
-                                DropdownMenuItem(value: '€', child: Text('€ EUR')),
-                                DropdownMenuItem(value: '£', child: Text('£ GBP')),
-                                DropdownMenuItem(value: '¥', child: Text('¥ JPY/CNY')),
-                                DropdownMenuItem(value: 'CA\$', child: Text('CA\$ CAD')),
-                                DropdownMenuItem(value: 'A\$', child: Text('A\$ AUD')),
-                                DropdownMenuItem(value: 'NT\$', child: Text('NT\$ TWD')),
-                                DropdownMenuItem(value: 'HK\$', child: Text('HK\$ HKD')),
-                              ],
+                              items: CurrencyService.supportedCurrencies.map((c) {
+                                return DropdownMenuItem(
+                                  value: c.code,
+                                  child: Text('${c.flag} ${c.code} (${c.symbol})'),
+                                );
+                              }).toList(),
                               onChanged: (val) {
-                                if (val != null) setState(() => _currency = val);
+                                if (val != null) _onCurrencyChanged(val);
                               },
                             ),
                           ),
@@ -1081,6 +1160,95 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
                         ),
                       ],
                     ),
+                    if (_currency != _baseCurrency) ...[
+                      const SizedBox(height: 14),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF0FDFA),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: isDark ? const Color(0xFF334155) : const Color(0xFF99F6E4),
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
+                                  children: [
+                                    const Icon(Icons.currency_exchange, size: 16, color: Color(0xFF0F766E)),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      l10n.foreignCurrencyConversion,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 12,
+                                        color: Color(0xFF0F766E),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                if (_isFetchingRate)
+                                  const SizedBox(
+                                    width: 14,
+                                    height: 14,
+                                    child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF0F766E)),
+                                  )
+                                else
+                                  InkWell(
+                                    onTap: () => _onCurrencyChanged(_currency),
+                                    child: Row(
+                                      children: [
+                                        const Icon(Icons.refresh, size: 13, color: Color(0xFF0F766E)),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          l10n.liveRateFetched,
+                                          style: const TextStyle(fontSize: 11, color: Color(0xFF0F766E)),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                              ],
+                            ),
+                            const SizedBox(height: 10),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: TextFormField(
+                                    controller: _rateController,
+                                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                    decoration: InputDecoration(
+                                      labelText: '1 $_currency = ($_baseCurrency)',
+                                      labelStyle: const TextStyle(fontSize: 11),
+                                      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                    ),
+                                    style: const TextStyle(fontSize: 13),
+                                    onChanged: _onRateChanged,
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: TextFormField(
+                                    controller: _convertedAmountController,
+                                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                    decoration: InputDecoration(
+                                      labelText: '${l10n.convertedTo} (${CurrencyService.instance.getSymbol(_baseCurrency)})',
+                                      labelStyle: const TextStyle(fontSize: 11),
+                                      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                    ),
+                                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                                    onChanged: _onConvertedAmountChanged,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),

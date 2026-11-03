@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
+import '../services/currency_service.dart';
 import '../services/glm_receipt_service.dart';
 import '../services/locale_service.dart';
 import '../services/storage_service.dart';
@@ -43,6 +44,73 @@ class _AppSettingsDialogState extends State<AppSettingsDialog> {
         _hasAiKey = hasKey;
       });
     }
+  }
+
+  void _showCurrencySelectionModal(BuildContext context, AppLocalizations l10n) {
+    showModalBottomSheet<void>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.defaultCurrency,
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        l10n.defaultCurrencySubtitle,
+                        style: const TextStyle(fontSize: 12, color: Colors.grey),
+                      ),
+                    ],
+                  ),
+                ),
+                const Divider(),
+                Flexible(
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: CurrencyService.supportedCurrencies.length,
+                    itemBuilder: (_, i) {
+                      final curr = CurrencyService.supportedCurrencies[i];
+                      final isSelected = curr.code == CurrencyService.instance.defaultCurrencyNotifier.value;
+                      return ListTile(
+                        leading: Text(curr.flag, style: const TextStyle(fontSize: 24)),
+                        title: Text('${curr.code} - ${curr.name}'),
+                        trailing: Text(
+                          curr.symbol,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: isSelected ? const Color(0xFF0F766E) : Colors.grey,
+                          ),
+                        ),
+                        selected: isSelected,
+                        onTap: () async {
+                          Navigator.of(ctx).pop();
+                          await CurrencyService.instance.setDefaultCurrency(curr.code);
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -168,6 +236,29 @@ class _AppSettingsDialogState extends State<AppSettingsDialog> {
                             ),
                             trailing: const Icon(Icons.chevron_right, size: 20),
                             onTap: () => LanguageSelectionDialog.show(context),
+                          ),
+                          const Divider(height: 1),
+
+                          // Default Currency Tile
+                          ListTile(
+                            leading: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF0F766E).withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: const Icon(Icons.monetization_on_outlined, color: Color(0xFF0F766E), size: 20),
+                            ),
+                            title: Text(l10n.defaultCurrency, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                            subtitle: ValueListenableBuilder<String>(
+                              valueListenable: CurrencyService.instance.defaultCurrencyNotifier,
+                              builder: (context, code, _) {
+                                final info = CurrencyService.instance.getCurrency(code);
+                                return Text(info.displayName, style: const TextStyle(fontSize: 12));
+                              },
+                            ),
+                            trailing: const Icon(Icons.chevron_right, size: 20),
+                            onTap: () => _showCurrencySelectionModal(context, l10n),
                           ),
                           const Divider(height: 1),
 

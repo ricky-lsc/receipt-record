@@ -1,4 +1,5 @@
 import 'package:intl/intl.dart';
+import '../services/currency_service.dart';
 
 class CurrencyHelper {
   static final NumberFormat _formatter = NumberFormat.currency(
@@ -15,6 +16,11 @@ class CurrencyHelper {
       decimalDigits: 2,
     );
     return customFormatter.format(amount);
+  }
+
+  static String formatWithCode(double amount, String code) {
+    final symbol = CurrencyService.instance.getSymbol(code);
+    return format(amount, symbol: symbol);
   }
 
   static String formatCompact(double amount, {String symbol = '\$'}) {

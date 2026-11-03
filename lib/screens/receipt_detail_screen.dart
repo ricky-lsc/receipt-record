@@ -176,14 +176,35 @@ class _ReceiptDetailScreenState extends State<ReceiptDetailScreen> {
                           ),
                         ),
                       ),
-                      Text(
-                        CurrencyHelper.format(_receipt.amount, symbol: _receipt.currency),
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: -0.5,
-                          color: isDark ? const Color(0xFF2DD4BF) : const Color(0xFF0F766E),
-                        ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            CurrencyHelper.formatWithCode(_receipt.amount, _receipt.currency),
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: -0.5,
+                              color: isDark ? const Color(0xFF2DD4BF) : const Color(0xFF0F766E),
+                            ),
+                          ),
+                          if (_receipt.isForeignCurrency) ...[
+                            const SizedBox(height: 2),
+                            Text(
+                              '≈ ${CurrencyHelper.formatWithCode(_receipt.convertedAmount!, _receipt.baseCurrency!)}',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                                color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                              ),
+                            ),
+                            if (_receipt.exchangeRate != null)
+                              Text(
+                                '1 ${_receipt.currency} = ${_receipt.exchangeRate} ${_receipt.baseCurrency}',
+                                style: const TextStyle(fontSize: 10, color: Colors.grey),
+                              ),
+                          ],
+                        ],
                       ),
                     ],
                   ),

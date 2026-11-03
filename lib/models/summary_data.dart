@@ -114,9 +114,10 @@ class SummaryData {
     final Map<String, double> unpaidBalances = {};
 
     for (final r in receipts) {
-      total += r.amount;
-      if (r.amount > maxAmount) {
-        maxAmount = r.amount;
+      final spendAmount = r.effectiveAmount;
+      total += spendAmount;
+      if (spendAmount > maxAmount) {
+        maxAmount = spendAmount;
       }
 
       // Tax & Tip
@@ -138,21 +139,21 @@ class SummaryData {
       }
 
       // Category
-      catSpending[r.category] = (catSpending[r.category] ?? 0.0) + r.amount;
+      catSpending[r.category] = (catSpending[r.category] ?? 0.0) + spendAmount;
       catCounts[r.category] = (catCounts[r.category] ?? 0) + 1;
 
       // Merchant
       final merchantKey = r.merchant.trim().isEmpty ? 'Unknown' : r.merchant.trim();
-      merchSpending[merchantKey] = (merchSpending[merchantKey] ?? 0.0) + r.amount;
+      merchSpending[merchantKey] = (merchSpending[merchantKey] ?? 0.0) + spendAmount;
 
       // Month (e.g. "Oct 2026")
       final monthKey = DateFormat('MMM yyyy').format(r.date);
-      monthSpending[monthKey] = (monthSpending[monthKey] ?? 0.0) + r.amount;
+      monthSpending[monthKey] = (monthSpending[monthKey] ?? 0.0) + spendAmount;
 
       // Payment method
       final methodKey = r.paymentMethod.isEmpty ? 'Other' : r.paymentMethod;
       payMethodSpending[methodKey] =
-          (payMethodSpending[methodKey] ?? 0.0) + r.amount;
+          (payMethodSpending[methodKey] ?? 0.0) + spendAmount;
 
       // Split bill parsing
       if (r.isSplit) {

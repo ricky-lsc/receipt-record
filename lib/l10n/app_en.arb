@@ -280,5 +280,12 @@
   "themeLight": "Light Mode",
   "themeDark": "Dark Mode",
   "themeSystem": "System Default",
-  "dataManagement": "Data Management"
+  "dataManagement": "Data Management",
+
+  "defaultCurrency": "Default Currency",
+  "defaultCurrencySubtitle": "Base currency for summaries, charts, and budget",
+  "foreignCurrencyConversion": "Currency Conversion",
+  "exchangeRate": "Exchange Rate",
+  "convertedTo": "Converted Amount",
+  "liveRateFetched": "Live exchange rate updated"
 }

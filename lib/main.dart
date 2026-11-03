@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'l10n/app_localizations.dart';
 import 'screens/home_navigation_screen.dart';
+import 'services/currency_service.dart';
 import 'services/locale_service.dart';
 import 'services/storage_service.dart';
 import 'services/theme_service.dart';
@@ -24,6 +25,7 @@ void main() async {
   await StorageService.instance.init();
   await LocaleService.instance.init();
   await ThemeService.instance.init();
+  await CurrencyService.instance.init();
 
   // Remove any previously preloaded sample receipts to ensure a completely clean start
   final current = StorageService.instance.receiptsNotifier.value;

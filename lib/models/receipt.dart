@@ -17,6 +17,9 @@ class Receipt {
   final String? imageBase64;
   final List<ReceiptItem> items;
   final ReceiptSplit? split;
+  final String? baseCurrency;
+  final double? exchangeRate;
+  final double? convertedAmount;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -24,7 +27,7 @@ class Receipt {
     required this.id,
     required this.merchant,
     required this.amount,
-    this.currency = '\$',
+    this.currency = 'USD',
     required this.date,
     required this.category,
     this.paymentMethod = 'Credit Card',
@@ -35,6 +38,9 @@ class Receipt {
     this.imageBase64,
     this.items = const [],
     this.split,
+    this.baseCurrency,
+    this.exchangeRate,
+    this.convertedAmount,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -47,6 +53,15 @@ class Receipt {
 
   double get itemsSubtotal =>
       items.fold(0.0, (sum, item) => sum + item.totalPrice);
+
+  /// Returns home currency converted amount if converted, otherwise original amount
+  double get effectiveAmount => convertedAmount ?? amount;
+
+  /// Whether this receipt was recorded in a foreign currency
+  bool get isForeignCurrency =>
+      baseCurrency != null &&
+      currency.toUpperCase() != baseCurrency!.toUpperCase() &&
+      convertedAmount != null;
 
   Map<String, dynamic> toMap() {
     return {
@@ -64,6 +79,9 @@ class Receipt {
       'imageBase64': imageBase64,
       'items': items.map((x) => x.toMap()).toList(),
       'split': split?.toMap(),
+      'baseCurrency': baseCurrency,
+      'exchangeRate': exchangeRate,
+      'convertedAmount': convertedAmount,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
     };
@@ -74,7 +92,7 @@ class Receipt {
       id: map['id'] as String? ?? '',
       merchant: map['merchant'] as String? ?? '',
       amount: (map['amount'] as num?)?.toDouble() ?? 0.0,
-      currency: map['currency'] as String? ?? '\$',
+      currency: map['currency'] as String? ?? 'USD',
       date: map['date'] != null
           ? DateTime.tryParse(map['date'] as String) ?? DateTime.now()
           : DateTime.now(),
@@ -92,6 +110,9 @@ class Receipt {
       split: map['split'] != null && map['split'] is Map<String, dynamic>
           ? ReceiptSplit.fromMap(map['split'] as Map<String, dynamic>)
           : null,
+      baseCurrency: map['baseCurrency'] as String?,
+      exchangeRate: (map['exchangeRate'] as num?)?.toDouble(),
+      convertedAmount: (map['convertedAmount'] as num?)?.toDouble(),
       createdAt: map['createdAt'] != null
           ? DateTime.tryParse(map['createdAt'] as String) ?? DateTime.now()
           : DateTime.now(),
@@ -123,6 +144,9 @@ class Receipt {
     List<ReceiptItem>? items,
     ReceiptSplit? split,
     bool clearSplit = false,
+    String? baseCurrency,
+    double? exchangeRate,
+    double? convertedAmount,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -141,6 +165,9 @@ class Receipt {
       imageBase64: clearImageBase64 ? null : (imageBase64 ?? this.imageBase64),
       items: items ?? this.items,
       split: clearSplit ? null : (split ?? this.split),
+      baseCurrency: baseCurrency ?? this.baseCurrency,
+      exchangeRate: exchangeRate ?? this.exchangeRate,
+      convertedAmount: convertedAmount ?? this.convertedAmount,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

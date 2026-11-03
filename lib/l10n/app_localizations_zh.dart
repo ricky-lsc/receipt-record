@@ -796,6 +796,24 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get dataManagement => '数据管理';
+
+  @override
+  String get defaultCurrency => '默认主货币';
+
+  @override
+  String get defaultCurrencySubtitle => '用于统计汇总与月度预算的本位货币';
+
+  @override
+  String get foreignCurrencyConversion => '外币汇率折算';
+
+  @override
+  String get exchangeRate => '换算汇率';
+
+  @override
+  String get convertedTo => '折算主货币金额';
+
+  @override
+  String get liveRateFetched => '已更新实时汇率';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -1589,6 +1607,24 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get dataManagement => '数据管理';
+
+  @override
+  String get defaultCurrency => '默认主货币';
+
+  @override
+  String get defaultCurrencySubtitle => '用于统计汇总与月度预算的本位货币';
+
+  @override
+  String get foreignCurrencyConversion => '外币汇率折算';
+
+  @override
+  String get exchangeRate => '换算汇率';
+
+  @override
+  String get convertedTo => '折算主货币金额';
+
+  @override
+  String get liveRateFetched => '已更新实时汇率';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -2382,4 +2418,22 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get dataManagement => '資料管理';
+
+  @override
+  String get defaultCurrency => '預設主貨幣';
+
+  @override
+  String get defaultCurrencySubtitle => '用於統計彙總與月度預算的基準貨幣';
+
+  @override
+  String get foreignCurrencyConversion => '外幣匯率折算';
+
+  @override
+  String get exchangeRate => '換算匯率';
+
+  @override
+  String get convertedTo => '折算主貨幣金額';
+
+  @override
+  String get liveRateFetched => '已更新即時匯率';
 }

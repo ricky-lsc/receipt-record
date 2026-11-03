@@ -1665,6 +1665,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Data Management'**
   String get dataManagement;
+
+  /// No description provided for @defaultCurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'Default Currency'**
+  String get defaultCurrency;
+
+  /// No description provided for @defaultCurrencySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Base currency for summaries, charts, and budget'**
+  String get defaultCurrencySubtitle;
+
+  /// No description provided for @foreignCurrencyConversion.
+  ///
+  /// In en, this message translates to:
+  /// **'Currency Conversion'**
+  String get foreignCurrencyConversion;
+
+  /// No description provided for @exchangeRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Exchange Rate'**
+  String get exchangeRate;
+
+  /// No description provided for @convertedTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Converted Amount'**
+  String get convertedTo;
+
+  /// No description provided for @liveRateFetched.
+  ///
+  /// In en, this message translates to:
+  /// **'Live exchange rate updated'**
+  String get liveRateFetched;
 }
 
 class _AppLocalizationsDelegate

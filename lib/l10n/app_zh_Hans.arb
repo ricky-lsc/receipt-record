@@ -280,5 +280,12 @@
   "themeLight": "浅色模式",
   "themeDark": "深色模式",
   "themeSystem": "跟随系统",
-  "dataManagement": "数据管理"
+  "dataManagement": "数据管理",
+
+  "defaultCurrency": "默认主货币",
+  "defaultCurrencySubtitle": "用于统计汇总与月度预算的本位货币",
+  "foreignCurrencyConversion": "外币汇率折算",
+  "exchangeRate": "换算汇率",
+  "convertedTo": "折算主货币金额",
+  "liveRateFetched": "已更新实时汇率"
 }

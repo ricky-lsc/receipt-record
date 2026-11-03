@@ -163,7 +163,7 @@ class ReceiptCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    CurrencyHelper.format(receipt.amount, symbol: receipt.currency),
+                    CurrencyHelper.formatWithCode(receipt.amount, receipt.currency),
                     style: TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.w800,
@@ -171,6 +171,17 @@ class ReceiptCard extends StatelessWidget {
                       color: isDark ? const Color(0xFF2DD4BF) : const Color(0xFF0F766E),
                     ),
                   ),
+                  if (receipt.isForeignCurrency) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      '≈ ${CurrencyHelper.formatWithCode(receipt.convertedAmount!, receipt.baseCurrency!)}',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 6),
                   Row(
                     mainAxisSize: MainAxisSize.min,
