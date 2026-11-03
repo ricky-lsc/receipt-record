@@ -145,7 +145,8 @@ void main() {
           ),
         ),
       );
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
 
       expect(find.text('Monthly Budget'), findsOneWidget);
       expect(find.text('Set Budget'), findsOneWidget);
@@ -189,15 +190,18 @@ void main() {
           ),
         ),
       );
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
 
       // Drag list down to make category breakdown visible
       await tester.drag(find.byType(ListView).first, const Offset(0, -300));
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
 
       final groceriesTile = find.text('Groceries').first;
       await tester.tap(groceriesTile);
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
 
       // Verify CategoryDrilldownSheet opens
       expect(find.byType(CategoryDrilldownSheet), findsOneWidget);

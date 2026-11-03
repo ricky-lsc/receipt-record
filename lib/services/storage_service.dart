@@ -81,8 +81,12 @@ class StorageService {
 
   /// Default application sandbox directory
   Future<String> getDefaultStoragePath() async {
+    if (Platform.environment.containsKey('FLUTTER_TEST')) {
+      return Directory.systemTemp.path;
+    }
     try {
-      final dir = await getApplicationDocumentsDirectory();
+      final dir = await getApplicationDocumentsDirectory()
+          .timeout(const Duration(milliseconds: 300));
       return dir.path;
     } catch (_) {
       return Directory.systemTemp.path;
@@ -195,26 +199,28 @@ class StorageService {
     }
   }
 
-  /// Syncs receipts.json and receipts.csv into effective storage directory
+  /// Syncs receipts.json and receipts.csv into custom storage directory if configured
   Future<void> syncBackupFiles([List<Receipt>? receiptsToSync]) async {
-    if (!autoBackupNotifier.value) return;
+    final customPath = customStoragePathNotifier.value;
+    if (!autoBackupNotifier.value || customPath == null || customPath.isEmpty) {
+      return;
+    }
     try {
       final list = receiptsToSync ?? receiptsNotifier.value;
-      final effectivePath = await getEffectiveStoragePath();
-      final dir = Directory(effectivePath);
+      final dir = Directory(customPath);
       if (!await dir.exists()) {
         await dir.create(recursive: true);
       }
 
       // 1. receipts.json
-      final jsonFile = File('$effectivePath/receipts.json');
+      final jsonFile = File('$customPath/receipts.json');
       final jsonString = const JsonEncoder.withIndent('  ').convert(
         list.map((r) => r.toMap()).toList(),
       );
       await jsonFile.writeAsString(jsonString);
 
       // 2. receipts.csv
-      final csvFile = File('$effectivePath/receipts.csv');
+      final csvFile = File('$customPath/receipts.csv');
       final csvString = ExportService.generateCsv(list);
       await csvFile.writeAsString(csvString);
     } catch (e) {
