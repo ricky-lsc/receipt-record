@@ -874,6 +874,7 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final isDesktop = MediaQuery.of(context).size.width >= 700;
     final isEditing = widget.existingReceipt != null;
 
     return Scaffold(
@@ -907,7 +908,7 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
               child: InkWell(
                 onTap: _showImageSourceDialog,
                 child: Container(
-                  height: 190,
+                  height: isDesktop ? 360 : 280,
                   width: double.infinity,
                   color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
                   child: (_imageBase64 != null || _imagePath != null)

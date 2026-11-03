@@ -78,6 +78,7 @@ class _ReceiptDetailScreenState extends State<ReceiptDetailScreen> {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final isDesktop = MediaQuery.of(context).size.width >= 700;
     final payment = PaymentMethod.fromString(_receipt.paymentMethod);
 
     return Scaffold(
@@ -106,7 +107,7 @@ class _ReceiptDetailScreenState extends State<ReceiptDetailScreen> {
               child: Stack(
                 children: [
                   Container(
-                    height: 280,
+                    height: isDesktop ? 540 : 440,
                     width: double.infinity,
                     color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
                     child: ReceiptImageView(
@@ -121,17 +122,17 @@ class _ReceiptDetailScreenState extends State<ReceiptDetailScreen> {
                     top: 12,
                     right: 12,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                       decoration: BoxDecoration(
                         color: Colors.black54,
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      child: Row(
+                      child: const Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.zoom_in, color: Colors.white, size: 14),
-                          const SizedBox(width: 4),
-                          Text(l10n.receiptAttached, style: const TextStyle(color: Colors.white, fontSize: 12)),
+                          Icon(Icons.zoom_in, color: Colors.white, size: 15),
+                          SizedBox(width: 4),
+                          Text('Tap to expand & zoom', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)),
                         ],
                       ),
                     ),

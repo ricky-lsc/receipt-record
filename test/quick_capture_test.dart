@@ -56,7 +56,7 @@ void main() {
 
       // Verify AddEditReceiptScreen opened
       expect(find.byType(AddEditReceiptScreen), findsOneWidget);
-      expect(find.text('MERCHANT / STORE NAME'), findsOneWidget);
+      expect(find.text('Record Receipt'), findsOneWidget);
     });
 
     testWidgets('AddEditReceiptScreen hides AI Extract when no key is set, and shows it when key is configured', (tester) async {

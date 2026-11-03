@@ -104,59 +104,93 @@ class ReceiptImageView extends StatelessWidget {
 
     if (file == null && bytes == null) return;
 
+    final TransformationController transformController = TransformationController();
+
     showDialog(
       context: context,
-      barrierColor: Colors.black.withValues(alpha: 0.85),
+      barrierColor: Colors.black.withValues(alpha: 0.95),
+      useSafeArea: false,
       builder: (ctx) => Dialog(
         backgroundColor: Colors.transparent,
-        insetPadding: const EdgeInsets.all(16),
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            InteractiveViewer(
-              minScale: 0.8,
-              maxScale: 4.5,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: file != null
-                    ? Image.file(file, fit: BoxFit.contain)
-                    : Image.memory(bytes!, fit: BoxFit.contain),
-              ),
-            ),
-            Positioned(
-              top: 12,
-              right: 12,
-              child: CircleAvatar(
-                backgroundColor: Colors.black54,
-                radius: 20,
-                child: IconButton(
-                  icon: const Icon(Icons.close, color: Colors.white, size: 20),
-                  onPressed: () => Navigator.of(ctx).pop(),
+        insetPadding: EdgeInsets.zero,
+        child: SizedBox.expand(
+          child: Stack(
+            fit: StackFit.expand,
+            alignment: Alignment.center,
+            children: [
+              // Full-screen interactive pan and zoom
+              InteractiveViewer(
+                transformationController: transformController,
+                minScale: 0.5,
+                maxScale: 8.0,
+                boundaryMargin: const EdgeInsets.all(double.infinity),
+                child: Center(
+                  child: file != null
+                      ? Image.file(file, fit: BoxFit.contain)
+                      : Image.memory(bytes!, fit: BoxFit.contain),
                 ),
               ),
-            ),
-            Positioned(
-              bottom: 16,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Colors.black54,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.pinch, color: Colors.white70, size: 16),
-                    SizedBox(width: 6),
-                    Text(
-                      'Pinch or drag to zoom',
-                      style: TextStyle(color: Colors.white70, fontSize: 12),
-                    ),
-                  ],
+
+              // Top bar with close button
+              Positioned(
+                top: MediaQuery.of(ctx).padding.top + 16,
+                right: 20,
+                child: CircleAvatar(
+                  backgroundColor: Colors.black54,
+                  radius: 22,
+                  child: IconButton(
+                    icon: const Icon(Icons.close, color: Colors.white, size: 22),
+                    tooltip: 'Close',
+                    onPressed: () => Navigator.of(ctx).pop(),
+                  ),
                 ),
               ),
-            ),
-          ],
+
+              // Bottom zoom controls toolbar
+              Positioned(
+                bottom: MediaQuery.of(ctx).padding.bottom + 20,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.black87,
+                    borderRadius: BorderRadius.circular(30),
+                    border: Border.all(color: Colors.white24),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.zoom_out, color: Colors.white, size: 20),
+                        tooltip: 'Zoom Out',
+                        onPressed: () {
+                          final matrix = transformController.value.clone();
+                          matrix.multiply(Matrix4.diagonal3Values(0.8, 0.8, 1.0));
+                          transformController.value = matrix;
+                        },
+                      ),
+                      const SizedBox(width: 4),
+                      TextButton(
+                        onPressed: () {
+                          transformController.value = Matrix4.identity();
+                        },
+                        child: const Text('1:1 Reset', style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold)),
+                      ),
+                      const SizedBox(width: 4),
+                      IconButton(
+                        icon: const Icon(Icons.zoom_in, color: Colors.white, size: 20),
+                        tooltip: 'Zoom In',
+                        onPressed: () {
+                          final matrix = transformController.value.clone();
+                          matrix.multiply(Matrix4.diagonal3Values(1.25, 1.25, 1.0));
+                          transformController.value = matrix;
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
