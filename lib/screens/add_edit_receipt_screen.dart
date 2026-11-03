@@ -852,14 +852,6 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
       appBar: AppBar(
         title: Text(isEditing ? l10n.editReceipt : l10n.recordReceipt),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.auto_awesome),
-            tooltip: l10n.cloudAiSettingsTooltip,
-            onPressed: () async {
-              await CloudAiSettingsDialog.show(context);
-              await _checkAiKeyAvailability();
-            },
-          ),
           Padding(
             padding: const EdgeInsets.only(right: 12),
             child: ElevatedButton.icon(
@@ -1013,37 +1005,19 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
                                       ],
                                     ],
                                   ),
-                                  Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      IconButton(
-                                        style: IconButton.styleFrom(
-                                          backgroundColor: Colors.black54,
-                                          foregroundColor: Colors.white,
-                                        ),
-                                        tooltip: l10n.cloudAiSettings,
-                                        onPressed: () async {
-                                          await CloudAiSettingsDialog.show(context);
-                                          await _checkAiKeyAvailability();
-                                        },
-                                        icon: const Icon(Icons.tune, size: 16),
-                                      ),
-                                      const SizedBox(width: 4),
-                                      IconButton(
-                                        style: IconButton.styleFrom(
-                                          backgroundColor: Colors.red.withValues(alpha: 0.7),
-                                          foregroundColor: Colors.white,
-                                        ),
-                                        onPressed: () {
-                                          setState(() {
-                                            _imageBase64 = null;
-                                            _imagePath = null;
-                                            _rawOcrText = null;
-                                          });
-                                        },
-                                        icon: const Icon(Icons.delete_outline, size: 18),
-                                      ),
-                                    ],
+                                  IconButton(
+                                    style: IconButton.styleFrom(
+                                      backgroundColor: Colors.red.withValues(alpha: 0.7),
+                                      foregroundColor: Colors.white,
+                                    ),
+                                    onPressed: () {
+                                      setState(() {
+                                        _imageBase64 = null;
+                                        _imagePath = null;
+                                        _rawOcrText = null;
+                                      });
+                                    },
+                                    icon: const Icon(Icons.delete_outline, size: 18),
                                   ),
                                 ],
                               ),
