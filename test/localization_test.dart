@@ -99,7 +99,6 @@ void main() {
       // Default (English in test environment)
       expect(find.text('Receipts'), findsWidgets);
       expect(find.text('Summary'), findsWidgets);
-      expect(find.text('Export'), findsWidgets);
 
       // Switch to Traditional Chinese
       await LocaleService.instance.setLocale(LocaleService.localeTraditionalChinese);
@@ -107,7 +106,6 @@ void main() {
 
       expect(find.text('收據明細'), findsWidgets);
       expect(find.text('支出統計'), findsWidgets);
-      expect(find.text('匯出資料'), findsWidgets);
 
       // Switch to Simplified Chinese
       await LocaleService.instance.setLocale(LocaleService.localeSimplifiedChinese);
@@ -115,7 +113,6 @@ void main() {
 
       expect(find.text('收据明细'), findsWidgets);
       expect(find.text('支出统计'), findsWidgets);
-      expect(find.text('导出数据'), findsWidgets);
 
       // Switch back to English
       await LocaleService.instance.setLocale(LocaleService.localeEnglish);
@@ -123,21 +120,24 @@ void main() {
 
       expect(find.text('Receipts'), findsWidgets);
       expect(find.text('Summary'), findsWidgets);
-      expect(find.text('Export'), findsWidgets);
     });
 
     testWidgets('LanguageSelectionDialog displays options and changes language', (tester) async {
       await tester.pumpWidget(const ReceiptRecordApp());
       await tester.pumpAndSettle();
 
-      // Open Language Dialog via Language Icon
-      final langButton = find.byIcon(Icons.language);
-      expect(langButton, findsWidgets);
-      await tester.tap(langButton.first);
+      // Open Settings Dialog via Settings Icon
+      final settingsButton = find.byIcon(Icons.settings_outlined);
+      expect(settingsButton, findsWidgets);
+      await tester.tap(settingsButton.first);
+      await tester.pumpAndSettle();
+
+      // Tap Language tile inside Settings
+      await tester.tap(find.text('Language'));
       await tester.pumpAndSettle();
 
       expect(find.text('Choose Language'), findsOneWidget);
-      expect(find.text('Follow System'), findsOneWidget);
+      expect(find.text('Follow System'), findsWidgets);
       expect(find.text('English'), findsOneWidget);
       expect(find.text('Traditional Chinese (繁體中文)'), findsOneWidget);
       expect(find.text('Simplified Chinese (简体中文)'), findsOneWidget);

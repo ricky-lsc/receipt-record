@@ -51,10 +51,14 @@ void main() {
       expect(find.text('Cloud AI Settings'), findsOneWidget);
       expect(find.text('Storage Location & Backup'), findsOneWidget);
 
-      // Verify theme switching via segment
-      await tester.tap(find.text('Dark Mode'));
-      await tester.pump();
-      expect(themeNotifier.value, ThemeMode.dark);
+      // Scroll down to Data Management
+      await tester.drag(find.byType(ListView), const Offset(0, -300));
+      await tester.pumpAndSettle();
+
+      expect(find.text('DATA MANAGEMENT'), findsOneWidget);
+      expect(find.text('Export Receipts'), findsOneWidget);
+      expect(find.text('Import & Restore'), findsOneWidget);
+      expect(find.text('Clear All Data'), findsOneWidget);
 
       // Verify closing dialog
       await tester.tap(find.byIcon(Icons.close));

@@ -279,5 +279,6 @@
   "themeAppearance": "Theme & Appearance",
   "themeLight": "Light Mode",
   "themeDark": "Dark Mode",
-  "themeSystem": "System Default"
+  "themeSystem": "System Default",
+  "dataManagement": "Data Management"
 }

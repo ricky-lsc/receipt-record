@@ -279,5 +279,6 @@
   "themeAppearance": "外觀主題",
   "themeLight": "淺色模式",
   "themeDark": "深色模式",
-  "themeSystem": "跟隨系統"
+  "themeSystem": "跟隨系統",
+  "dataManagement": "資料管理"
 }

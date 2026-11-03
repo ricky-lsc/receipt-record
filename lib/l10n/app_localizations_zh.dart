@@ -793,6 +793,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get themeSystem => '跟随系统';
+
+  @override
+  String get dataManagement => '数据管理';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -1583,6 +1586,9 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get themeSystem => '跟随系统';
+
+  @override
+  String get dataManagement => '数据管理';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -2373,4 +2379,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get themeSystem => '跟隨系統';
+
+  @override
+  String get dataManagement => '資料管理';
 }

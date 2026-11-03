@@ -812,4 +812,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get themeSystem => 'System Default';
+
+  @override
+  String get dataManagement => 'Data Management';
 }

@@ -24,7 +24,6 @@ class _CloudAiSettingsDialogState extends State<CloudAiSettingsDialog> {
   final _modelController = TextEditingController();
 
   bool _obscureKey = true;
-  bool _isAiEnabled = true;
   bool _isLoading = true;
   bool _isTesting = false;
   GlmTestResult? _testResult;
@@ -52,14 +51,12 @@ class _CloudAiSettingsDialogState extends State<CloudAiSettingsDialog> {
   Future<void> _loadSettings() async {
     final service = GlmReceiptService.instance;
     final key = await service.getApiKey();
-    final enabled = await service.isAiEnabled();
     final endpoint = await service.getEndpoint();
     final model = await service.getModelName();
 
     if (!mounted) return;
     setState(() {
       _keyController.text = key ?? '';
-      _isAiEnabled = enabled;
       _endpointController.text = endpoint;
       _modelController.text = model;
       _isLoading = false;
@@ -101,7 +98,6 @@ class _CloudAiSettingsDialogState extends State<CloudAiSettingsDialog> {
     final l10n = AppLocalizations.of(context);
     final service = GlmReceiptService.instance;
     await service.saveApiKey(_keyController.text.trim());
-    await service.setAiEnabled(_isAiEnabled);
     if (_endpointController.text.trim().isNotEmpty) {
       await service.setEndpoint(_endpointController.text.trim());
     }
@@ -240,23 +236,7 @@ class _CloudAiSettingsDialogState extends State<CloudAiSettingsDialog> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 16),
-
-                    // Toggle AI Enabled
-                    SwitchListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: Text(
-                        l10n.enableCloudAi,
-                        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-                      ),
-                      subtitle: Text(
-                        l10n.enableCloudAiSubtitle,
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                      value: _isAiEnabled,
-                      onChanged: (val) => setState(() => _isAiEnabled = val),
-                    ),
-                    const Divider(height: 24),
+                    const SizedBox(height: 20),
 
                     // API Key Field
                     Text(

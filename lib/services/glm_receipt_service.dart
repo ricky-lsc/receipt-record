@@ -37,7 +37,6 @@ class GlmReceiptService {
   String? _cachedApiKey;
 
   static const String _keyApiKey = 'glm_api_key';
-  static const String _prefAiEnabled = 'glm_ai_enabled';
   static const String _prefEndpoint = 'glm_api_endpoint';
   static const String _prefModel = 'glm_model_name';
 
@@ -114,25 +113,13 @@ class GlmReceiptService {
     return key != null && key.isNotEmpty;
   }
 
-  /// Whether Cloud AI receipt extraction is enabled by the user
+  /// Whether Cloud AI receipt extraction is available (strictly key-dependent)
   Future<bool> isAiEnabled() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      return prefs.getBool(_prefAiEnabled) ?? true;
-    } catch (_) {
-      return true;
-    }
+    return hasApiKey();
   }
 
-  /// Sets whether Cloud AI is enabled
-  Future<void> setAiEnabled(bool enabled) async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool(_prefAiEnabled, enabled);
-    } catch (e) {
-      debugPrint('GlmReceiptService: Error saving AI enabled pref: $e');
-    }
-  }
+  /// Sets whether Cloud AI is enabled (deprecated, kept for interface compatibility)
+  Future<void> setAiEnabled(bool enabled) async {}
 
   /// Gets configured API endpoint
   Future<String> getEndpoint() async {

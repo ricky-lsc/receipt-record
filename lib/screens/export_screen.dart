@@ -114,16 +114,6 @@ class _ExportScreenState extends State<ExportScreen> {
     }
   }
 
-  void _copyToClipboard(List<Receipt> receipts) {
-    final l10n = AppLocalizations.of(context);
-    if (receipts.isEmpty) return;
-    final content = _getPreviewContent(receipts);
-    Clipboard.setData(ClipboardData(text: content));
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l10n.exportSuccess)),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -310,35 +300,21 @@ class _ExportScreenState extends State<ExportScreen> {
               ),
               const SizedBox(height: 20),
 
-              // Action Buttons
-              Row(
-                children: [
-                  Expanded(
-                    child: SizedBox(
-                      height: 50,
-                      child: ElevatedButton.icon(
-                        onPressed: _isExporting ? null : () => _handleSaveToFile(filteredReceipts),
-                        icon: _isExporting
-                            ? const SizedBox(
-                                width: 16,
-                                height: 16,
-                                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                              )
-                            : const Icon(Icons.save_alt),
-                        label: Text(l10n.exportAsFile),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  SizedBox(
-                    height: 50,
-                    child: OutlinedButton.icon(
-                      onPressed: () => _copyToClipboard(filteredReceipts),
-                      icon: const Icon(Icons.copy),
-                      label: Text(l10n.copyToClipboard),
-                    ),
-                  ),
-                ],
+              // Action Button
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton.icon(
+                  onPressed: _isExporting ? null : () => _handleSaveToFile(filteredReceipts),
+                  icon: _isExporting
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                        )
+                      : const Icon(Icons.save_alt),
+                  label: Text(l10n.exportAsFile),
+                ),
               ),
               const SizedBox(height: 16),
 

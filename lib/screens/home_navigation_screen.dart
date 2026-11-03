@@ -22,7 +22,9 @@ class _HomeNavigationScreenState extends State<HomeNavigationScreen> {
   }
 
   void _navigateToExport() {
-    setState(() => _currentIndex = 2);
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const ExportScreen()),
+    );
   }
 
   @override
@@ -39,16 +41,10 @@ class _HomeNavigationScreenState extends State<HomeNavigationScreen> {
         onNavigateToExport: _navigateToExport,
         themeModeNotifier: widget.themeModeNotifier,
       ),
-      const ExportScreen(),
     ];
 
     return Scaffold(
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1080),
-          child: screens[_currentIndex],
-        ),
-      ),
+      body: screens[_currentIndex],
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,
         onDestinationSelected: (index) {
@@ -64,11 +60,6 @@ class _HomeNavigationScreenState extends State<HomeNavigationScreen> {
             icon: const Icon(Icons.analytics_outlined),
             selectedIcon: const Icon(Icons.analytics),
             label: l10n.navSummary,
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.file_download_outlined),
-            selectedIcon: const Icon(Icons.file_download),
-            label: l10n.navExport,
           ),
         ],
       ),

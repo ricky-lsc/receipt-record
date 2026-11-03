@@ -1659,6 +1659,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'System Default'**
   String get themeSystem;
+
+  /// No description provided for @dataManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Data Management'**
+  String get dataManagement;
 }
 
 class _AppLocalizationsDelegate

@@ -220,8 +220,6 @@ class _SummaryScreenState extends State<SummaryScreen> {
               icon: Icons.analytics_outlined,
               title: l10n.noExpenseData,
               message: l10n.noExpenseDataDesc,
-              primaryActionLabel: l10n.recordReceipt,
-              onPrimaryAction: widget.onNavigateToAdd,
             ),
           );
         }
