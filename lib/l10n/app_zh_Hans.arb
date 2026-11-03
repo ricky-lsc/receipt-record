@@ -272,5 +272,12 @@
   "manualEntrySubtitle": "直接手动填写商家与金额",
   "takePhotoSubtitle": "拍摄纸质小票或发票",
   "chooseFromGallerySubtitle": "从相册中选择收据照片",
-  "copyToClipboard": "复制到剪贴板"
+  "copyToClipboard": "复制到剪贴板",
+
+  "settingsHub": "设置",
+  "analyticsAndReports": "统计与报告",
+  "themeAppearance": "外观主题",
+  "themeLight": "浅色模式",
+  "themeDark": "深色模式",
+  "themeSystem": "跟随系统"
 }

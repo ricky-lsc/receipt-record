@@ -775,6 +775,24 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get copyToClipboard => '复制到剪贴板';
+
+  @override
+  String get settingsHub => '设置';
+
+  @override
+  String get analyticsAndReports => '统计与报告';
+
+  @override
+  String get themeAppearance => '外观主题';
+
+  @override
+  String get themeLight => '浅色模式';
+
+  @override
+  String get themeDark => '深色模式';
+
+  @override
+  String get themeSystem => '跟随系统';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -1547,6 +1565,24 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get copyToClipboard => '复制到剪贴板';
+
+  @override
+  String get settingsHub => '设置';
+
+  @override
+  String get analyticsAndReports => '统计与报告';
+
+  @override
+  String get themeAppearance => '外观主题';
+
+  @override
+  String get themeLight => '浅色模式';
+
+  @override
+  String get themeDark => '深色模式';
+
+  @override
+  String get themeSystem => '跟随系统';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -2319,4 +2355,22 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get copyToClipboard => '複製到剪貼簿';
+
+  @override
+  String get settingsHub => '設定';
+
+  @override
+  String get analyticsAndReports => '統計與報告';
+
+  @override
+  String get themeAppearance => '外觀主題';
+
+  @override
+  String get themeLight => '淺色模式';
+
+  @override
+  String get themeDark => '深色模式';
+
+  @override
+  String get themeSystem => '跟隨系統';
 }

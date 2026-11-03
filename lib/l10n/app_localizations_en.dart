@@ -794,4 +794,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get copyToClipboard => 'Copy to Clipboard';
+
+  @override
+  String get settingsHub => 'Settings';
+
+  @override
+  String get analyticsAndReports => 'Analytics & Reports';
+
+  @override
+  String get themeAppearance => 'Theme & Appearance';
+
+  @override
+  String get themeLight => 'Light Mode';
+
+  @override
+  String get themeDark => 'Dark Mode';
+
+  @override
+  String get themeSystem => 'System Default';
 }

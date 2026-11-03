@@ -5,12 +5,11 @@ import '../models/receipt_category.dart';
 import '../services/locale_service.dart';
 import '../services/storage_service.dart';
 import '../utils/currency_helper.dart';
-import '../widgets/cloud_ai_settings_dialog.dart';
+import '../widgets/app_settings_dialog.dart';
 import '../widgets/empty_state.dart';
 import '../widgets/import_preview_dialog.dart';
 import '../widgets/language_selection_dialog.dart';
 import '../widgets/receipt_card.dart';
-import '../widgets/storage_settings_dialog.dart';
 import 'add_edit_receipt_screen.dart';
 import 'receipt_detail_screen.dart';
 
@@ -59,8 +58,13 @@ String getDateRangeFilterLabel(DateRangeFilter filter, AppLocalizations l10n) {
 
 class ReceiptListScreen extends StatefulWidget {
   final VoidCallback onNavigateToAdd;
+  final ValueNotifier<ThemeMode>? themeModeNotifier;
 
-  const ReceiptListScreen({super.key, required this.onNavigateToAdd});
+  const ReceiptListScreen({
+    super.key,
+    required this.onNavigateToAdd,
+    this.themeModeNotifier,
+  });
 
   @override
   State<ReceiptListScreen> createState() => _ReceiptListScreenState();
@@ -231,16 +235,6 @@ class _ReceiptListScreenState extends State<ReceiptListScreen> {
                 onPressed: () => LanguageSelectionDialog.show(context),
               ),
               IconButton(
-                icon: const Icon(Icons.auto_awesome),
-                tooltip: l10n.cloudAiSettingsTooltip,
-                onPressed: () => CloudAiSettingsDialog.show(context),
-              ),
-              IconButton(
-                icon: const Icon(Icons.folder_shared_outlined),
-                tooltip: l10n.storageSettings,
-                onPressed: () => StorageSettingsDialog.show(context),
-              ),
-              IconButton(
                 icon: const Icon(Icons.sort),
                 tooltip: l10n.sortAndFilter,
                 onPressed: _showSortFilterModal,
@@ -295,6 +289,12 @@ class _ReceiptListScreenState extends State<ReceiptListScreen> {
                     ),
                 ],
               ),
+              if (widget.themeModeNotifier != null)
+                IconButton(
+                  icon: const Icon(Icons.settings_outlined),
+                  tooltip: l10n.settingsHub,
+                  onPressed: () => AppSettingsDialog.show(context, widget.themeModeNotifier!),
+                ),
             ],
           ),
           body: Column(

@@ -272,5 +272,12 @@
   "manualEntrySubtitle": "Type merchant and amount by hand",
   "takePhotoSubtitle": "Snap a photo of your paper receipt",
   "chooseFromGallerySubtitle": "Select an existing photo from device",
-  "copyToClipboard": "Copy to Clipboard"
+  "copyToClipboard": "Copy to Clipboard",
+
+  "settingsHub": "Settings",
+  "analyticsAndReports": "Analytics & Reports",
+  "themeAppearance": "Theme & Appearance",
+  "themeLight": "Light Mode",
+  "themeDark": "Dark Mode",
+  "themeSystem": "System Default"
 }

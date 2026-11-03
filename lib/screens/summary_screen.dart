@@ -7,6 +7,7 @@ import '../models/summary_data.dart';
 import '../services/locale_service.dart';
 import '../services/storage_service.dart';
 import '../utils/currency_helper.dart';
+import '../widgets/app_settings_dialog.dart';
 import '../widgets/category_drilldown_sheet.dart';
 import '../widgets/custom_charts.dart';
 import '../widgets/empty_state.dart';
@@ -53,11 +54,13 @@ String getSummaryPeriodLabel(
 class SummaryScreen extends StatefulWidget {
   final VoidCallback onNavigateToAdd;
   final VoidCallback onNavigateToExport;
+  final ValueNotifier<ThemeMode>? themeModeNotifier;
 
   const SummaryScreen({
     super.key,
     required this.onNavigateToAdd,
     required this.onNavigateToExport,
+    this.themeModeNotifier,
   });
 
   @override
@@ -253,6 +256,12 @@ class _SummaryScreenState extends State<SummaryScreen> {
                 tooltip: l10n.navExport,
                 onPressed: widget.onNavigateToExport,
               ),
+              if (widget.themeModeNotifier != null)
+                IconButton(
+                  icon: const Icon(Icons.settings_outlined),
+                  tooltip: l10n.settingsHub,
+                  onPressed: () => AppSettingsDialog.show(context, widget.themeModeNotifier!),
+                ),
             ],
           ),
           body: ListView(

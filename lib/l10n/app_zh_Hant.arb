@@ -272,5 +272,12 @@
   "manualEntrySubtitle": "直接手動填寫店家與金額",
   "takePhotoSubtitle": "拍攝紙本收據或發票",
   "chooseFromGallerySubtitle": "從相簿中選取收據相片",
-  "copyToClipboard": "複製到剪貼簿"
+  "copyToClipboard": "複製到剪貼簿",
+
+  "settingsHub": "設定",
+  "analyticsAndReports": "統計與報告",
+  "themeAppearance": "外觀主題",
+  "themeLight": "淺色模式",
+  "themeDark": "深色模式",
+  "themeSystem": "跟隨系統"
 }

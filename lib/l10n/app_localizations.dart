@@ -1623,6 +1623,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Copy to Clipboard'**
   String get copyToClipboard;
+
+  /// No description provided for @settingsHub.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get settingsHub;
+
+  /// No description provided for @analyticsAndReports.
+  ///
+  /// In en, this message translates to:
+  /// **'Analytics & Reports'**
+  String get analyticsAndReports;
+
+  /// No description provided for @themeAppearance.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme & Appearance'**
+  String get themeAppearance;
+
+  /// No description provided for @themeLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Light Mode'**
+  String get themeLight;
+
+  /// No description provided for @themeDark.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark Mode'**
+  String get themeDark;
+
+  /// No description provided for @themeSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'System Default'**
+  String get themeSystem;
 }
 
 class _AppLocalizationsDelegate
