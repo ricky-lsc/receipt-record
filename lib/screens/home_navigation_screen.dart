@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
 import '../widgets/cloud_ai_settings_dialog.dart';
 import '../widgets/language_selection_dialog.dart';
+import '../widgets/storage_settings_dialog.dart';
 import 'add_edit_receipt_screen.dart';
 import 'export_screen.dart';
 import 'receipt_list_screen.dart';
@@ -87,6 +88,12 @@ class _HomeNavigationScreenState extends State<HomeNavigationScreen> {
                           icon: const Icon(Icons.auto_awesome),
                           tooltip: l10n.cloudAiSettingsTooltip,
                           onPressed: () => CloudAiSettingsDialog.show(context),
+                        ),
+                        const SizedBox(height: 6),
+                        IconButton(
+                          icon: const Icon(Icons.folder_shared_outlined),
+                          tooltip: l10n.storageSettings,
+                          onPressed: () => StorageSettingsDialog.show(context),
                         ),
                         const SizedBox(height: 6),
                         IconButton(

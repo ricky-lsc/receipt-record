@@ -666,4 +666,49 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tapCategoryToInspect => 'Tap any category to view all receipts';
+
+  @override
+  String get storageSettings => 'Storage Location & Backup';
+
+  @override
+  String get storageMode => 'Storage Location';
+
+  @override
+  String get defaultStorage => 'Default App Storage';
+
+  @override
+  String get defaultStorageDesc => 'Internal application sandbox directory';
+
+  @override
+  String get customStorage => 'Custom Directory';
+
+  @override
+  String get customStorageDesc =>
+      'Save receipt photos and live backups in your chosen folder';
+
+  @override
+  String get chooseFolder => 'Choose Folder';
+
+  @override
+  String get resetToDefault => 'Reset to Default';
+
+  @override
+  String get autoBackupTitle => 'Auto-Sync Live Backup';
+
+  @override
+  String get autoBackupSubtitle =>
+      'Automatically maintains receipts.json and receipts.csv in this folder (sync with Dropbox, Nextcloud, or Obsidian)';
+
+  @override
+  String get migrateReceipts => 'Migrate Existing Receipts';
+
+  @override
+  String get migrateReceiptsDesc =>
+      'Copy all current receipts and photos into this folder';
+
+  @override
+  String get folderNotSelected => 'No folder selected';
+
+  @override
+  String get currentPath => 'Current Path';
 }

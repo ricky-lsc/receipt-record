@@ -228,5 +228,20 @@
 
   "categoryDetails": "类别支出明细",
   "receiptsInCategory": "该类别共包含收据",
-  "tapCategoryToInspect": "点击分类可查看收据明细"
+  "tapCategoryToInspect": "点击分类可查看收据明细",
+
+  "storageSettings": "存储位置与数据备份",
+  "storageMode": "存储位置",
+  "defaultStorage": "默认应用存储目录",
+  "defaultStorageDesc": "保存在应用内置安全沙盒中",
+  "customStorage": "自定义外部文件夹",
+  "customStorageDesc": "直接在您指定的文件夹中存储收据照片与自动备份",
+  "chooseFolder": "选择文件夹",
+  "resetToDefault": "恢复默认存储",
+  "autoBackupTitle": "实时同步数据备份",
+  "autoBackupSubtitle": "在此文件夹中自动保持最新的 receipts.json 与 receipts.csv（方便与云盘或笔记同步）",
+  "migrateReceipts": "迁移现有收据数据",
+  "migrateReceiptsDesc": "将目前的所有收据照片与备份数据拷贝至新目录",
+  "folderNotSelected": "未选择文件夹",
+  "currentPath": "当前存储路径"
 }

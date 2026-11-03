@@ -1,11 +1,18 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/receipt.dart';
+import 'export_service.dart';
 
 class StorageService {
   static const String _storageKey = 'saved_receipts_v1';
   static const String _budgetKey = 'app_monthly_budget';
+  static const String _customStoragePathKey = 'app_custom_storage_path';
+  static const String _autoBackupKey = 'app_auto_backup_enabled';
+
   static final StorageService instance = StorageService._internal();
 
   StorageService._internal();
@@ -13,6 +20,9 @@ class StorageService {
   final ValueNotifier<List<Receipt>> receiptsNotifier =
       ValueNotifier<List<Receipt>>([]);
   final ValueNotifier<double?> budgetNotifier = ValueNotifier<double?>(null);
+  final ValueNotifier<String?> customStoragePathNotifier =
+      ValueNotifier<String?>(null);
+  final ValueNotifier<bool> autoBackupNotifier = ValueNotifier<bool>(true);
 
   bool _isInitialized = false;
 
@@ -20,6 +30,7 @@ class StorageService {
     if (_isInitialized) return;
     await loadReceipts();
     await loadBudget();
+    await loadStorageSettings();
     _isInitialized = true;
   }
 
@@ -43,6 +54,215 @@ class StorageService {
       debugPrint('Error saving budget: $e');
     }
   }
+
+  // ==========================================
+  // Custom Storage Location & Auto-Backup
+  // ==========================================
+
+  Future<void> loadStorageSettings() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final path = prefs.getString(_customStoragePathKey);
+      if (path != null && path.isNotEmpty) {
+        final dir = Directory(path);
+        if (await dir.exists()) {
+          customStoragePathNotifier.value = path;
+        } else {
+          customStoragePathNotifier.value = null;
+        }
+      } else {
+        customStoragePathNotifier.value = null;
+      }
+      autoBackupNotifier.value = prefs.getBool(_autoBackupKey) ?? true;
+    } catch (e) {
+      debugPrint('Error loading storage settings: $e');
+    }
+  }
+
+  /// Default application sandbox directory
+  Future<String> getDefaultStoragePath() async {
+    try {
+      final dir = await getApplicationDocumentsDirectory();
+      return dir.path;
+    } catch (_) {
+      return Directory.systemTemp.path;
+    }
+  }
+
+  /// Returns custom storage path if active and valid, otherwise default sandbox
+  Future<String> getEffectiveStoragePath() async {
+    final custom = customStoragePathNotifier.value;
+    if (custom != null && custom.isNotEmpty) {
+      final d = Directory(custom);
+      if (await d.exists()) {
+        return custom;
+      }
+    }
+    return getDefaultStoragePath();
+  }
+
+  Future<void> setCustomStoragePath(String? path) async {
+    customStoragePathNotifier.value = path;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      if (path == null || path.isEmpty) {
+        await prefs.remove(_customStoragePathKey);
+      } else {
+        await prefs.setString(_customStoragePathKey, path.trim());
+        final dir = Directory(path.trim());
+        if (!await dir.exists()) {
+          await dir.create(recursive: true);
+        }
+        await syncBackupFiles();
+      }
+    } catch (e) {
+      debugPrint('Error saving custom storage path: $e');
+    }
+  }
+
+  Future<void> setAutoBackup(bool enabled) async {
+    autoBackupNotifier.value = enabled;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_autoBackupKey, enabled);
+      if (enabled) {
+        await syncBackupFiles();
+      }
+    } catch (e) {
+      debugPrint('Error saving auto-backup setting: $e');
+    }
+  }
+
+  /// Saves receipt image to the effective storage directory under receipt_images/
+  Future<String?> saveReceiptImageFile({
+    required String receiptId,
+    String? sourcePath,
+    String? base64Data,
+    String? merchant,
+    DateTime? date,
+    String? targetDirectory,
+  }) async {
+    try {
+      final effectiveDir = targetDirectory ?? await getEffectiveStoragePath();
+      final imagesDir = Directory('$effectiveDir/receipt_images');
+      if (!await imagesDir.exists()) {
+        await imagesDir.create(recursive: true);
+      }
+
+      final datePrefix = DateFormat('yyyy-MM-dd').format(date ?? DateTime.now());
+      final cleanMerchant = (merchant ?? 'Receipt')
+          .replaceAll(RegExp(r'[^\w\s-]'), '')
+          .replaceAll(RegExp(r'\s+'), '_');
+      final shortId = receiptId.length > 8 ? receiptId.substring(0, 8) : receiptId;
+
+      String extension = '.jpg';
+      Uint8List? bytes;
+
+      if (sourcePath != null && sourcePath.isNotEmpty) {
+        final srcFile = File(sourcePath);
+        if (await srcFile.exists()) {
+          final lower = sourcePath.toLowerCase();
+          if (lower.endsWith('.png')) {
+            extension = '.png';
+          } else if (lower.endsWith('.webp')) {
+            extension = '.webp';
+          }
+          bytes = await srcFile.readAsBytes();
+        }
+      }
+
+      if (bytes == null && base64Data != null && base64Data.isNotEmpty) {
+        String cleanB64 = base64Data;
+        if (cleanB64.startsWith('data:image/')) {
+          final comma = cleanB64.indexOf(',');
+          if (comma != -1) cleanB64 = cleanB64.substring(comma + 1);
+        }
+        if (cleanB64.startsWith('iVBORw0KGgo')) {
+          extension = '.png';
+        }
+        bytes = base64Decode(cleanB64);
+      }
+
+      if (bytes == null || bytes.isEmpty) return null;
+
+      final fileName = '${datePrefix}_${cleanMerchant}_$shortId$extension';
+      final destFile = File('${imagesDir.path}/$fileName');
+      await destFile.writeAsBytes(bytes);
+      return destFile.path;
+    } catch (e) {
+      debugPrint('Error saving receipt image file: $e');
+      return null;
+    }
+  }
+
+  /// Syncs receipts.json and receipts.csv into effective storage directory
+  Future<void> syncBackupFiles([List<Receipt>? receiptsToSync]) async {
+    if (!autoBackupNotifier.value) return;
+    try {
+      final list = receiptsToSync ?? receiptsNotifier.value;
+      final effectivePath = await getEffectiveStoragePath();
+      final dir = Directory(effectivePath);
+      if (!await dir.exists()) {
+        await dir.create(recursive: true);
+      }
+
+      // 1. receipts.json
+      final jsonFile = File('$effectivePath/receipts.json');
+      final jsonString = const JsonEncoder.withIndent('  ').convert(
+        list.map((r) => r.toMap()).toList(),
+      );
+      await jsonFile.writeAsString(jsonString);
+
+      // 2. receipts.csv
+      final csvFile = File('$effectivePath/receipts.csv');
+      final csvString = ExportService.generateCsv(list);
+      await csvFile.writeAsString(csvString);
+    } catch (e) {
+      debugPrint('Error syncing backup files: $e');
+    }
+  }
+
+  /// Migrates existing receipts to a new target path and updates image references
+  Future<int> migrateExistingReceiptsToCustomPath(String targetPath) async {
+    final targetDir = Directory(targetPath);
+    if (!await targetDir.exists()) {
+      await targetDir.create(recursive: true);
+    }
+    final imagesDir = Directory('$targetPath/receipt_images');
+    if (!await imagesDir.exists()) {
+      await imagesDir.create(recursive: true);
+    }
+
+    final current = List<Receipt>.from(receiptsNotifier.value);
+    int migratedCount = 0;
+
+    for (int i = 0; i < current.length; i++) {
+      final r = current[i];
+      if (r.hasImage) {
+        final newPath = await saveReceiptImageFile(
+          receiptId: r.id,
+          sourcePath: r.imagePath,
+          base64Data: r.imageBase64,
+          merchant: r.merchant,
+          date: r.date,
+          targetDirectory: targetPath,
+        );
+        if (newPath != null) {
+          current[i] = r.copyWith(imagePath: newPath);
+          migratedCount++;
+        }
+      }
+    }
+
+    await setCustomStoragePath(targetPath);
+    await _persistReceipts(current);
+    await syncBackupFiles(current);
+    return migratedCount;
+  }
+
+  // ==========================================
+  // Core Storage & CRUD
+  // ==========================================
 
   Future<List<Receipt>> loadReceipts() async {
     try {
@@ -93,18 +313,21 @@ class StorageService {
 
     current.sort((a, b) => b.date.compareTo(a.date));
     await _persistReceipts(current);
+    await syncBackupFiles(current);
   }
 
   Future<void> deleteReceipt(String id) async {
     final current = List<Receipt>.from(receiptsNotifier.value);
     current.removeWhere((r) => r.id == id);
     await _persistReceipts(current);
+    await syncBackupFiles(current);
   }
 
   Future<void> clearAll() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_storageKey);
     receiptsNotifier.value = [];
+    await syncBackupFiles([]);
   }
 
   Receipt? getReceipt(String id) {
@@ -120,6 +343,7 @@ class StorageService {
       final sorted = List<Receipt>.from(newReceipts)
         ..sort((a, b) => b.date.compareTo(a.date));
       await _persistReceipts(sorted);
+      await syncBackupFiles(sorted);
       return;
     }
 
@@ -134,5 +358,6 @@ class StorageService {
     final combined = currentMap.values.toList()
       ..sort((a, b) => b.date.compareTo(a.date));
     await _persistReceipts(combined);
+    await syncBackupFiles(combined);
   }
 }

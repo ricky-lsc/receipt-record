@@ -9,6 +9,7 @@ import '../widgets/cloud_ai_settings_dialog.dart';
 import '../widgets/empty_state.dart';
 import '../widgets/language_selection_dialog.dart';
 import '../widgets/receipt_card.dart';
+import '../widgets/storage_settings_dialog.dart';
 import 'add_edit_receipt_screen.dart';
 import 'receipt_detail_screen.dart';
 
@@ -232,6 +233,11 @@ class _ReceiptListScreenState extends State<ReceiptListScreen> {
                 icon: const Icon(Icons.auto_awesome),
                 tooltip: l10n.cloudAiSettingsTooltip,
                 onPressed: () => CloudAiSettingsDialog.show(context),
+              ),
+              IconButton(
+                icon: const Icon(Icons.folder_shared_outlined),
+                tooltip: l10n.storageSettings,
+                onPressed: () => StorageSettingsDialog.show(context),
               ),
               IconButton(
                 icon: const Icon(Icons.sort),

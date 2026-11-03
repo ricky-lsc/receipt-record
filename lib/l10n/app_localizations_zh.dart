@@ -654,6 +654,49 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get tapCategoryToInspect => '点击分类可查看收据明细';
+
+  @override
+  String get storageSettings => '存储位置与数据备份';
+
+  @override
+  String get storageMode => '存储位置';
+
+  @override
+  String get defaultStorage => '默认应用存储目录';
+
+  @override
+  String get defaultStorageDesc => '保存在应用内置安全沙盒中';
+
+  @override
+  String get customStorage => '自定义外部文件夹';
+
+  @override
+  String get customStorageDesc => '直接在您指定的文件夹中存储收据照片与自动备份';
+
+  @override
+  String get chooseFolder => '选择文件夹';
+
+  @override
+  String get resetToDefault => '恢复默认存储';
+
+  @override
+  String get autoBackupTitle => '实时同步数据备份';
+
+  @override
+  String get autoBackupSubtitle =>
+      '在此文件夹中自动保持最新的 receipts.json 与 receipts.csv（方便与云盘或笔记同步）';
+
+  @override
+  String get migrateReceipts => '迁移现有收据数据';
+
+  @override
+  String get migrateReceiptsDesc => '将目前的所有收据照片与备份数据拷贝至新目录';
+
+  @override
+  String get folderNotSelected => '未选择文件夹';
+
+  @override
+  String get currentPath => '当前存储路径';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -1305,6 +1348,49 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get tapCategoryToInspect => '点击分类可查看收据明细';
+
+  @override
+  String get storageSettings => '存储位置与数据备份';
+
+  @override
+  String get storageMode => '存储位置';
+
+  @override
+  String get defaultStorage => '默认应用存储目录';
+
+  @override
+  String get defaultStorageDesc => '保存在应用内置安全沙盒中';
+
+  @override
+  String get customStorage => '自定义外部文件夹';
+
+  @override
+  String get customStorageDesc => '直接在您指定的文件夹中存储收据照片与自动备份';
+
+  @override
+  String get chooseFolder => '选择文件夹';
+
+  @override
+  String get resetToDefault => '恢复默认存储';
+
+  @override
+  String get autoBackupTitle => '实时同步数据备份';
+
+  @override
+  String get autoBackupSubtitle =>
+      '在此文件夹中自动保持最新的 receipts.json 与 receipts.csv（方便与云盘或笔记同步）';
+
+  @override
+  String get migrateReceipts => '迁移现有收据数据';
+
+  @override
+  String get migrateReceiptsDesc => '将目前的所有收据照片与备份数据拷贝至新目录';
+
+  @override
+  String get folderNotSelected => '未选择文件夹';
+
+  @override
+  String get currentPath => '当前存储路径';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -1956,4 +2042,47 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get tapCategoryToInspect => '點擊類別可檢視收據明細';
+
+  @override
+  String get storageSettings => '儲存位置與資料備份';
+
+  @override
+  String get storageMode => '儲存位置';
+
+  @override
+  String get defaultStorage => '預設應用程式儲存目錄';
+
+  @override
+  String get defaultStorageDesc => '儲存在應用程式內建安全沙盒中';
+
+  @override
+  String get customStorage => '自訂外部資料夾';
+
+  @override
+  String get customStorageDesc => '直接在您指定的資料夾中儲存收據相片與自動備份';
+
+  @override
+  String get chooseFolder => '選擇資料夾';
+
+  @override
+  String get resetToDefault => '恢復預設儲存';
+
+  @override
+  String get autoBackupTitle => '即時同步資料備份';
+
+  @override
+  String get autoBackupSubtitle =>
+      '在此資料夾中自動保持最新的 receipts.json 與 receipts.csv（方便與雲端硬碟或筆記同步）';
+
+  @override
+  String get migrateReceipts => '遷移現有收據資料';
+
+  @override
+  String get migrateReceiptsDesc => '將目前的所有收據相片與備份資料拷貝至新目錄';
+
+  @override
+  String get folderNotSelected => '未選擇資料夾';
+
+  @override
+  String get currentPath => '目前儲存路徑';
 }

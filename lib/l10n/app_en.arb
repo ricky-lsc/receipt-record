@@ -228,5 +228,20 @@
 
   "categoryDetails": "Category Details",
   "receiptsInCategory": "receipts in this category",
-  "tapCategoryToInspect": "Tap any category to view all receipts"
+  "tapCategoryToInspect": "Tap any category to view all receipts",
+
+  "storageSettings": "Storage Location & Backup",
+  "storageMode": "Storage Location",
+  "defaultStorage": "Default App Storage",
+  "defaultStorageDesc": "Internal application sandbox directory",
+  "customStorage": "Custom Directory",
+  "customStorageDesc": "Save receipt photos and live backups in your chosen folder",
+  "chooseFolder": "Choose Folder",
+  "resetToDefault": "Reset to Default",
+  "autoBackupTitle": "Auto-Sync Live Backup",
+  "autoBackupSubtitle": "Automatically maintains receipts.json and receipts.csv in this folder (sync with Dropbox, Nextcloud, or Obsidian)",
+  "migrateReceipts": "Migrate Existing Receipts",
+  "migrateReceiptsDesc": "Copy all current receipts and photos into this folder",
+  "folderNotSelected": "No folder selected",
+  "currentPath": "Current Path"
 }

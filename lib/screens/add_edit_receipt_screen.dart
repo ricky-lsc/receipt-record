@@ -791,8 +791,25 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
     setState(() => _isLoading = true);
 
     final now = DateTime.now();
+    final receiptId = widget.existingReceipt?.id ?? const Uuid().v4();
+
+    // Persist receipt image to configured storage folder
+    String? finalImagePath = _imagePath;
+    if (_imageBase64 != null || _imagePath != null) {
+      final savedPath = await StorageService.instance.saveReceiptImageFile(
+        receiptId: receiptId,
+        sourcePath: _imagePath,
+        base64Data: _imageBase64,
+        merchant: merchant,
+        date: _selectedDate,
+      );
+      if (savedPath != null) {
+        finalImagePath = savedPath;
+      }
+    }
+
     final receipt = Receipt(
-      id: widget.existingReceipt?.id ?? const Uuid().v4(),
+      id: receiptId,
       merchant: merchant,
       amount: amount,
       currency: _currency,
@@ -802,9 +819,10 @@ class _AddEditReceiptScreenState extends State<AddEditReceiptScreen> {
       taxAmount: tax,
       tipAmount: tip,
       notes: notes,
-      imagePath: _imagePath,
+      imagePath: finalImagePath,
       imageBase64: _imageBase64,
       items: _items,
+      split: widget.existingReceipt?.split,
       createdAt: widget.existingReceipt?.createdAt ?? now,
       updatedAt: now,
     );

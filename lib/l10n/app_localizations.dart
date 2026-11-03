@@ -1383,6 +1383,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tap any category to view all receipts'**
   String get tapCategoryToInspect;
+
+  /// No description provided for @storageSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Storage Location & Backup'**
+  String get storageSettings;
+
+  /// No description provided for @storageMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Storage Location'**
+  String get storageMode;
+
+  /// No description provided for @defaultStorage.
+  ///
+  /// In en, this message translates to:
+  /// **'Default App Storage'**
+  String get defaultStorage;
+
+  /// No description provided for @defaultStorageDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Internal application sandbox directory'**
+  String get defaultStorageDesc;
+
+  /// No description provided for @customStorage.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom Directory'**
+  String get customStorage;
+
+  /// No description provided for @customStorageDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Save receipt photos and live backups in your chosen folder'**
+  String get customStorageDesc;
+
+  /// No description provided for @chooseFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Folder'**
+  String get chooseFolder;
+
+  /// No description provided for @resetToDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset to Default'**
+  String get resetToDefault;
+
+  /// No description provided for @autoBackupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-Sync Live Backup'**
+  String get autoBackupTitle;
+
+  /// No description provided for @autoBackupSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatically maintains receipts.json and receipts.csv in this folder (sync with Dropbox, Nextcloud, or Obsidian)'**
+  String get autoBackupSubtitle;
+
+  /// No description provided for @migrateReceipts.
+  ///
+  /// In en, this message translates to:
+  /// **'Migrate Existing Receipts'**
+  String get migrateReceipts;
+
+  /// No description provided for @migrateReceiptsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy all current receipts and photos into this folder'**
+  String get migrateReceiptsDesc;
+
+  /// No description provided for @folderNotSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'No folder selected'**
+  String get folderNotSelected;
+
+  /// No description provided for @currentPath.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Path'**
+  String get currentPath;
 }
 
 class _AppLocalizationsDelegate
