@@ -1,13 +1,20 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 import '../models/receipt_category.dart';
 import '../models/summary_data.dart';
+import '../services/locale_service.dart';
 import '../utils/currency_helper.dart';
 
 class CategoryPieChart extends StatefulWidget {
   final SummaryData summary;
+  final void Function(String categoryId)? onCategoryTap;
 
-  const CategoryPieChart({super.key, required this.summary});
+  const CategoryPieChart({
+    super.key,
+    required this.summary,
+    this.onCategoryTap,
+  });
 
   @override
   State<CategoryPieChart> createState() => _CategoryPieChartState();
@@ -18,15 +25,16 @@ class _CategoryPieChartState extends State<CategoryPieChart> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final entries = widget.summary.categorySpending.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
 
     if (entries.isEmpty || widget.summary.totalSpending <= 0) {
-      return const SizedBox(
+      return SizedBox(
         height: 160,
         child: Center(
-          child: Text('No spending data to display in chart'),
+          child: Text(l10n.noExpenseData, style: const TextStyle(color: Colors.grey)),
         ),
       );
     }
@@ -70,6 +78,9 @@ class _CategoryPieChartState extends State<CategoryPieChart> {
                       return;
                     }
                     _touchedIndex = pieTouchResponse.touchedSection!.touchedSectionIndex;
+                    if (event is FlTapUpEvent && _touchedIndex >= 0 && _touchedIndex < entries.length) {
+                      widget.onCategoryTap?.call(entries[_touchedIndex].key);
+                    }
                   });
                 },
               ),
@@ -81,7 +92,7 @@ class _CategoryPieChartState extends State<CategoryPieChart> {
           ),
         ),
         const SizedBox(height: 16),
-        // Breakdown List with progress bars
+        // Breakdown List with progress bars and drill-down tap
         ListView.separated(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -93,66 +104,72 @@ class _CategoryPieChartState extends State<CategoryPieChart> {
             final percentage = widget.summary.categoryPercentages[entry.key] ?? 0.0;
             final count = widget.summary.categoryCounts[entry.key] ?? 0;
 
-            return Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF1E293B) : Colors.white,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                  color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+            return InkWell(
+              onTap: () => widget.onCategoryTap?.call(entry.key),
+              borderRadius: BorderRadius.circular(10),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                  ),
                 ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 12,
-                        height: 12,
-                        decoration: BoxDecoration(
-                          color: category.color,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          category.name,
-                          style: const TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          width: 12,
+                          height: 12,
+                          decoration: BoxDecoration(
+                            color: category.color,
+                            shape: BoxShape.circle,
                           ),
                         ),
-                      ),
-                      Text(
-                        '$count ${count == 1 ? 'receipt' : 'receipts'}',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            LocaleService.getCategoryName(entry.key, l10n),
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 10),
-                      Text(
-                        CurrencyHelper.format(entry.value),
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
+                        Text(
+                          '$count ${l10n.receiptCountSuffix}',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(4),
-                    child: LinearProgressIndicator(
-                      value: percentage / 100,
-                      backgroundColor: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9),
-                      valueColor: AlwaysStoppedAnimation<Color>(category.color),
-                      minHeight: 5,
+                        const SizedBox(width: 10),
+                        Text(
+                          CurrencyHelper.format(entry.value),
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        const Icon(Icons.chevron_right, size: 16, color: Colors.grey),
+                      ],
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 6),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: LinearProgressIndicator(
+                        value: percentage / 100,
+                        backgroundColor: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9),
+                        valueColor: AlwaysStoppedAnimation<Color>(category.color),
+                        minHeight: 5,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             );
           },
@@ -169,13 +186,14 @@ class MonthlySpendingBarChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final entries = summary.monthlySpending.entries.toList();
 
     if (entries.isEmpty) {
-      return const SizedBox(
+      return SizedBox(
         height: 150,
-        child: Center(child: Text('No monthly data available')),
+        child: Center(child: Text(l10n.noExpenseData, style: const TextStyle(color: Colors.grey))),
       );
     }
 

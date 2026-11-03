@@ -5,19 +5,43 @@ import '../models/receipt.dart';
 
 class StorageService {
   static const String _storageKey = 'saved_receipts_v1';
+  static const String _budgetKey = 'app_monthly_budget';
   static final StorageService instance = StorageService._internal();
 
   StorageService._internal();
 
   final ValueNotifier<List<Receipt>> receiptsNotifier =
       ValueNotifier<List<Receipt>>([]);
+  final ValueNotifier<double?> budgetNotifier = ValueNotifier<double?>(null);
 
   bool _isInitialized = false;
 
   Future<void> init() async {
     if (_isInitialized) return;
     await loadReceipts();
+    await loadBudget();
     _isInitialized = true;
+  }
+
+  Future<void> loadBudget() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      budgetNotifier.value = prefs.getDouble(_budgetKey);
+    } catch (_) {}
+  }
+
+  Future<void> setMonthlyBudget(double? budget) async {
+    budgetNotifier.value = budget;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      if (budget == null || budget <= 0) {
+        await prefs.remove(_budgetKey);
+      } else {
+        await prefs.setDouble(_budgetKey, budget);
+      }
+    } catch (e) {
+      debugPrint('Error saving budget: $e');
+    }
   }
 
   Future<List<Receipt>> loadReceipts() async {

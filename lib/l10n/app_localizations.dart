@@ -1203,6 +1203,186 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Unpaid'**
   String get markUnpaid;
+
+  /// No description provided for @filterThisWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'This Week'**
+  String get filterThisWeek;
+
+  /// No description provided for @filterLast30Days.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 30 Days'**
+  String get filterLast30Days;
+
+  /// No description provided for @customRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom Range'**
+  String get customRange;
+
+  /// No description provided for @selectDateRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Date Range'**
+  String get selectDateRange;
+
+  /// No description provided for @vsPreviousPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'vs previous period'**
+  String get vsPreviousPeriod;
+
+  /// No description provided for @spendingUp.
+  ///
+  /// In en, this message translates to:
+  /// **'more than previous'**
+  String get spendingUp;
+
+  /// No description provided for @spendingDown.
+  ///
+  /// In en, this message translates to:
+  /// **'less than previous'**
+  String get spendingDown;
+
+  /// No description provided for @spendingFlat.
+  ///
+  /// In en, this message translates to:
+  /// **'equal to previous'**
+  String get spendingFlat;
+
+  /// No description provided for @monthlyBudget.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly Budget'**
+  String get monthlyBudget;
+
+  /// No description provided for @setBudget.
+  ///
+  /// In en, this message translates to:
+  /// **'Set Budget'**
+  String get setBudget;
+
+  /// No description provided for @editBudget.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Budget'**
+  String get editBudget;
+
+  /// No description provided for @budgetAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget Amount'**
+  String get budgetAmount;
+
+  /// No description provided for @budgetSpent.
+  ///
+  /// In en, this message translates to:
+  /// **'Spent of'**
+  String get budgetSpent;
+
+  /// No description provided for @budgetRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining'**
+  String get budgetRemaining;
+
+  /// No description provided for @budgetExceeded.
+  ///
+  /// In en, this message translates to:
+  /// **'Over Budget'**
+  String get budgetExceeded;
+
+  /// No description provided for @daysRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'days left'**
+  String get daysRemaining;
+
+  /// No description provided for @dailyAllowance.
+  ///
+  /// In en, this message translates to:
+  /// **'daily budget'**
+  String get dailyAllowance;
+
+  /// No description provided for @noBudgetSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Set a monthly budget to track spending goals.'**
+  String get noBudgetSet;
+
+  /// No description provided for @splitAndReimbursements.
+  ///
+  /// In en, this message translates to:
+  /// **'Split & Reimbursements'**
+  String get splitAndReimbursements;
+
+  /// No description provided for @netPersonal.
+  ///
+  /// In en, this message translates to:
+  /// **'Net Personal Spend'**
+  String get netPersonal;
+
+  /// No description provided for @grossTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Gross Total'**
+  String get grossTotal;
+
+  /// No description provided for @unsettledFromFriends.
+  ///
+  /// In en, this message translates to:
+  /// **'Owed to You'**
+  String get unsettledFromFriends;
+
+  /// No description provided for @settledReimbursements.
+  ///
+  /// In en, this message translates to:
+  /// **'Reimbursed'**
+  String get settledReimbursements;
+
+  /// No description provided for @taxAndTipSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Tax & Tip Deductibles'**
+  String get taxAndTipSummary;
+
+  /// No description provided for @totalTaxPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Tax Paid'**
+  String get totalTaxPaid;
+
+  /// No description provided for @totalTipPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Tips Paid'**
+  String get totalTipPaid;
+
+  /// No description provided for @subtotalBeforeTax.
+  ///
+  /// In en, this message translates to:
+  /// **'Pre-Tax Subtotal'**
+  String get subtotalBeforeTax;
+
+  /// No description provided for @categoryDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Category Details'**
+  String get categoryDetails;
+
+  /// No description provided for @receiptsInCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'receipts in this category'**
+  String get receiptsInCategory;
+
+  /// No description provided for @tapCategoryToInspect.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap any category to view all receipts'**
+  String get tapCategoryToInspect;
 }
 
 class _AppLocalizationsDelegate

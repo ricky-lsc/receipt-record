@@ -564,6 +564,96 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get markUnpaid => '未付';
+
+  @override
+  String get filterThisWeek => '本周';
+
+  @override
+  String get filterLast30Days => '近30天';
+
+  @override
+  String get customRange => '自定义范围';
+
+  @override
+  String get selectDateRange => '选择日期范围';
+
+  @override
+  String get vsPreviousPeriod => '较上周期';
+
+  @override
+  String get spendingUp => '较上期增加';
+
+  @override
+  String get spendingDown => '较上期减少';
+
+  @override
+  String get spendingFlat => '与上期持平';
+
+  @override
+  String get monthlyBudget => '月度预算';
+
+  @override
+  String get setBudget => '设置预算';
+
+  @override
+  String get editBudget => '编辑预算';
+
+  @override
+  String get budgetAmount => '预算金额';
+
+  @override
+  String get budgetSpent => '已使用 / 预算';
+
+  @override
+  String get budgetRemaining => '剩余额度';
+
+  @override
+  String get budgetExceeded => '超出预算';
+
+  @override
+  String get daysRemaining => '剩余天数';
+
+  @override
+  String get dailyAllowance => '建议日均可用';
+
+  @override
+  String get noBudgetSet => '设定月度预算以管理消费目标与控制开支。';
+
+  @override
+  String get splitAndReimbursements => '分摊与待收款项';
+
+  @override
+  String get netPersonal => '个人实际支出';
+
+  @override
+  String get grossTotal => '账面总额';
+
+  @override
+  String get unsettledFromFriends => '待收款项';
+
+  @override
+  String get settledReimbursements => '已收回款项';
+
+  @override
+  String get taxAndTipSummary => '税费与小费统计';
+
+  @override
+  String get totalTaxPaid => '累计税费支出';
+
+  @override
+  String get totalTipPaid => '累计小费支出';
+
+  @override
+  String get subtotalBeforeTax => '税前总小计';
+
+  @override
+  String get categoryDetails => '类别支出明细';
+
+  @override
+  String get receiptsInCategory => '该类别共包含收据';
+
+  @override
+  String get tapCategoryToInspect => '点击分类可查看收据明细';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -1125,6 +1215,96 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get markUnpaid => '未付';
+
+  @override
+  String get filterThisWeek => '本周';
+
+  @override
+  String get filterLast30Days => '近30天';
+
+  @override
+  String get customRange => '自定义范围';
+
+  @override
+  String get selectDateRange => '选择日期范围';
+
+  @override
+  String get vsPreviousPeriod => '较上周期';
+
+  @override
+  String get spendingUp => '较上期增加';
+
+  @override
+  String get spendingDown => '较上期减少';
+
+  @override
+  String get spendingFlat => '与上期持平';
+
+  @override
+  String get monthlyBudget => '月度预算';
+
+  @override
+  String get setBudget => '设置预算';
+
+  @override
+  String get editBudget => '编辑预算';
+
+  @override
+  String get budgetAmount => '预算金额';
+
+  @override
+  String get budgetSpent => '已使用 / 预算';
+
+  @override
+  String get budgetRemaining => '剩余额度';
+
+  @override
+  String get budgetExceeded => '超出预算';
+
+  @override
+  String get daysRemaining => '剩余天数';
+
+  @override
+  String get dailyAllowance => '建议日均可用';
+
+  @override
+  String get noBudgetSet => '设定月度预算以管理消费目标与控制开支。';
+
+  @override
+  String get splitAndReimbursements => '分摊与待收款项';
+
+  @override
+  String get netPersonal => '个人实际支出';
+
+  @override
+  String get grossTotal => '账面总额';
+
+  @override
+  String get unsettledFromFriends => '待收款项';
+
+  @override
+  String get settledReimbursements => '已收回款项';
+
+  @override
+  String get taxAndTipSummary => '税费与小费统计';
+
+  @override
+  String get totalTaxPaid => '累计税费支出';
+
+  @override
+  String get totalTipPaid => '累计小费支出';
+
+  @override
+  String get subtotalBeforeTax => '税前总小计';
+
+  @override
+  String get categoryDetails => '类别支出明细';
+
+  @override
+  String get receiptsInCategory => '该类别共包含收据';
+
+  @override
+  String get tapCategoryToInspect => '点击分类可查看收据明细';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -1686,4 +1866,94 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get markUnpaid => '未付';
+
+  @override
+  String get filterThisWeek => '本週';
+
+  @override
+  String get filterLast30Days => '近30天';
+
+  @override
+  String get customRange => '自訂範圍';
+
+  @override
+  String get selectDateRange => '選擇日期範圍';
+
+  @override
+  String get vsPreviousPeriod => '較上週期';
+
+  @override
+  String get spendingUp => '較上期增加';
+
+  @override
+  String get spendingDown => '較上期減少';
+
+  @override
+  String get spendingFlat => '與上期持平';
+
+  @override
+  String get monthlyBudget => '月度預算';
+
+  @override
+  String get setBudget => '設定預算';
+
+  @override
+  String get editBudget => '編輯預算';
+
+  @override
+  String get budgetAmount => '預算金額';
+
+  @override
+  String get budgetSpent => '已使用 / 預算';
+
+  @override
+  String get budgetRemaining => '剩餘額度';
+
+  @override
+  String get budgetExceeded => '超出預算';
+
+  @override
+  String get daysRemaining => '剩餘天數';
+
+  @override
+  String get dailyAllowance => '建議每日可用';
+
+  @override
+  String get noBudgetSet => '設定月度預算以管理消費目標與控制開支。';
+
+  @override
+  String get splitAndReimbursements => '分攤與待收款項';
+
+  @override
+  String get netPersonal => '個人實際支出';
+
+  @override
+  String get grossTotal => '帳面總額';
+
+  @override
+  String get unsettledFromFriends => '待收款項';
+
+  @override
+  String get settledReimbursements => '已收回款項';
+
+  @override
+  String get taxAndTipSummary => '稅金與服務費統計';
+
+  @override
+  String get totalTaxPaid => '累計稅金支出';
+
+  @override
+  String get totalTipPaid => '累計服務費支出';
+
+  @override
+  String get subtotalBeforeTax => '稅前總小計';
+
+  @override
+  String get categoryDetails => '類別支出明細';
+
+  @override
+  String get receiptsInCategory => '此類別共包含收據';
+
+  @override
+  String get tapCategoryToInspect => '點擊類別可檢視收據明細';
 }

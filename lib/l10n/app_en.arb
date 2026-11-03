@@ -193,5 +193,40 @@
   "clearSplit": "Clear Split",
   "clearSplitConfirm": "Remove bill split for this receipt?",
   "markPaid": "Paid",
-  "markUnpaid": "Unpaid"
+  "markUnpaid": "Unpaid",
+
+  "filterThisWeek": "This Week",
+  "filterLast30Days": "Last 30 Days",
+  "customRange": "Custom Range",
+  "selectDateRange": "Select Date Range",
+  "vsPreviousPeriod": "vs previous period",
+  "spendingUp": "more than previous",
+  "spendingDown": "less than previous",
+  "spendingFlat": "equal to previous",
+
+  "monthlyBudget": "Monthly Budget",
+  "setBudget": "Set Budget",
+  "editBudget": "Edit Budget",
+  "budgetAmount": "Budget Amount",
+  "budgetSpent": "Spent of",
+  "budgetRemaining": "Remaining",
+  "budgetExceeded": "Over Budget",
+  "daysRemaining": "days left",
+  "dailyAllowance": "daily budget",
+  "noBudgetSet": "Set a monthly budget to track spending goals.",
+
+  "splitAndReimbursements": "Split & Reimbursements",
+  "netPersonal": "Net Personal Spend",
+  "grossTotal": "Gross Total",
+  "unsettledFromFriends": "Owed to You",
+  "settledReimbursements": "Reimbursed",
+
+  "taxAndTipSummary": "Tax & Tip Deductibles",
+  "totalTaxPaid": "Total Tax Paid",
+  "totalTipPaid": "Total Tips Paid",
+  "subtotalBeforeTax": "Pre-Tax Subtotal",
+
+  "categoryDetails": "Category Details",
+  "receiptsInCategory": "receipts in this category",
+  "tapCategoryToInspect": "Tap any category to view all receipts"
 }

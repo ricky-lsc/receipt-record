@@ -576,4 +576,94 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get markUnpaid => 'Unpaid';
+
+  @override
+  String get filterThisWeek => 'This Week';
+
+  @override
+  String get filterLast30Days => 'Last 30 Days';
+
+  @override
+  String get customRange => 'Custom Range';
+
+  @override
+  String get selectDateRange => 'Select Date Range';
+
+  @override
+  String get vsPreviousPeriod => 'vs previous period';
+
+  @override
+  String get spendingUp => 'more than previous';
+
+  @override
+  String get spendingDown => 'less than previous';
+
+  @override
+  String get spendingFlat => 'equal to previous';
+
+  @override
+  String get monthlyBudget => 'Monthly Budget';
+
+  @override
+  String get setBudget => 'Set Budget';
+
+  @override
+  String get editBudget => 'Edit Budget';
+
+  @override
+  String get budgetAmount => 'Budget Amount';
+
+  @override
+  String get budgetSpent => 'Spent of';
+
+  @override
+  String get budgetRemaining => 'Remaining';
+
+  @override
+  String get budgetExceeded => 'Over Budget';
+
+  @override
+  String get daysRemaining => 'days left';
+
+  @override
+  String get dailyAllowance => 'daily budget';
+
+  @override
+  String get noBudgetSet => 'Set a monthly budget to track spending goals.';
+
+  @override
+  String get splitAndReimbursements => 'Split & Reimbursements';
+
+  @override
+  String get netPersonal => 'Net Personal Spend';
+
+  @override
+  String get grossTotal => 'Gross Total';
+
+  @override
+  String get unsettledFromFriends => 'Owed to You';
+
+  @override
+  String get settledReimbursements => 'Reimbursed';
+
+  @override
+  String get taxAndTipSummary => 'Tax & Tip Deductibles';
+
+  @override
+  String get totalTaxPaid => 'Total Tax Paid';
+
+  @override
+  String get totalTipPaid => 'Total Tips Paid';
+
+  @override
+  String get subtotalBeforeTax => 'Pre-Tax Subtotal';
+
+  @override
+  String get categoryDetails => 'Category Details';
+
+  @override
+  String get receiptsInCategory => 'receipts in this category';
+
+  @override
+  String get tapCategoryToInspect => 'Tap any category to view all receipts';
 }

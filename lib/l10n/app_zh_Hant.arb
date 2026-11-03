@@ -193,5 +193,40 @@
   "clearSplit": "清除分帳",
   "clearSplitConfirm": "確定要清除此收據的分帳記錄嗎？",
   "markPaid": "已付",
-  "markUnpaid": "未付"
+  "markUnpaid": "未付",
+
+  "filterThisWeek": "本週",
+  "filterLast30Days": "近30天",
+  "customRange": "自訂範圍",
+  "selectDateRange": "選擇日期範圍",
+  "vsPreviousPeriod": "較上週期",
+  "spendingUp": "較上期增加",
+  "spendingDown": "較上期減少",
+  "spendingFlat": "與上期持平",
+
+  "monthlyBudget": "月度預算",
+  "setBudget": "設定預算",
+  "editBudget": "編輯預算",
+  "budgetAmount": "預算金額",
+  "budgetSpent": "已使用 / 預算",
+  "budgetRemaining": "剩餘額度",
+  "budgetExceeded": "超出預算",
+  "daysRemaining": "剩餘天數",
+  "dailyAllowance": "建議每日可用",
+  "noBudgetSet": "設定月度預算以管理消費目標與控制開支。",
+
+  "splitAndReimbursements": "分攤與待收款項",
+  "netPersonal": "個人實際支出",
+  "grossTotal": "帳面總額",
+  "unsettledFromFriends": "待收款項",
+  "settledReimbursements": "已收回款項",
+
+  "taxAndTipSummary": "稅金與服務費統計",
+  "totalTaxPaid": "累計稅金支出",
+  "totalTipPaid": "累計服務費支出",
+  "subtotalBeforeTax": "稅前總小計",
+
+  "categoryDetails": "類別支出明細",
+  "receiptsInCategory": "此類別共包含收據",
+  "tapCategoryToInspect": "點擊類別可檢視收據明細"
 }
